@@ -27,8 +27,9 @@ module NumberSix.Irc
     , writeChannelTo
     , writeChannelReply
 
-      -- * Creating handlers
+      -- * Handlers
     , makeHandler
+    , runHandler
 
       -- * Reacting on events
     , onCommand
@@ -215,6 +216,12 @@ makeHandler :: String   -- ^ Handler name
             -> Irc ()   -- ^ Hook
             -> Handler  -- ^ Resulting handler
 makeHandler name irc = Handler name [irc]
+
+-- | Run a handler
+--
+runHandler :: Handler  -- ^ Handler to run
+           -> Irc ()   -- ^ Result
+runHandler = sequence_ . handlerHooks
 
 -- | Execute an 'Irc' action only if the command given is the command received.
 --

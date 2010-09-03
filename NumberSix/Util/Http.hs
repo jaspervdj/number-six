@@ -1,3 +1,5 @@
+-- | HTTP utility functions
+--
 module NumberSix.Util.Http
     ( httpGet
     , httpScrape

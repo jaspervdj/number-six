@@ -1,3 +1,5 @@
+-- | Utility functions
+--
 module NumberSix.Util
     ( sleep
     , breakWord

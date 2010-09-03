@@ -1,3 +1,5 @@
+-- | Utility functions for persistence
+--
 module NumberSix.Util.Redis
     ( getItem
     , existsItem
@@ -14,6 +16,9 @@ import Database.Redis.Redis
 
 import NumberSix.Irc
 
+-- | Construct a fully qualified key, given a simple key. This key ensures that
+-- it will be unique for different hosts and channels.
+--
 getKey :: String             -- ^ Simple key
        -> Irc LB.ByteString  -- ^ Fully qualified key
 getKey key = do
