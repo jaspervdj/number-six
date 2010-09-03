@@ -8,7 +8,6 @@ module NumberSix.Util.Redis
 import Data.List (intercalate)
 import Control.Monad.Trans (liftIO)
 
-import qualified Data.ByteString as SB
 import qualified Data.ByteString.Lazy as LB
 import Data.Binary (Binary, encode, decode)
 import Database.Redis.Redis

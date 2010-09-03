@@ -2,7 +2,7 @@ module NumberSix.Irc
     ( -- * Core types
       IrcConfig (..)
     , IrcState (..)
-    , Irc (..)
+    , Irc
     , Handler (..)
 
       -- * Obtaining parameters
@@ -40,7 +40,6 @@ import Control.Monad (when)
 import Control.Monad.Reader (ReaderT, ask)
 import Control.Monad.Trans (liftIO)
 import Data.Char (isSpace, toLower)
-import Data.Maybe (listToMaybe)
 import System.IO (Handle, hPutStr)
 
 import Database.Redis.Redis (Redis)

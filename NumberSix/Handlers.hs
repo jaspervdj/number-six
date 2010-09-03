@@ -2,7 +2,7 @@ module NumberSix.Handlers
     ( handlers
     ) where
 
-import NumberSix.Irc (Irc, Handler)
+import NumberSix.Irc (Handler)
 
 import qualified NumberSix.Handlers.Ping
 import qualified NumberSix.Handlers.Identify

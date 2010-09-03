@@ -1,0 +1,40 @@
+Name:                number-six
+Version:             0.1
+Synopsis:            A sexy IRC bot
+License-file:        LICENSE
+Author:              Jasper Van der Jeugt
+Maintainer:          jaspervdj@gmail.com
+Stability:           Experimental
+Category:            Network
+Build-type:          Simple
+Cabal-version:       >= 1.2
+
+Library
+  Ghc-Options:       -Wall
+  Exposed-Modules:   NumberSix.Handlers
+                     NumberSix.Handlers.Google
+                     NumberSix.Handlers.Hello
+                     NumberSix.Handlers.Identify
+                     NumberSix.Handlers.Kick
+                     NumberSix.Handlers.Ping
+                     NumberSix.Handlers.Seen
+                     NumberSix.Handlers.Tell
+                     NumberSix.Handlers.Twitter
+                     NumberSix.Irc
+                     NumberSix.Util
+                     NumberSix.Util.Http
+                     NumberSix.Util.Redis
+  Build-depends:     base >= 4 && < 5,
+                     monads-fd >= 0.1,
+                     random >= 1,
+                     containers >= 0.3,
+                     HTTP >= 4000,
+                     bytestring >= 0.9,
+                     utf8-string >= 0.3,
+                     redis >= 0.7,
+                     binary >= 0.5,
+                     tagsoup >= 0.10,
+                     irc >= 0.4,
+                     old-locale >= 1,
+                     time >= 1,
+                     dataenc >= 0.13

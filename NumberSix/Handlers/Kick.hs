@@ -12,8 +12,8 @@ import Network.IRC
 
 handler :: Handler
 handler = makeHandler "kick" $ onCommand "kick" $ do
-    (channel : nick : _) <- getParameters
+    (channel : nick' : _) <- getParameters
     myNick <- getNick
-    when (nick == myNick) $ do
+    when (nick' == myNick) $ do
         sleep 3
         writeMessage $ joinChan channel

@@ -3,8 +3,6 @@ module NumberSix.Handlers.Seen
     ) where
 
 import Control.Applicative ((<$>))
-import Data.Maybe (fromMaybe)
-import Control.Monad (forM_)
 
 import NumberSix.Irc
 import NumberSix.Util

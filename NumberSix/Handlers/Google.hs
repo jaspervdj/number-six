@@ -14,7 +14,7 @@ google :: String -> Irc String
 google query = httpScrape url $ \tags ->
     case find (~== TagOpen "a" [("class", "l")]) tags of
         Just (TagOpen _ attrs) -> fromMaybe "Not found" $ lookup "href" attrs
-        Nothing -> "Not found"
+        _ -> "Not found"
   where
     url = "http://www.google.com/search?q=" ++ urlEncode query
 
