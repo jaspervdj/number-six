@@ -1,11 +1,13 @@
-module Main where
+module NumberSix
+    ( numberSix
+    ) where
 
 import Control.Concurrent (forkIO)
-import Control.Applicative ((<$>))
-import Control.Monad (forever, when, forM_, (<=<))
+import Control.Concurrent.MVar (newEmptyMVar, readMVar)
+import Control.Monad (forever, forM_)
 import System.IO
 import Network (connectTo, withSocketsDo, PortID (PortNumber))
-import Control.Monad.Reader (ReaderT, ask, runReaderT)
+import Control.Monad.Reader (runReaderT)
 import Database.Redis.Redis (connect, localhost, defaultPort)
 
 import Network.IRC
@@ -13,6 +15,8 @@ import Network.IRC
 import NumberSix.Irc
 import NumberSix.Handlers
 
+-- | Run a single IRC connection
+--
 runIrc :: IrcConfig   -- ^ Configuration
        -> [Handler]   -- ^ Handlers
        -> IO ()
@@ -39,13 +43,15 @@ runIrc config handlers' = do
                     _ <- forkIO $ runReaderT (sequence_ $ handlerHooks h) state
                     return ()
 
-main :: IO ()
-main = withSocketsDo $ runIrc config handlers
-  where
-    config = IrcConfig
-        { ircNick     = "mempty"
-        , ircRealName = "mempty bot"
-        , ircChannels = ["#testing"]
-        , ircHost     = "wina.ugent.be"
-        , ircPort     = 6666
-        }
+-- | Launch multiple bots and block forever
+--
+numberSix :: [IrcConfig] -> IO ()
+numberSix configs = withSocketsDo $ do
+    forM_ configs $ \config -> do
+        _ <- forkIO $ runIrc config handlers
+        return ()
+
+    -- Wait forever
+    mvar <- newEmptyMVar
+    () <- readMVar mvar
+    return ()
