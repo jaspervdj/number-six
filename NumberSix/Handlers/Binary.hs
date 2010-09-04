@@ -25,10 +25,7 @@ binHook = onBangCommand "!bin" $ do
 unBinHook :: Irc ()
 unBinHook = onBangCommand "!unbin" $ do
     s <- getBangCommandText
-    writeChannelReply $ show $ unBin 0 s
-  where
-    unBin x [] = x
-    unBin x (y : ys) = unBin (x * 2 + digitToInt y) ys
+    writeChannelReply $ show $ foldl (\x y -> x * 2 + digitToInt y) 0 s
 
 hexHook :: Irc ()
 hexHook = onBangCommand "!hex" $ do

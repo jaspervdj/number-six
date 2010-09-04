@@ -27,7 +27,7 @@ loadHook = onBangCommand "!seen" $ do
     (who, _) <- breakWord <$> getBangCommandText
     item <- getItem who
     case item of
-        Just (time, text) -> do
-            writeChannelReply $  "I last saw " ++ who ++ " on " ++ time
-                              ++ " saying: " ++ text
+        Just (time, text) -> writeChannelReply $
+            "I last saw " ++ who ++ " on " ++ time
+                          ++ " saying: " ++ text
         _ -> writeChannelReply $ "I ain't never seen " ++ who
