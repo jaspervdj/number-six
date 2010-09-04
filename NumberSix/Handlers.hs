@@ -12,6 +12,7 @@ import qualified NumberSix.Handlers.Kick
 import qualified NumberSix.Handlers.Twitter
 import qualified NumberSix.Handlers.Tell
 import qualified NumberSix.Handlers.Seen
+import qualified NumberSix.Handlers.Binary
 
 handlers :: [Handler]
 handlers =
@@ -23,4 +24,5 @@ handlers =
     , NumberSix.Handlers.Twitter.handler
     , NumberSix.Handlers.Tell.handler
     , NumberSix.Handlers.Seen.handler
+    , NumberSix.Handlers.Binary.handler
     ]
