@@ -2,13 +2,15 @@
 --
 module NumberSix.Util
     ( sleep
+    , forkIrc
     , breakWord
     , prettyTime
     ) where
 
 import Control.Applicative ((<$>))
 import Control.Arrow (second)
-import Control.Concurrent (threadDelay)
+import Control.Concurrent (threadDelay, forkIO)
+import Control.Monad.Reader (runReaderT, ask)
 import Control.Monad.Trans (liftIO)
 import Data.Char (isSpace)
 import Data.Time.Clock (getCurrentTime)
@@ -22,6 +24,14 @@ import NumberSix.Irc
 sleep :: Int     -- ^ Number of seconds to sleep
       -> Irc ()  -- ^ Result
 sleep = liftIO . threadDelay . (* 1000000)
+
+-- | 'forkIO' lifted to the Irc monad
+--
+forkIrc :: Irc ()  -- ^ Action to execute in another thread
+        -> Irc ()  -- ^ Returns immediately
+forkIrc irc = do
+    _<- liftIO . forkIO . runReaderT irc =<< ask
+    return ()
 
 -- | Take a word from a string, returing the word and the remainder.
 --
