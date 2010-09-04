@@ -25,7 +25,9 @@ getKey key = do
     host <- getHost
     channel <- getChannel
     handler <- getHandlerName
-    return $ encode $ intercalate "-" [host, channel, handler, key]
+    return $ encode $ intercalate "-" [ "number-six", host
+                                      , channel, handler, key
+                                      ]
 
 getItem :: Binary a => String -> Irc (Maybe a)
 getItem key = do
