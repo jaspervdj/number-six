@@ -1,3 +1,5 @@
+-- | Evaluates Haskell expressions using the TryHaskell API
+--
 module NumberSix.Handlers.TryHaskell
     ( handler
     ) where
@@ -12,8 +14,9 @@ import NumberSix.Util.Http
 eval :: String -> Irc String
 eval query = do
     Ok (JSObject object) <- decode <$> httpGet url
-    let (Ok result) = valFromObj "result" object
-    return result
+    return $ case valFromObj "result" object of
+        Ok result -> result
+        Error _ -> "I'm a cybernetic lifeform node. Spare me your rubbish."
   where
     url =  "http://tryhaskell.org/haskell.json?method=eval&expr="
         ++ urlEncode query
