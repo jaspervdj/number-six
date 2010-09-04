@@ -2,7 +2,7 @@ module NumberSix.Handlers.TryHaskell
     ( handler
     ) where
 
-import Control.Applicative
+import Control.Applicative ((<$>))
 
 import Text.JSON
 
