@@ -13,6 +13,7 @@ import qualified NumberSix.Handlers.Twitter
 import qualified NumberSix.Handlers.Tell
 import qualified NumberSix.Handlers.Seen
 import qualified NumberSix.Handlers.Binary
+import qualified NumberSix.Handlers.TryHaskell
 
 handlers :: [Handler]
 handlers =
@@ -25,4 +26,5 @@ handlers =
     , NumberSix.Handlers.Tell.handler
     , NumberSix.Handlers.Seen.handler
     , NumberSix.Handlers.Binary.handler
+    , NumberSix.Handlers.TryHaskell.handler
     ]
