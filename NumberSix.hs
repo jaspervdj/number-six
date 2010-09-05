@@ -9,7 +9,6 @@ import Control.Monad (forever, forM_)
 import System.IO
 import Network (connectTo, withSocketsDo, PortID (PortNumber))
 import Control.Monad.Reader (runReaderT)
-import Database.Redis.Redis (connect, localhost, defaultPort)
 
 import Network.IRC
 
@@ -22,10 +21,9 @@ runIrc :: IrcConfig   -- ^ Configuration
        -> [Handler]   -- ^ Handlers
        -> IO ()
 runIrc config handlers' = do
-    -- Connect to the IRC server and the Redis host.
+    -- Connect to the IRC server
     handle <- connectTo (ircHost config)
                         (PortNumber $ fromIntegral $ ircPort config)
-    redis <- connect localhost defaultPort
 
     -- Make sure we have no buffering, so we can access all lines immediately
     -- when they are sent.
@@ -43,7 +41,6 @@ runIrc config handlers' = do
                 let state = IrcState
                         { ircConfig = config
                         , ircHandle = handle
-                        , ircRedis = redis
                         , ircMessage = message
                         , ircHandler = h
                         , ircLogger = logger

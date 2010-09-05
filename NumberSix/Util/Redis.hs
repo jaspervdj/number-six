@@ -1,7 +1,8 @@
 -- | Utility functions for persistence
 --
 module NumberSix.Util.Redis
-    ( getItem
+    ( withRedis
+    , getItem
     , existsItem
     , setItem
     , deleteItem
@@ -29,32 +30,38 @@ getKey key = do
                                       , channel, handler, key
                                       ]
 
-getItem :: Binary a => String -> Irc (Maybe a)
-getItem key = do
-    redis <- getRedis
+-- | Run a function with a redis connection
+--
+withRedis :: (Redis -> Irc a)  -- ^ Function to run with redis support
+          -> Irc a             -- ^ Result
+withRedis irc = do
+    redis <- liftIO $ connect localhost defaultPort
+    x <- irc redis
+    liftIO $ disconnect redis
+    return x
+
+getItem :: Binary a => Redis -> String -> Irc (Maybe a)
+getItem redis key = do
     key' <- getKey key
     reply <- liftIO $ get redis key'
     return $ case reply of RBulk (Just r) -> Just $ decode r
                            _              -> Nothing
 
-existsItem :: String -> Irc Bool
-existsItem key = do
-    redis <- getRedis
+existsItem :: Redis -> String -> Irc Bool
+existsItem redis key = do
     key' <- getKey key
     reply <- liftIO $ exists redis key'
     return $ case reply of RInt 1 -> True
                            _      -> False
 
-setItem :: Binary a => String -> a -> Irc ()
-setItem key item = do
-    redis <- getRedis
+setItem :: Binary a => Redis -> String -> a -> Irc ()
+setItem redis key item = do
     key' <- getKey key
     _ <- liftIO $ set redis key' (encode item)
     return ()
 
-deleteItem :: String -> Irc ()
-deleteItem key = do
-    redis <- getRedis
+deleteItem :: Redis -> String -> Irc ()
+deleteItem redis key = do
     key' <- getKey key
     _ <- liftIO $ del redis key'
     return ()

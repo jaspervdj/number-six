@@ -20,12 +20,12 @@ storeHook = onCommand "privmsg" $ do
     time <- prettyTime
     text <- getMessageText
     let lastSeen = (time, text)
-    setItem sender lastSeen
+    withRedis $ \redis -> setItem redis sender lastSeen
 
 loadHook :: Irc ()
 loadHook = onBangCommand "!seen" $ do
     (who, _) <- breakWord <$> getBangCommandText
-    item <- getItem who
+    item <- withRedis $ \redis -> getItem redis who
     case item of
         Just (time, text) -> writeChannelReply $
             "I last saw " ++ who ++ " on " ++ time

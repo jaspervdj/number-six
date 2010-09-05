@@ -18,7 +18,6 @@ module NumberSix.Irc
     , getMessageText
     , getBangCommand
     , getBangCommandText
-    , getRedis
 
       -- * Sending responses
     , write
@@ -61,7 +60,6 @@ data IrcConfig = IrcConfig
 data IrcState = IrcState
     { ircConfig   :: IrcConfig
     , ircHandle   :: Handle
-    , ircRedis    :: Redis
     , ircMessage  :: Message
     , ircHandler  :: Handler
     , ircLogger   :: String -> IO ()
@@ -149,11 +147,6 @@ getBangCommand = map toLower . head . words <$> getMessageText
 --
 getBangCommandText :: Irc String
 getBangCommandText = drop 1 . dropWhile (not . isSpace) <$> getMessageText
-
--- | Get the redis handle
---
-getRedis :: Irc Redis
-getRedis = ircRedis <$> ask
 
 -- | Report some message -- it will be logged
 --

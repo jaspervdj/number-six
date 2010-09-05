@@ -23,17 +23,18 @@ storeHook = onBangCommand "!tell" $ do
     time <- prettyTime
     let (recipient, message) = breakWord text
         tell = (sender, time, message)
-    messages <- fromMaybe [] <$> getItem recipient
-    setItem recipient $ messages ++ [tell]
+    withRedis $ \redis -> do
+        messages <- fromMaybe [] <$> getItem redis recipient
+        setItem redis recipient $ messages ++ [tell]
     writeChannelReply $ "I'll pass that on when " ++ recipient ++ " is here."
 
 loadHook :: Irc ()
-loadHook = onCommand "privmsg" $ do
+loadHook = onCommand "privmsg" $ withRedis $ \redis -> do
     sender <- getSender
-    items <- getItem sender
+    items <- getItem redis sender
     case items of
         Nothing -> return ()
         Just l -> do
             forM_ l $ \(from, time, message) ->
                 writeChannelReply $ from ++ " (" ++ time ++ "): " ++ message
-            deleteItem sender
+            deleteItem redis sender
