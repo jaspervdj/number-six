@@ -19,6 +19,9 @@ module NumberSix.Irc
     , getBangCommand
     , getBangCommandText
 
+      -- * Debugging
+    , report
+
       -- * Sending responses
     , write
     , writeMessage
