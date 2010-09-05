@@ -62,5 +62,4 @@ numberSix configs = withSocketsDo $ do
         return ()
 
     -- Wait forever
-    _ <- getContents
-    return ()
+    interact id
