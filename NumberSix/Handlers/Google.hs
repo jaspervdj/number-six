@@ -19,4 +19,4 @@ google query = httpScrape url $ \tags ->
     url = "http://www.google.com/search?q=" ++ urlEncode query
 
 handler :: Handler
-handler = makeBangHandler "google" "!google" $ fmap return . google
+handler = makeBangHandler "google" "!google" google
