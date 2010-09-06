@@ -25,5 +25,4 @@ eval query = do
     complain = "I'm a cybernetic lifeform node. Spare me your rubbish."
 
 handler :: Handler
-handler = makeHandler "tryhaskell" $ onBangCommand ">" $
-    getBangCommandText >>= eval >>= writeChannel
+handler = makeBangHandler "tryhaskell" ">" eval

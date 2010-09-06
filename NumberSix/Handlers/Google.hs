@@ -19,5 +19,4 @@ google query = httpScrape url $ \tags ->
     url = "http://www.google.com/search?q=" ++ urlEncode query
 
 handler :: Handler
-handler = makeHandler "google" $ onBangCommand "!google" $
-    getBangCommandText >>= google >>= writeChannel
+handler = makeBangHandler "google" "!google" google

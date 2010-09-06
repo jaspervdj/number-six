@@ -31,6 +31,7 @@ module NumberSix.Irc
 
       -- * Handlers
     , makeHandler
+    , makeBangHandler
     , runHandler
 
       -- * Reacting on events
@@ -212,6 +213,17 @@ makeHandler :: String   -- ^ Handler name
             -> Irc ()   -- ^ Hook
             -> Handler  -- ^ Resulting handler
 makeHandler name irc = Handler name [irc]
+
+-- | Create a simple handler with one bang hook. You should provide this
+-- function with a function that produces a string to be written into the
+-- channel, based on the bang command text.
+--
+makeBangHandler :: String                  -- ^ Handler name
+                -> String                  -- ^ Bang command
+                -> (String -> Irc String)  -- ^ Function
+                -> Handler                 -- ^ Resulting handler
+makeBangHandler name command f = makeHandler name $ onBangCommand command $
+    getBangCommandText >>= f >>= writeChannel
 
 -- | Run a handler
 --

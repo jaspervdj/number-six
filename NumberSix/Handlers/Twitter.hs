@@ -27,5 +27,4 @@ twitter argument =
           ++ urlEncode argument ++ ".xml"
 
 handler :: Handler
-handler = makeHandler "twitter" $ onBangCommand "!twitter" $
-    getBangCommandText >>= twitter >>= writeChannel
+handler = makeBangHandler "twitter" "!twitter" twitter
