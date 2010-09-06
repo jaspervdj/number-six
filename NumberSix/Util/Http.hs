@@ -4,6 +4,7 @@ module NumberSix.Util.Http
     ( httpGet
     , httpScrape
     , nextTag
+    , nextTagText
     , urlEncode
     ) where
 
@@ -38,6 +39,14 @@ nextTag :: [Tag String] -> Tag String -> Maybe (Tag String)
 nextTag tags tag = case dropWhile (~/= tag) tags of
     (_ : x : _) -> Just x
     _ -> Nothing
+
+-- | Get the text chunk following an opening tag with the given name
+--
+nextTagText :: [Tag String] -> String -> Maybe String
+nextTagText tags name = do
+    tag <- nextTag tags (TagOpen name [])
+    case tag of TagText t -> return t
+                _ -> Nothing
 
 -- | Encode a String to an URL
 --

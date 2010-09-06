@@ -12,8 +12,8 @@ import NumberSix.Util.Http
 
 getTweet :: [Tag String] -> String
 getTweet tags = fromMaybe "Not found" $ do
-    TagText text <- nextTag tags (TagOpen "text" [])
-    TagText user <- nextTag tags (TagOpen "screen_name" [])
+    text <- nextTagText tags "text"
+    user <- nextTagText tags "screen_name"
     return $ "@" ++ user ++ ": " ++ text
 
 twitter :: String -> Irc String

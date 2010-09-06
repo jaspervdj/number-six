@@ -13,9 +13,9 @@ import NumberSix.Util.Http
 
 lastFm :: String -> Irc [String]
 lastFm query = httpScrape url $ \tags -> fromMaybe ["Not found"] $ do
-    TagText artist <- nextTag tags (TagOpen "artist" [])
-    TagText name <- nextTag tags (TagOpen "name" [])
-    TagText url <- nextTag tags (TagOpen "url" [])
+    artist <- nextTagText tags "artist"
+    name <- nextTagText tags "name"
+    url <- nextTagText tags "url"
     return $ [ query ++ " last listened to: " ++ name ++ " by " ++ artist
              , url
              ]
