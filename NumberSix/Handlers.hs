@@ -15,6 +15,7 @@ import qualified NumberSix.Handlers.Seen
 import qualified NumberSix.Handlers.Binary
 import qualified NumberSix.Handlers.TryHaskell
 import qualified NumberSix.Handlers.Quote
+import qualified NumberSix.Handlers.EightBall
 
 handlers :: [Handler]
 handlers =
@@ -29,4 +30,5 @@ handlers =
     , NumberSix.Handlers.Binary.handler
     , NumberSix.Handlers.TryHaskell.handler
     , NumberSix.Handlers.Quote.handler
+    , NumberSix.Handlers.EightBall.handler
     ]
