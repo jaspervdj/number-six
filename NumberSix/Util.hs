@@ -5,6 +5,7 @@ module NumberSix.Util
     , forkIrc
     , breakWord
     , prettyTime
+    , trim
     ) where
 
 import Control.Applicative ((<$>))
@@ -42,3 +43,8 @@ breakWord = second (drop 1) . break isSpace
 --
 prettyTime :: Irc String
 prettyTime = formatTime defaultTimeLocale "%F@%H:%M" <$> liftIO getCurrentTime
+
+-- | Drop spaces around a string
+--
+trim :: String -> String
+trim = dropWhile isSpace . reverse . dropWhile isSpace . reverse

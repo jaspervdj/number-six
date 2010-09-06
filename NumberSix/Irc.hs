@@ -46,7 +46,6 @@ import Control.Monad.Trans (liftIO)
 import Data.Char (isSpace, toLower)
 import System.IO (Handle, hPutStr)
 
-import Database.Redis.Redis (Redis)
 import Network.IRC (Message (..), Prefix (..), privmsg, encode)
 
 -- | User-specified IRC configuration

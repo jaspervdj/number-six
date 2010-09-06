@@ -17,6 +17,7 @@ import qualified NumberSix.Handlers.TryHaskell
 import qualified NumberSix.Handlers.Quote
 import qualified NumberSix.Handlers.EightBall
 import qualified NumberSix.Handlers.UrbanDictionary
+import qualified NumberSix.Handlers.LastFm
 
 handlers :: [Handler]
 handlers =
@@ -33,4 +34,5 @@ handlers =
     , NumberSix.Handlers.Quote.handler
     , NumberSix.Handlers.EightBall.handler
     , NumberSix.Handlers.UrbanDictionary.handler
+    , NumberSix.Handlers.LastFm.handler
     ]

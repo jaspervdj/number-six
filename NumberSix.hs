@@ -32,8 +32,8 @@ runIrc config handlers' = do
     -- Loop forever, consuming one line every loop
     forever $ hGetLine handle >>= \line -> case decode line of
         Nothing -> logger "Parse error."
-        Just message -> do
-            logger $ "RECEIVED: " ++ show message
+        Just message' -> do
+            logger $ "RECEIVED: " ++ show message'
 
             -- Run every handler on the message
             forM_ handlers' $ \h -> do
@@ -41,7 +41,7 @@ runIrc config handlers' = do
                 let state = IrcState
                         { ircConfig = config
                         , ircHandle = handle
-                        , ircMessage = message
+                        , ircMessage = message'
                         , ircHandler = h
                         , ircLogger = logger
                         }

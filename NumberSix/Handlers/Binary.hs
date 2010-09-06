@@ -30,7 +30,7 @@ unBinHook = onBangCommand "!unbin" $ do
 hexHook :: Irc ()
 hexHook = onBangCommand "!hex" $ do
     n <- read <$> getBangCommandText
-    writeChannelReply $ showHex n ""
+    writeChannelReply $ showHex (n :: Integer) ""
 
 unHexHook :: Irc ()
 unHexHook = onBangCommand "!unhex" $ do

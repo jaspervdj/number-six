@@ -4,8 +4,6 @@ module NumberSix.Handlers.UrbanDictionary
     ( handler
     ) where
 
-import Data.Maybe (fromMaybe)
-
 import Text.HTML.TagSoup
 
 import NumberSix.Irc
