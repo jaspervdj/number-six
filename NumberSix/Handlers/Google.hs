@@ -12,11 +12,11 @@ import NumberSix.Util.Http
 
 google :: String -> Irc String
 google query = httpScrape url $ \tags ->
-    case find (~== TagOpen "a" [("class", "l")]) tags of
-        Just (TagOpen _ attrs) -> fromMaybe "Not found" $ lookup "href" attrs
-        _ -> "Not found"
+    let Just (TagOpen _ attrs) = find (~== TagOpen "a" [("class", "l")]) tags
+        Just t = lookup "href" attrs
+        in t
   where
     url = "http://www.google.com/search?q=" ++ urlEncode query
 
 handler :: Handler
-handler = makeBangHandler "google" "!google" google
+handler = makeBangHandler "google" "!google" $ fmap return . google

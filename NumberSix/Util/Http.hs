@@ -27,9 +27,9 @@ httpGet = liftIO . getResponseBody <=< liftIO . simpleHTTP . getRequest
 -- | Perform an HTTP get request, and scrape the body using a user-defined
 -- function.
 --
-httpScrape :: String                    -- ^ URL
-           -> ([Tag String] -> String)  -- ^ Scrape function
-           -> Irc String                -- ^ Result
+httpScrape :: String               -- ^ URL
+           -> ([Tag String] -> a)  -- ^ Scrape function
+           -> Irc a                -- ^ Result
 httpScrape url f = f . parseTags <$> httpGet url
 
 -- | Get the tag following a certain tag

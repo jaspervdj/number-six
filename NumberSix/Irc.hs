@@ -214,15 +214,15 @@ makeHandler :: String   -- ^ Handler name
 makeHandler name irc = Handler name [irc]
 
 -- | Create a simple handler with one bang hook. You should provide this
--- function with a function that produces a string to be written into the
+-- function with a function that produces strings to be written into the
 -- channel, based on the bang command text.
 --
-makeBangHandler :: String                  -- ^ Handler name
-                -> String                  -- ^ Bang command
-                -> (String -> Irc String)  -- ^ Function
-                -> Handler                 -- ^ Resulting handler
+makeBangHandler :: String                    -- ^ Handler name
+                -> String                    -- ^ Bang command
+                -> (String -> Irc [String])  -- ^ Function
+                -> Handler                   -- ^ Resulting handler
 makeBangHandler name command f = makeHandler name $ onBangCommand command $
-    getBangCommandText >>= f >>= writeChannel
+    getBangCommandText >>= f >>= mapM_ writeChannel
 
 -- | Run a handler
 --
