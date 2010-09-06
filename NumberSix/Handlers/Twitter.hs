@@ -2,19 +2,29 @@ module NumberSix.Handlers.Twitter
     ( handler
     ) where
 
+import Data.Maybe (fromMaybe)
+import Data.Char (isDigit)
+
 import Text.HTML.TagSoup
 
 import NumberSix.Irc
 import NumberSix.Util.Http
 
+getTweet :: [Tag String] -> String
+getTweet tags = fromMaybe "Not found" $ do
+    TagText text <- nextTag tags (TagOpen "text" [])
+    TagText user <- nextTag tags (TagOpen "screen_name" [])
+    return $ "@" ++ user ++ ": " ++ text
+
 twitter :: String -> Irc String
-twitter userName = httpScrape url $ \tags ->
-    case dropWhile (~/= TagOpen "text" []) tags of
-        (_ : TagText t : _) -> "@" ++ userName ++ ": " ++ t
-        _ -> "Not found"
+twitter argument =
+    let url = if all isDigit argument then tweet else user
+    in httpScrape url getTweet
   where
-    url =  "http://api.twitter.com/1/statuses/user_timeline.xml?screen_name="
-        ++ urlEncode userName
+    user  =  "http://api.twitter.com/1/statuses/user_timeline.xml?screen_name="
+          ++ urlEncode argument
+    tweet =  "http://api.twitter.com/1/statuses/show/"
+          ++ urlEncode argument ++ ".xml"
 
 handler :: Handler
 handler = makeHandler "twitter" $ onBangCommand "!twitter" $

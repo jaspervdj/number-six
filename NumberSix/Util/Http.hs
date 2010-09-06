@@ -3,6 +3,7 @@
 module NumberSix.Util.Http
     ( httpGet
     , httpScrape
+    , nextTag
     , urlEncode
     ) where
 
@@ -30,6 +31,13 @@ httpScrape :: String                    -- ^ URL
            -> ([Tag String] -> String)  -- ^ Scrape function
            -> Irc String                -- ^ Result
 httpScrape url f = f . parseTags <$> httpGet url
+
+-- | Get the tag following a certain tag
+--
+nextTag :: [Tag String] -> Tag String -> Maybe (Tag String)
+nextTag tags tag = case dropWhile (~/= tag) tags of
+    (_ : x : _) -> Just x
+    _ -> Nothing
 
 -- | Encode a String to an URL
 --
