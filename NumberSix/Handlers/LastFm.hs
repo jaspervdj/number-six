@@ -4,26 +4,21 @@ module NumberSix.Handlers.LastFm
     ( handler
     ) where
 
-import Data.List (isInfixOf)
+import Data.Maybe (fromMaybe)
 
 import Text.HTML.TagSoup
 
 import NumberSix.Irc
-import NumberSix.Util
 import NumberSix.Util.Http
 
 lastFm :: String -> Irc String
-lastFm query = httpScrape url $
-    trim . innerText
-         . takeWhile (~/= TagClose "td")
-         . dropWhile (not . isSubjectCell)
-         . dropWhile (~/= TagOpen "table" [("id", "recentTracks")])
+lastFm query = httpScrape url $ \tags -> fromMaybe "Not found" $ do
+    TagText artist <- nextTag tags (TagOpen "artist" [])
+    TagText name <- nextTag tags (TagOpen "name" [])
+    return $ name ++ " by " ++ artist
   where
-    url = "http://www.last.fm/user/" ++ urlEncode query
-    isSubjectCell (TagOpen _ attrs) = case lookup "class" attrs of
-        Nothing -> False
-        Just x -> "subjectCell" `isInfixOf` x
-    isSubjectCell _ = False
+    url =  "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="
+        ++ urlEncode query ++ "&api_key=87b8b81da496639cb5a295d78e5f8f4d"
 
 handler :: Handler
 handler = makeBangHandler "lastfm" "!lastfm" lastFm
