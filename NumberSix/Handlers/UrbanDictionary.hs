@@ -12,9 +12,9 @@ import NumberSix.Irc
 import NumberSix.Util.Http
 
 urban :: String -> Irc String
-urban query = httpScrape url $ \tags -> fromMaybe "Not found" $ do
-    TagText def <- nextTag tags (TagOpen "div" [("class", "definition")])
-    return def
+urban query = httpScrape url $
+    innerText . takeWhile (~/= TagClose "div")
+              . dropWhile (~/= TagOpen "div" [("class", "definition")])
   where
     url = "http://www.urbandictionary.com/define.php?term=" ++ urlEncode query
 
