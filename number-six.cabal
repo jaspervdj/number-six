@@ -39,4 +39,5 @@ Library
                      old-locale >= 1,
                      time >= 1,
                      dataenc >= 0.13,
-                     network >= 2.2
+                     network >= 2.2,
+                     json >= 0.4
