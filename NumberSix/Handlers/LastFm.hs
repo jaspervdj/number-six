@@ -26,4 +26,4 @@ lastFm query = do
         ++ urlEncode query ++ "&api_key=87b8b81da496639cb5a295d78e5f8f4d"
 
 handler :: Handler
-handler = makeBangHandler "lastfm" "!lastfm" lastFm
+handler = makeBangHandler "lastfm" ["!lastfm"] lastFm

@@ -25,4 +25,4 @@ eval query = do
     complain = "I'm a cybernetic lifeform node. Spare me your rubbish."
 
 handler :: Handler
-handler = makeBangHandler "tryhaskell" ">" eval
+handler = makeBangHandler "tryhaskell" [">", "!haskell"] eval

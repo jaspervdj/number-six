@@ -40,7 +40,7 @@ module NumberSix.Irc
     ) where
 
 import Control.Applicative ((<$>))
-import Control.Monad (when)
+import Control.Monad (when, forM_)
 import Control.Monad.Reader (ReaderT, ask)
 import Control.Monad.Trans (liftIO)
 import Data.Char (isSpace, toLower)
@@ -218,11 +218,11 @@ makeHandler name irc = Handler name [irc]
 -- channel, based on the bang command text.
 --
 makeBangHandler :: String                  -- ^ Handler name
-                -> String                  -- ^ Bang command
+                -> [String]                -- ^ Bang commands
                 -> (String -> Irc String)  -- ^ Function
                 -> Handler                 -- ^ Resulting handler
-makeBangHandler name command f = makeHandler name $ onBangCommand command $
-    getBangCommandText >>= f >>= writeChannel
+makeBangHandler name commands f = makeHandler name $ forM_ commands $ \c ->
+    onBangCommand c $ getBangCommandText >>= f >>= writeChannel
 
 -- | Run a handler
 --

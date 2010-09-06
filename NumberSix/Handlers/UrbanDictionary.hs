@@ -17,4 +17,4 @@ urban query = httpScrape url $
     url = "http://www.urbandictionary.com/define.php?term=" ++ urlEncode query
 
 handler :: Handler
-handler = makeBangHandler "urbandictionary" "!urban" urban
+handler = makeBangHandler "urbandictionary" ["!urban"] urban
