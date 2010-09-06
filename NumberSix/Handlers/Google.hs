@@ -2,7 +2,6 @@ module NumberSix.Handlers.Google
     ( handler
     ) where
 
-import Data.Maybe (fromMaybe)
 import Data.List (find)
 
 import Text.HTML.TagSoup

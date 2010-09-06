@@ -221,8 +221,8 @@ makeBangHandler :: String                  -- ^ Handler name
                 -> [String]                -- ^ Bang commands
                 -> (String -> Irc String)  -- ^ Function
                 -> Handler                 -- ^ Resulting handler
-makeBangHandler name commands f = makeHandler name $ forM_ commands $ \c ->
-    onBangCommand c $ getBangCommandText >>= f >>= writeChannel
+makeBangHandler name commands f = makeHandler name $ onBangCommands commands $
+    getBangCommandText >>= f >>= writeChannel
 
 -- | Run a handler
 --
@@ -244,6 +244,13 @@ onCommand command irc = do
 onBangCommand :: String  -- ^ Bang command (e.g. @!google@)
               -> Irc ()  -- ^ Irc action to execute if match
               -> Irc ()  -- ^ Result
-onBangCommand command irc = onCommand "privmsg" $ do
+onBangCommand command = onBangCommands [command]
+
+-- | Execute an 'Irc' action only if one of the given bang commands is executed.
+--
+onBangCommands :: [String]  -- ^ Bang commands (e.g. @!google@)
+               -> Irc ()    -- ^ Irc action to execute if match
+               -> Irc ()    -- ^ Result
+onBangCommands commands irc = onCommand "privmsg" $ do
     actualCommand <- getBangCommand
-    when (actualCommand == command) irc
+    forM_ commands $ \c -> when (actualCommand == c) irc

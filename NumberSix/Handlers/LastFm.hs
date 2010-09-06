@@ -4,10 +4,6 @@ module NumberSix.Handlers.LastFm
     ( handler
     ) where
 
-import Data.Maybe (fromMaybe)
-
-import Text.HTML.TagSoup
-
 import NumberSix.Irc
 import NumberSix.Util.Http
 import NumberSix.Util.BitLy
@@ -17,8 +13,8 @@ lastFm query = do
     Just (text, longUrl) <- httpScrape url $ \tags -> do
         artist <- nextTagText tags "artist"
         name <- nextTagText tags "name"
-        url <- nextTagText tags "url"
-        return (query ++ " last listened to: " ++ name ++ " by " ++ artist, url)
+        url' <- nextTagText tags "url"
+        return (query ++ " listened to: " ++ name ++ " by " ++ artist , url')
     shortUrl <- shorten longUrl
     return $ text ++ " - " ++ shortUrl
   where
