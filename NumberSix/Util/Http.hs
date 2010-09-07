@@ -16,7 +16,8 @@ import Data.List (isPrefixOf)
 
 import qualified Codec.Binary.UTF8.String as Utf8
 import qualified Codec.Binary.Url as Url
-import Network.HTTP (simpleHTTP, getRequest, getResponseBody)
+import Network.HTTP (getRequest, getResponseBody)
+import Network.Browser (browse, request, setAllowRedirects)
 import Text.HTML.TagSoup
 
 import NumberSix.Irc
@@ -26,8 +27,11 @@ import NumberSix.Irc
 --
 httpGet :: String      -- ^ URL
         -> Irc String  -- ^ Response body
-httpGet =   liftIO . fmap (take 4096) . getResponseBody
-        <=< liftIO . simpleHTTP . getRequest
+httpGet url = liftIO $ do
+    (_, response) <- browse $ do
+        setAllowRedirects True
+        request $ getRequest url
+    fmap (take 4096) $ getResponseBody $ return response
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
 -- function.
