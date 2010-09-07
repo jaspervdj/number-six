@@ -2,6 +2,7 @@
 --
 module NumberSix.Util.BitLy
     ( shorten
+    , textAndUrl
     ) where
 
 import Data.List (isPrefixOf)
@@ -20,3 +21,8 @@ shorten query = fromMaybe query <$> httpScrape url getUrl
         ++ "&apiKey=R_578fb5b17a40fa1f94669c6cba844df1"
         ++ "&longUrl=" ++ urlEncode longUrl
         ++ "&format=xml"
+
+textAndUrl :: String -> String -> Irc String
+textAndUrl text url = do
+    shortUrl <- shorten url
+    return $ text ++ " >> " ++ shortUrl

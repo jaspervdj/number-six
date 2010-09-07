@@ -18,6 +18,7 @@ import qualified NumberSix.Handlers.Quote
 import qualified NumberSix.Handlers.EightBall
 import qualified NumberSix.Handlers.UrbanDictionary
 import qualified NumberSix.Handlers.LastFm
+import qualified NumberSix.Handlers.GitHub
 
 handlers :: [Handler]
 handlers =
@@ -35,4 +36,5 @@ handlers =
     , NumberSix.Handlers.EightBall.handler
     , NumberSix.Handlers.UrbanDictionary.handler
     , NumberSix.Handlers.LastFm.handler
+    , NumberSix.Handlers.GitHub.handler
     ]
