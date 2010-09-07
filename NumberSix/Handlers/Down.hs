@@ -6,15 +6,15 @@ module NumberSix.Handlers.Down
 
 import Control.Exception (try, SomeException (..))
 import Control.Monad.Trans (liftIO)
-
-import Network.HTTP (simpleHTTP, getRequest, getResponseBody)
+import Control.Monad.Reader (runReaderT, ask)
 
 import NumberSix.Irc
+import NumberSix.Util.Http
 
 down :: String -> Irc String
 down query = do
-    let get = getResponseBody =<< simpleHTTP (getRequest query)
-    result <- liftIO $ try $ fmap (take 100) get
+    env <- ask
+    result <- liftIO $ try $ runReaderT (httpGet query) env
     return $ case result of
         -- Catch all exceptions
         Left (SomeException _)  -> query ++ " looks down from Caprica."
