@@ -4,6 +4,7 @@ module NumberSix.Handlers.Down
     ( handler
     ) where
 
+import Control.Exception (try, SomeException (..))
 import Control.Monad.Trans (liftIO)
 
 import Network.HTTP (simpleHTTP, getRequest, getResponseBody)
@@ -14,13 +15,12 @@ import NumberSix.Util.Http
 down :: String -> Irc String
 down query = do
     let get = getResponseBody =<< simpleHTTP (getRequest $ httpPrefix query)
-    result <- liftIO $ catch (fmap (Just . take 100) get)
-                             (const $ return Nothing)
+    result <- liftIO $ try $ fmap (take 100) get
     return $ case result of
         -- Catch all exceptions
-        Nothing -> query ++ " looks down from Caprica."
+        Left (SomeException _)  -> query ++ " looks down from Caprica."
         -- All is fine
-        Just _ -> query ++ " seems to be working fine, stop whining."
+        Right _ -> query ++ " seems to be working fine, stop whining."
 
 handler :: Handler
 handler = makeBangHandler "down" ["!down"] down
