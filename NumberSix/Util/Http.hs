@@ -21,11 +21,13 @@ import Text.HTML.TagSoup
 
 import NumberSix.Irc
 
--- | Perform an HTTP get request and return the response body.
+-- | Perform an HTTP get request and return the response body. The response body
+-- is limited to 4096 characters, for security reasons.
 --
 httpGet :: String      -- ^ URL
         -> Irc String  -- ^ Response body
-httpGet = liftIO . getResponseBody <=< liftIO . simpleHTTP . getRequest
+httpGet =   liftIO . fmap (take 4096) . getResponseBody
+        <=< liftIO . simpleHTTP . getRequest
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
 -- function.
