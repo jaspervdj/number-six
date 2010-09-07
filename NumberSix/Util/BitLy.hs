@@ -5,7 +5,6 @@ module NumberSix.Util.BitLy
     , textAndUrl
     ) where
 
-import Data.List (isPrefixOf)
 import Control.Applicative ((<$>))
 import Data.Maybe (fromMaybe)
 
@@ -15,7 +14,7 @@ import NumberSix.Util.Http
 shorten :: String -> Irc String
 shorten query = fromMaybe query <$> httpScrape url getUrl
   where
-    longUrl = if "http://" `isPrefixOf` query then query else "http://" ++ query
+    longUrl = httpPrefix query
     getUrl tags = nextTagText tags "url"
     url =  "http://api.bit.ly/v3/shorten?login=jaspervdj"
         ++ "&apiKey=R_578fb5b17a40fa1f94669c6cba844df1"

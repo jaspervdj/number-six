@@ -6,11 +6,13 @@ module NumberSix.Util.Http
     , nextTag
     , nextTagText
     , urlEncode
+    , httpPrefix
     ) where
 
 import Control.Applicative ((<$>))
 import Control.Monad ((<=<))
 import Control.Monad.Trans (liftIO)
+import Data.List (isPrefixOf)
 
 import qualified Codec.Binary.UTF8.String as Utf8
 import qualified Codec.Binary.Url as Url
@@ -52,3 +54,8 @@ nextTagText tags name = do
 --
 urlEncode :: String -> String
 urlEncode = Url.encode . Utf8.encode
+
+-- | Add @"http://"@ to a string if needed
+--
+httpPrefix :: String -> String
+httpPrefix url = if "http://" `isPrefixOf` url then url else "http://" ++ url
