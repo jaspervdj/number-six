@@ -10,12 +10,10 @@ import NumberSix.Irc
 import NumberSix.Util.Http
 
 title :: String -> Irc String
-title query = httpScrape url $ \tags ->
+title query = httpScrape query $ \tags ->
     fromMaybe "Not now, I'm taking a break." $ do
-        title <- nextTagText tags "title"
-        return $ "Title: " ++ title
-  where
-    url = httpPrefix query
+        title' <- nextTagText tags "title"
+        return $ "Title: " ++ title'
 
 handler :: Handler
 handler = makeBangHandler "title" ["!title"] title

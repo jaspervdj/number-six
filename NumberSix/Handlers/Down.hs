@@ -10,11 +10,10 @@ import Control.Monad.Trans (liftIO)
 import Network.HTTP (simpleHTTP, getRequest, getResponseBody)
 
 import NumberSix.Irc
-import NumberSix.Util.Http
 
 down :: String -> Irc String
 down query = do
-    let get = getResponseBody =<< simpleHTTP (getRequest $ httpPrefix query)
+    let get = getResponseBody =<< simpleHTTP (getRequest query)
     result <- liftIO $ try $ fmap (take 100) get
     return $ case result of
         -- Catch all exceptions

@@ -6,11 +6,9 @@ module NumberSix.Util.Http
     , nextTag
     , nextTagText
     , urlEncode
-    , httpPrefix
     ) where
 
 import Control.Applicative ((<$>))
-import Control.Monad ((<=<))
 import Control.Monad.Trans (liftIO)
 import Data.List (isPrefixOf)
 
@@ -30,8 +28,10 @@ httpGet :: String      -- ^ URL
 httpGet url = liftIO $ do
     (_, response) <- browse $ do
         setAllowRedirects True
-        request $ getRequest url
-    fmap (take 4096) $ getResponseBody $ return response
+        request $ getRequest url'
+    fmap (take 4096) $ getResponseBody $ Right response
+  where
+    url' = if "http://" `isPrefixOf` url then url else "http://" ++ url
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
 -- function.
@@ -60,8 +60,3 @@ nextTagText tags name = do
 --
 urlEncode :: String -> String
 urlEncode = Url.encode . Utf8.encode
-
--- | Add @"http://"@ to a string if needed
---
-httpPrefix :: String -> String
-httpPrefix url = if "http://" `isPrefixOf` url then url else "http://" ++ url
