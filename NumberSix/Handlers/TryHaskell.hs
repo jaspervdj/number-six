@@ -9,6 +9,7 @@ import Control.Applicative ((<$>))
 import Text.JSON
 
 import NumberSix.Irc
+import NumberSix.Bang
 import NumberSix.Util.Http
 
 eval :: String -> Irc String

@@ -9,6 +9,7 @@ import Control.Monad.Trans (liftIO)
 import Control.Monad.Reader (runReaderT, ask)
 
 import NumberSix.Irc
+import NumberSix.Bang
 import NumberSix.Util.Http
 
 down :: String -> Irc String

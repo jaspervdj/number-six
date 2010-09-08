@@ -8,6 +8,7 @@ import Data.Char (toUpper)
 
 import Network.IRC
 
+import NumberSix.Bang
 import NumberSix.Irc
 import NumberSix.Util
 

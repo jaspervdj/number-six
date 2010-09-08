@@ -8,6 +8,7 @@ import Control.Monad.Trans (liftIO)
 import System.Random (randomRIO)
 
 import NumberSix.Irc
+import NumberSix.Bang
 
 handler :: Handler
 handler = makeHandler "eightball" $ onBangCommand "!8ball" $ do

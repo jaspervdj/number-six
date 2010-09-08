@@ -5,6 +5,7 @@ module NumberSix.Handlers.LastFm
     ) where
 
 import NumberSix.Irc
+import NumberSix.Bang
 import NumberSix.Util.Http
 import NumberSix.Util.BitLy
 

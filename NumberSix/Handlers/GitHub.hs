@@ -9,6 +9,7 @@ import Data.List (find)
 import Text.HTML.TagSoup
 
 import NumberSix.Irc
+import NumberSix.Bang
 import NumberSix.Util.Http
 import NumberSix.Util.BitLy
 

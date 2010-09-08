@@ -10,6 +10,7 @@ import Data.List (isPrefixOf)
 import Numeric (showIntAtBase, showHex)
 
 import NumberSix.Irc
+import NumberSix.Bang
 
 handler :: Handler
 handler = Handler

@@ -5,6 +5,7 @@ module NumberSix.Handlers.Seen
 import Control.Applicative ((<$>))
 
 import NumberSix.Irc
+import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Redis
 

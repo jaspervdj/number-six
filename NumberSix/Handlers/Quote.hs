@@ -11,6 +11,7 @@ import Data.Maybe (fromMaybe, catMaybes)
 import System.Random (randomRIO)
 
 import NumberSix.Irc
+import NumberSix.Bang
 import NumberSix.Util.Redis
 
 handler :: Handler

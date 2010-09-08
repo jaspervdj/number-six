@@ -3,7 +3,7 @@ module NumberSix.Handlers.Hello
     ) where
 
 import NumberSix.Irc
+import NumberSix.Bang
 
 handler :: Handler
-handler = makeHandler "hello" $
-    onBangCommand "!hello" $ writeChannelReply "O hai!"
+handler = makeBangHandler "hello" ["!hello"] $ const $ return "O hai!"

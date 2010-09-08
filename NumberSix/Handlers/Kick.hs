@@ -6,6 +6,7 @@ module NumberSix.Handlers.Kick
 
 import Control.Monad (when)
 
+import NumberSix.Bang
 import NumberSix.Irc
 import NumberSix.Util
 import Network.IRC

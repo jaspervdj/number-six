@@ -7,6 +7,7 @@ module NumberSix.Handlers.UrbanDictionary
 import Text.HTML.TagSoup
 
 import NumberSix.Irc
+import NumberSix.Bang
 import NumberSix.Util.Http
 
 urban :: String -> Irc String

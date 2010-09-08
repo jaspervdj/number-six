@@ -8,6 +8,7 @@ import Data.Char (isDigit)
 import Text.HTML.TagSoup
 
 import NumberSix.Irc
+import NumberSix.Bang
 import NumberSix.Util.Http
 
 getTweet :: [Tag String] -> String

@@ -7,6 +7,7 @@ module NumberSix.Handlers.Title
 import Data.Maybe (fromMaybe)
 
 import NumberSix.Irc
+import NumberSix.Bang
 import NumberSix.Util.Http
 
 title :: String -> Irc String

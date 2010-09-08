@@ -3,6 +3,7 @@ module NumberSix.Handlers.Ping
     ) where
 
 import NumberSix.Irc
+import NumberSix.Bang
 import Network.IRC
 
 handler :: Handler

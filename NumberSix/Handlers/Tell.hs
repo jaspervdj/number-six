@@ -7,6 +7,7 @@ import Data.Maybe (fromMaybe)
 import Control.Monad (forM_)
 
 import NumberSix.Irc
+import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Redis
 
