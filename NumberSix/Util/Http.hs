@@ -43,7 +43,7 @@ httpGet mode url = liftIO $ do
                 request $ getRequest url'
             getResponseBody $ Right browse'
         CurlHttp -> fmap snd $ curlGetString url' []
-    return $ take 4096 response
+    return $ take 32768 response
   where
     url' = if "http://" `isPrefixOf` url then url else "http://" ++ url
 
