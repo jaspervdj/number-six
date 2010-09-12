@@ -15,7 +15,7 @@ import NumberSix.Util.Http
 down :: String -> Irc String
 down query = do
     env <- ask
-    result <- liftIO $ try $ runReaderT (httpGet query) env
+    result <- liftIO $ try $ runReaderT (httpGet SimpleHttp query) env
     return $ case result of
         -- Catch all exceptions
         Left (SomeException _)  -> query ++ " looks down from Caprica."

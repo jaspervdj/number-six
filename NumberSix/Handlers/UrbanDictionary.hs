@@ -11,7 +11,7 @@ import NumberSix.Bang
 import NumberSix.Util.Http
 
 urban :: String -> Irc String
-urban query = httpScrape url $
+urban query = httpScrape SimpleHttp url $
     innerText . takeWhile (~/= TagClose "div")
               . dropWhile (~/= TagOpen "div" [("class", "definition")])
   where

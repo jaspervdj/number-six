@@ -11,7 +11,7 @@ import NumberSix.Util.BitLy
 
 lastFm :: String -> Irc String
 lastFm query = do
-    Just (text, longUrl) <- httpScrape url $ \tags -> do
+    Just (text, longUrl) <- httpScrape SimpleHttp url $ \tags -> do
         artist <- nextTagText tags "artist"
         name <- nextTagText tags "name"
         url' <- nextTagText tags "url"

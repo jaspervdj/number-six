@@ -11,7 +11,7 @@ import NumberSix.Bang
 import NumberSix.Util.Http
 
 google :: String -> Irc String
-google query = httpScrape url $ \tags ->
+google query = httpScrape SimpleHttp url $ \tags ->
     let Just (TagOpen _ attrs) = find (~== TagOpen "a" [("class", "l")]) tags
         Just t = lookup "href" attrs
         in t

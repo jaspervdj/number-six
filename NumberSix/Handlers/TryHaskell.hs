@@ -4,7 +4,8 @@ module NumberSix.Handlers.TryHaskell
     ( handler
     ) where
 
-import Control.Applicative ((<$>), (<|>))
+import Data.List (isPrefixOf)
+import Control.Applicative ((<$>))
 import Data.Either (either)
 
 import Text.JSON
@@ -15,10 +16,12 @@ import NumberSix.Util.Http
 
 eval :: String -> Irc String
 eval query = do
-    json <- decode . take 200 <$> httpGet url
-    return $ either (const complain) id $ resultToEither $ do
+    json <- decode . take 200 <$> httpGet SimpleHttp url
+    let x = either (const complain) id $ resultToEither $ do
         JSObject object <- json
-        valFromObj "result" object <|> valFromObj "type" object
+        valFromObj (if ":t" `isPrefixOf` query then "type" else "result") object
+    report x
+    return x
   where
     url =  "http://tryhaskell.org/haskell.json?method=eval&expr="
         ++ urlEncode query

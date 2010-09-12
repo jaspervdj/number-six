@@ -20,7 +20,7 @@ getTweet tags = fromMaybe "Not found" $ do
 twitter :: String -> Irc String
 twitter argument =
     let url = if all isDigit argument then tweet else user
-    in httpScrape url getTweet
+    in httpScrape SimpleHttp url getTweet
   where
     user  =  "http://api.twitter.com/1/statuses/user_timeline.xml?screen_name="
           ++ urlEncode argument

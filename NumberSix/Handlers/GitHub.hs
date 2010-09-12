@@ -15,7 +15,7 @@ import NumberSix.Util.BitLy
 
 gitHub :: String -> Irc String
 gitHub query = do
-    Just (text, longUrl) <- httpScrape url $ \tags -> do
+    Just (text, longUrl) <- httpScrape SimpleHttp url $ \tags -> do
         let tags' = dropWhile (~/= TagOpen "entry" []) tags
         text <- nextTagText tags' "title"
         TagOpen _ attrs <- find (~== TagOpen "link" []) tags'

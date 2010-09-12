@@ -1,7 +1,8 @@
 -- | HTTP utility functions
 --
 module NumberSix.Util.Http
-    ( httpGet
+    ( HttpMode (..)
+    , httpGet
     , httpScrape
     , nextTag
     , nextTagText
@@ -14,32 +15,41 @@ import Data.List (isPrefixOf)
 
 import qualified Codec.Binary.UTF8.String as Utf8
 import qualified Codec.Binary.Url as Url
-import Network.HTTP (getRequest, getResponseBody)
+import Network.HTTP (getRequest, getResponseBody, simpleHTTP)
 import Network.Browser (browse, request, setAllowRedirects)
 import Text.HTML.TagSoup
 
 import NumberSix.Irc
 
+-- | The HTTP modes available
+--
+data HttpMode = SimpleHttp  -- ^ Simple HTTP requests
+              | BrowseHttp  -- ^ Allows cookies and redirects
+
 -- | Perform an HTTP get request and return the response body. The response body
 -- is limited to 4096 characters, for security reasons.
 --
-httpGet :: String      -- ^ URL
+httpGet :: HttpMode    -- ^ Mode to use
+        -> String      -- ^ URL
         -> Irc String  -- ^ Response body
-httpGet url = liftIO $ do
-    (_, response) <- browse $ do
-        setAllowRedirects True
-        request $ getRequest url'
-    fmap (take 4096) $ getResponseBody $ Right response
+httpGet mode url = liftIO $ do
+    response <- case mode of
+        SimpleHttp -> simpleHTTP (getRequest url')
+        BrowseHttp -> fmap (Right . snd) $ browse $ do
+            setAllowRedirects True
+            request $ getRequest url'
+    fmap (take 4096) $ getResponseBody response
   where
     url' = if "http://" `isPrefixOf` url then url else "http://" ++ url
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
 -- function.
 --
-httpScrape :: String               -- ^ URL
+httpScrape :: HttpMode             -- ^ Mode to use
+           -> String               -- ^ URL
            -> ([Tag String] -> a)  -- ^ Scrape function
            -> Irc a                -- ^ Result
-httpScrape url f = f . parseTags <$> httpGet url
+httpScrape mode url f = f . parseTags <$> httpGet mode url
 
 -- | Get the tag following a certain tag
 --

@@ -12,7 +12,7 @@ import NumberSix.Irc
 import NumberSix.Util.Http
 
 shorten :: String -> Irc String
-shorten query = fromMaybe query <$> httpScrape url getUrl
+shorten query = fromMaybe query <$> httpScrape SimpleHttp url getUrl
   where
     getUrl tags = nextTagText tags "url"
     url =  "http://api.bit.ly/v3/shorten?login=jaspervdj"
