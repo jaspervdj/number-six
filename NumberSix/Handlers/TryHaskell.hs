@@ -17,11 +17,9 @@ import NumberSix.Util.Http
 eval :: String -> Irc String
 eval query = do
     json <- decode . take 200 <$> httpGet SimpleHttp url
-    let x = either (const complain) id $ resultToEither $ do
+    return $ either (const complain) id $ resultToEither $ do
         JSObject object <- json
         valFromObj (if ":t" `isPrefixOf` query then "type" else "result") object
-    report x
-    return x
   where
     url =  "http://tryhaskell.org/haskell.json?method=eval&expr="
         ++ urlEncode query
