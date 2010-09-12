@@ -4,7 +4,8 @@ module NumberSix.Handlers.TryHaskell
     ( handler
     ) where
 
-import Control.Applicative ((<$>))
+import Control.Applicative ((<$>), (<|>))
+import Data.Either (either)
 
 import Text.JSON
 
@@ -15,11 +16,9 @@ import NumberSix.Util.Http
 eval :: String -> Irc String
 eval query = do
     json <- decode . take 200 <$> httpGet url
-    return $ case json of
-        Ok (JSObject object) -> case valFromObj "result" object of
-            Ok result -> result
-            Error _ -> complain
-        _ -> complain
+    return $ either (const complain) id $ resultToEither $ do
+        JSObject object <- json
+        valFromObj "result" object <|> valFromObj "type" object
   where
     url =  "http://tryhaskell.org/haskell.json?method=eval&expr="
         ++ urlEncode query
