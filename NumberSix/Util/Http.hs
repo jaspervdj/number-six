@@ -18,6 +18,7 @@ import qualified Codec.Binary.Url as Url
 import Network.HTTP (getRequest, getResponseBody, simpleHTTP)
 import Network.Browser (browse, request, setAllowRedirects)
 import Text.HTML.TagSoup
+import Network.Curl (curlGetString)
 
 import NumberSix.Irc
 
@@ -25,6 +26,7 @@ import NumberSix.Irc
 --
 data HttpMode = SimpleHttp  -- ^ Simple HTTP requests
               | BrowseHttp  -- ^ Allows cookies and redirects
+              | CurlHttp    -- ^ Use cURL
 
 -- | Perform an HTTP get request and return the response body. The response body
 -- is limited to 4096 characters, for security reasons.
@@ -34,11 +36,14 @@ httpGet :: HttpMode    -- ^ Mode to use
         -> Irc String  -- ^ Response body
 httpGet mode url = liftIO $ do
     response <- case mode of
-        SimpleHttp -> simpleHTTP (getRequest url')
-        BrowseHttp -> fmap (Right . snd) $ browse $ do
-            setAllowRedirects True
-            request $ getRequest url'
-    fmap (take 4096) $ getResponseBody response
+        SimpleHttp -> getResponseBody =<< simpleHTTP (getRequest url')
+        BrowseHttp -> do
+            (_, browse') <- browse $ do
+                setAllowRedirects True
+                request $ getRequest url'
+            getResponseBody $ Right browse'
+        CurlHttp -> fmap snd $ curlGetString url' []
+    return $ take 4096 response
   where
     url' = if "http://" `isPrefixOf` url then url else "http://" ++ url
 
