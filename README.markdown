@@ -25,7 +25,7 @@ Down
 
 Check if a website is down. Commands:
 
-- `!down website`: Check if the website is down
+- `!down url`: Check if the website is down
 
 EightBall
 ---------
@@ -98,3 +98,47 @@ Interface to the epic quote database. Commands:
 - `!quote pattern`: Prints a random quote matching the given pattern
 - `!lastquote`: Prints the most recently added quote
 - `!addquote quote`: Adds a quote to the database
+
+Seen
+----
+
+Check when a user was last seen in the channel. Commands:
+
+- `!seen username`: Check when the given user was last seen
+
+Tell
+----
+
+Send a message to a user who is currently away. Commands:
+
+- `!tell username message`: Tell the message to the given user when he becomes
+  active.
+
+Title
+-----
+
+Prints the title of a web page. Commands:
+
+- `!title url`: Print the title of the given webpage
+
+TryHaskell
+----------
+
+Bindings to the haskell evaluation service of tryhaskell.org. Commands:
+
+- `> expression`, `!haskell expression`: Evaluate the given expression
+
+Twitter
+-------
+
+Handler to get twitters by id or user. Commands:
+
+- `!twitter username`: Prints the last tweet of the given user
+- `!twitter id`: Prints the tweet with the given id
+
+UrbanDictionary
+---------------
+
+Lookup an expression on urbandictionary.com. Commands:
+
+- `!urban term`: Looks up the given term on urban dictionary
