@@ -6,6 +6,7 @@ module NumberSix.Util
     , breakWord
     , prettyTime
     , trim
+    , meAction
     ) where
 
 import Control.Applicative ((<$>))
@@ -48,3 +49,8 @@ prettyTime = formatTime defaultTimeLocale "%F@%H:%M" <$> liftIO getCurrentTime
 --
 trim :: String -> String
 trim = dropWhile isSpace . reverse . dropWhile isSpace . reverse
+
+-- | Make an action a /me command
+--
+meAction :: String -> String
+meAction x = "\SOHACTION " ++ x ++ "\SOH"
