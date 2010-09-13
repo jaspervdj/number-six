@@ -25,6 +25,9 @@ runIrc config handlers' = do
     handle <- connectTo (ircHost config)
                         (PortNumber $ fromIntegral $ ircPort config)
 
+    -- Use UTF-8 by default
+    hSetEncoding handle utf8
+
     -- Make sure we have no buffering, so we can access all lines immediately
     -- when they are sent.
     hSetBuffering handle NoBuffering
