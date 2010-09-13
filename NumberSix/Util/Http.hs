@@ -4,6 +4,7 @@ module NumberSix.Util.Http
     ( HttpMode (..)
     , httpGet
     , httpScrape
+    , httpPrefix
     , nextTag
     , nextTagText
     , urlEncode
@@ -45,7 +46,7 @@ httpGet mode url = liftIO $ do
         CurlHttp -> fmap snd $ curlGetString url' []
     return $ take 32768 response
   where
-    url' = if "http://" `isPrefixOf` url then url else "http://" ++ url
+    url' = httpPrefix url
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
 -- function.
@@ -55,6 +56,11 @@ httpScrape :: HttpMode             -- ^ Mode to use
            -> ([Tag String] -> a)  -- ^ Scrape function
            -> Irc a                -- ^ Result
 httpScrape mode url f = f . parseTags <$> httpGet mode url
+
+-- | Add @"http://"@ to the given URL, if needed
+--
+httpPrefix :: String -> String
+httpPrefix url = if "http://" `isPrefixOf` url then url else "http://" ++ url
 
 -- | Get the tag following a certain tag
 --

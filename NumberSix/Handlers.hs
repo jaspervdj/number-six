@@ -22,6 +22,7 @@ import qualified NumberSix.Handlers.GitHub
 import qualified NumberSix.Handlers.Down
 import qualified NumberSix.Handlers.Title
 import qualified NumberSix.Handlers.HackerNews
+import qualified NumberSix.Handlers.Shorten
 
 handlers :: [Handler]
 handlers =
@@ -43,4 +44,5 @@ handlers =
     , NumberSix.Handlers.Down.handler
     , NumberSix.Handlers.Title.handler
     , NumberSix.Handlers.HackerNews.handler
+    , NumberSix.Handlers.Shorten.handler
     ]

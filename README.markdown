@@ -106,6 +106,13 @@ Check when a user was last seen in the channel. Commands:
 
 - `!seen username`: Check when the given user was last seen
 
+Shorten
+-------
+
+Shortens a URL using bit.ly. Commands:
+
+- `!shorten url`: Shorten the given URL
+
 Tell
 ----
 

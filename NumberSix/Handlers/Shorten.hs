@@ -1,4 +1,4 @@
-module NumberSix.Handlers.Google
+module NumberSix.Handlers.Shorten
     ( handler
     ) where
 
