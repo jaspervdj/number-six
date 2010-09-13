@@ -4,6 +4,7 @@ module NumberSix.Handlers.Twitter
 
 import Data.Maybe (fromMaybe)
 import Data.Char (isDigit)
+import Control.Monad (mplus)
 
 import Text.HTML.TagSoup
 
@@ -11,19 +12,19 @@ import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util.Http
 
-getTweet :: [Tag String] -> String
-getTweet tags = fromMaybe "Not found" $ do
+getTweet :: Maybe String -> [Tag String] -> String
+getTweet muser tags = fromMaybe "Not found" $ do
     text <- nextTagText tags "text"
-    user <- nextTagText tags "screen_name"
+    user <- muser `mplus` nextTagText tags "screen_name"
     return $ "@" ++ user ++ ": " ++ text
 
 twitter :: String -> Irc String
-twitter argument =
-    let url = if all isDigit argument then tweet else user
-    in httpScrape SimpleHttp url getTweet
+twitter argument = if all isDigit argument
+    then httpScrape SimpleHttp tweet $ getTweet Nothing
+    else httpScrape SimpleHttp user $ getTweet $ Just argument
   where
     user  =  "http://api.twitter.com/1/statuses/user_timeline.xml?screen_name="
-          ++ urlEncode argument
+          ++ urlEncode argument ++ "&include_rts=1"
     tweet =  "http://api.twitter.com/1/statuses/show/"
           ++ urlEncode argument ++ ".xml"
 
