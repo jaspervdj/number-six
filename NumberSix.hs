@@ -39,24 +39,28 @@ runIrc config handlers' = do
     chan <- newChan
     _ <- forkIO $ writer chan handle
 
+    let writer m = do
+            writeChan chan m
+            logger $ "SENT: " ++ show m
+        environment = IrcEnvironment
+            { ircConfig = config
+            , ircWriter = writer
+            , ircLogger = logger
+            }
+
     -- Loop forever, consuming one line every loop
     forever $ hGetLine handle >>= \line -> case decode line of
         Nothing -> logger "Parse error."
         Just message' -> do
             logger $ "RECEIVED: " ++ show message'
 
+                -- Build an IRC state
             -- Run every handler on the message
             forM_ handlers' $ \h -> do
-                -- Build an IRC state
-                let writer m = do
-                        writeChan chan m
-                        logger $ "SENT: " ++ show m
-                    state = IrcState
-                        { ircConfig = config
-                        , ircWriter = writer
+                let state = IrcState
+                        { ircEnvironment = environment
                         , ircMessage = message'
                         , ircHandler = h
-                        , ircLogger = logger
                         }
 
                 -- Run the handler in a separate thread

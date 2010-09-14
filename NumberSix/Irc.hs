@@ -1,6 +1,7 @@
 module NumberSix.Irc
     ( -- * Core types
       IrcConfig (..)
+    , IrcEnvironment (..)
     , IrcState (..)
     , Irc
     , Handler (..)
@@ -56,14 +57,20 @@ data IrcConfig = IrcConfig
     , ircGods     :: [String]
     }
 
+-- | Represents the outer IRC state
+--
+data IrcEnvironment = IrcEnvironment
+    { ircConfig   :: IrcConfig
+    , ircWriter   :: Message -> IO ()
+    , ircLogger   :: String -> IO ()
+    }
+
 -- | Represents the internal IRC state
 --
 data IrcState = IrcState
-    { ircConfig   :: IrcConfig
-    , ircWriter   :: Message -> IO ()
-    , ircMessage  :: Message
-    , ircHandler  :: Handler
-    , ircLogger   :: String -> IO ()
+    { ircEnvironment :: IrcEnvironment
+    , ircMessage     :: Message
+    , ircHandler     :: Handler
     }
 
 -- | Monad stack for the IRC bot
@@ -80,27 +87,27 @@ data Handler = Handler
 -- | Get our own nick
 --
 getNick :: Irc String
-getNick = ircNick . ircConfig <$> ask
+getNick = ircNick . ircConfig . ircEnvironment <$> ask
 
 -- | Get our real name
 --
 getRealName :: Irc String
-getRealName = ircRealName . ircConfig <$> ask
+getRealName = ircRealName . ircConfig . ircEnvironment <$> ask
 
 -- | Get the host we are connected to
 --
 getHost :: Irc String
-getHost = ircHost . ircConfig <$> ask
+getHost = ircHost . ircConfig . ircEnvironment <$> ask
 
 -- | Get the channels we are supposed to join
 --
 getChannels :: Irc [String]
-getChannels = ircChannels . ircConfig <$> ask
+getChannels = ircChannels . ircConfig . ircEnvironment <$> ask
 
 -- | Get the gods of the server
 --
 getGods :: Irc [String]
-getGods = ircGods . ircConfig <$> ask
+getGods = ircGods . ircConfig . ircEnvironment <$> ask
 
 -- | Get the name of the current handler
 --
@@ -149,7 +156,7 @@ getMessageText = do
 report :: String  -- ^ Message to log
        -> Irc ()  -- ^ Result
 report message = do
-    logger <- ircLogger <$> ask
+    logger <- ircLogger . ircEnvironment <$> ask
     liftIO $ logger message
 
 -- | Write a raw message to the IRC socket
@@ -157,7 +164,7 @@ report message = do
 writeMessage :: Message  -- ^ Message to write
              -> Irc ()   -- ^ Result
 writeMessage message = do
-    writer <- ircWriter <$> ask
+    writer <- ircWriter . ircEnvironment <$> ask
     liftIO $ writer message
 
 -- | Write a message to the active channel
