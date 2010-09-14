@@ -228,4 +228,6 @@ onGod :: Irc ()  -- ^ Irc action to execute if the sender is a god
 onGod irc = do
     gods <- getGods
     sender <- getSender
-    when (sender `elem` gods) irc
+    if sender `elem` gods
+        then irc
+        else writeChannelReply "I laugh at your mortality"
