@@ -10,6 +10,14 @@ Handlers
 Handlers are plugins which react to IRC messages. Here, we give a short listing
 of the available Handlers, together with the commands they provide.
 
+AddGod
+------
+
+Register a new user as god on a server. Commands:
+
+- `!addgod password`: This adds the sender as a god. Obviously, you should run
+  this in a private query.
+
 Binary
 ------
 
