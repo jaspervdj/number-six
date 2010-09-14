@@ -79,6 +79,13 @@ Test handler, simply greets a user. Commands:
 
 - `!hello`: Greet the user
 
+Help
+----
+
+Provides information. Commands:
+
+- `!help`: Print help information
+
 Identify
 --------
 
