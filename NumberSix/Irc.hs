@@ -34,8 +34,12 @@ module NumberSix.Irc
 
       -- * Reacting on events
     , onCommand
+
+      -- * Utility
+    , addGod
     ) where
 
+import Control.Concurrent (MVar, readMVar, modifyMVar_)
 import Control.Applicative ((<$>))
 import Control.DeepSeq (deepseq)
 import Control.Monad (when)
@@ -49,12 +53,12 @@ import Network.IRC (Message (..), Prefix (..), privmsg, encode)
 -- | User-specified IRC configuration
 --
 data IrcConfig = IrcConfig
-    { ircNick     :: String
-    , ircRealName :: String
-    , ircChannels :: [String]
-    , ircHost     :: String
-    , ircPort     :: Int
-    , ircGods     :: [String]
+    { ircNick        :: String
+    , ircRealName    :: String
+    , ircChannels    :: [String]
+    , ircHost        :: String
+    , ircPort        :: Int
+    , ircGodPassword :: String
     }
 
 -- | Represents the outer IRC state
@@ -63,6 +67,7 @@ data IrcEnvironment = IrcEnvironment
     { ircConfig   :: IrcConfig
     , ircWriter   :: Message -> IO ()
     , ircLogger   :: String -> IO ()
+    , ircGods     :: MVar [String]
     }
 
 -- | Represents the internal IRC state
@@ -104,10 +109,17 @@ getHost = ircHost . ircConfig . ircEnvironment <$> ask
 getChannels :: Irc [String]
 getChannels = ircChannels . ircConfig . ircEnvironment <$> ask
 
+-- | Get the god password
+--
+getGodPassword :: Irc String
+getGodPassword = ircGodPassword . ircConfig . ircEnvironment <$> ask
+
 -- | Get the gods of the server
 --
 getGods :: Irc [String]
-getGods = ircGods . ircConfig . ircEnvironment <$> ask
+getGods = do
+    mvar <- ircGods . ircEnvironment <$> ask
+    liftIO $ readMVar mvar
 
 -- | Get the name of the current handler
 --
@@ -157,7 +169,7 @@ report :: String  -- ^ Message to log
        -> Irc ()  -- ^ Result
 report message = do
     logger <- ircLogger . ircEnvironment <$> ask
-    liftIO $ logger message
+    liftIO $ logger $ "REPORTED: " ++ message
 
 -- | Write a raw message to the IRC socket
 --
@@ -231,3 +243,17 @@ onGod irc = do
     if sender `elem` gods
         then irc
         else writeChannelReply "I laugh at your mortality"
+
+-- | Add a god
+--
+addGod :: String  -- ^ Username
+       -> String  -- ^ Password
+       -> Irc ()
+addGod nick password = do
+    password' <- getGodPassword
+    mvar <- ircGods . ircEnvironment <$> ask
+    if password == password'
+        then do
+            report $ "Adding god: " ++ nick
+            liftIO $ modifyMVar_ mvar $ return . (nick :)
+        else report $ "Failed god attempt by " ++ nick

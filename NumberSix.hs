@@ -12,6 +12,7 @@ import System.IO
 import Network (connectTo, withSocketsDo, PortID (PortNumber))
 import Control.Monad.Reader (runReaderT)
 import Control.Concurrent.Chan (Chan, readChan, newChan, writeChan)
+import Control.Concurrent.MVar (newMVar)
 
 import Network.IRC
 
@@ -39,6 +40,9 @@ runIrc config handlers' = do
     chan <- newChan
     _ <- forkIO $ writer chan handle
 
+    -- Create a god container
+    gods <- newMVar []
+
     let writer m = do
             writeChan chan m
             logger $ "SENT: " ++ show m
@@ -46,6 +50,7 @@ runIrc config handlers' = do
             { ircConfig = config
             , ircWriter = writer
             , ircLogger = logger
+            , ircGods   = gods
             }
 
     -- Loop forever, consuming one line every loop
