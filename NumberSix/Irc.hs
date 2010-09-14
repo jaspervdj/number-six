@@ -37,6 +37,7 @@ module NumberSix.Irc
     ) where
 
 import Control.Applicative ((<$>))
+import Control.DeepSeq (deepseq)
 import Control.Monad (when)
 import Control.Monad.Reader (ReaderT, ask)
 import Control.Monad.Trans (liftIO)
@@ -156,7 +157,7 @@ report message = do
 --
 write :: String  -- ^ Raw text to write
       -> Irc ()  -- ^ Result
-write string = do
+write string = string `deepseq` do
     handle <- ircHandle <$> ask
     liftIO $ hPutStr handle $ string ++ "\r\n"
     report $ "SENT: " ++ string
