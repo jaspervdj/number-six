@@ -4,11 +4,14 @@ module NumberSix
     ( numberSix
     ) where
 
+import Control.Applicative ((<$>))
 import Control.Concurrent (forkIO)
 import Control.Monad (forever, forM_)
+import Control.DeepSeq (deepseq)
 import System.IO
 import Network (connectTo, withSocketsDo, PortID (PortNumber))
 import Control.Monad.Reader (runReaderT)
+import Control.Concurrent.Chan (Chan, readChan, newChan, writeChan)
 
 import Network.IRC
 
@@ -32,6 +35,10 @@ runIrc config handlers' = do
     -- when they are sent.
     hSetBuffering handle NoBuffering
 
+    -- Spawn our thread to take care of the writes
+    chan <- newChan
+    _ <- forkIO $ writer chan handle
+
     -- Loop forever, consuming one line every loop
     forever $ hGetLine handle >>= \line -> case decode line of
         Nothing -> logger "Parse error."
@@ -41,9 +48,12 @@ runIrc config handlers' = do
             -- Run every handler on the message
             forM_ handlers' $ \h -> do
                 -- Build an IRC state
-                let state = IrcState
+                let writer m = do
+                        writeChan chan m
+                        logger $ "SENT: " ++ show m
+                    state = IrcState
                         { ircConfig = config
-                        , ircHandle = handle
+                        , ircWriter = writer
                         , ircMessage = message'
                         , ircHandler = h
                         , ircLogger = logger
@@ -54,6 +64,13 @@ runIrc config handlers' = do
                 return ()
   where
     logger = hPutStrLn stderr
+
+-- | A thread that writes messages from a channel
+--
+writer :: Chan Message -> Handle -> IO ()
+writer chan handle = forever $ do
+    message <- encode <$> readChan chan
+    message `deepseq` hPutStr handle $ message ++ "\r\n"
 
 -- | Launch multiple bots and block forever
 --

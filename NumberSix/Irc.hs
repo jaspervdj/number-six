@@ -22,7 +22,6 @@ module NumberSix.Irc
     , report
 
       -- * Sending responses
-    , write
     , writeMessage
     , writeChannel
     , writeChannelTo
@@ -61,7 +60,7 @@ data IrcConfig = IrcConfig
 --
 data IrcState = IrcState
     { ircConfig   :: IrcConfig
-    , ircHandle   :: Handle
+    , ircWriter   :: Message -> IO ()
     , ircMessage  :: Message
     , ircHandler  :: Handler
     , ircLogger   :: String -> IO ()
@@ -153,20 +152,13 @@ report message = do
     logger <- ircLogger <$> ask
     liftIO $ logger message
 
--- | Write raw text to the IRC socket
---
-write :: String  -- ^ Raw text to write
-      -> Irc ()  -- ^ Result
-write string = string `deepseq` do
-    handle <- ircHandle <$> ask
-    liftIO $ hPutStr handle $ string ++ "\r\n"
-    report $ "SENT: " ++ string
-
 -- | Write a raw message to the IRC socket
 --
 writeMessage :: Message  -- ^ Message to write
              -> Irc ()   -- ^ Result
-writeMessage = write . encode
+writeMessage message = do
+    writer <- ircWriter <$> ask
+    liftIO $ writer message
 
 -- | Write a message to the active channel
 --
