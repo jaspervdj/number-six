@@ -41,6 +41,13 @@ Provides the latest action of a GitHub user. Commands:
 
 - `!github username`: Prints the latest GitHub action of the given user
 
+Gods
+----
+
+Check who the gods are on this server. Commands:
+
+- `!gods`: Show the gods on this server
+
 Google
 ------
 

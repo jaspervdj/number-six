@@ -5,6 +5,7 @@ module NumberSix.Util
     , forkIrc
     , breakWord
     , prettyTime
+    , prettyList
     , trim
     , meAction
     ) where
@@ -44,6 +45,14 @@ breakWord = second (drop 1) . break isSpace
 --
 prettyTime :: Irc String
 prettyTime = formatTime defaultTimeLocale "%F@%H:%M" <$> liftIO getCurrentTime
+
+-- | Show a list of strings in a pretty format
+--
+prettyList :: [String] -> String
+prettyList [] = "none"
+prettyList (x : []) = x
+prettyList (x : y : []) = x ++ " and " ++ y
+prettyList (x : y : z : r) = x ++ ", " ++ prettyList (y : z : r)
 
 -- | Drop spaces around a string
 --

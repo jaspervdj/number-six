@@ -10,6 +10,7 @@ module NumberSix.Irc
     , getRealName
     , getHost
     , getChannels
+    , getGods
     , getHandlerName
     , getCommand
     , getParameters
@@ -52,6 +53,7 @@ data IrcConfig = IrcConfig
     , ircChannels :: [String]
     , ircHost     :: String
     , ircPort     :: Int
+    , ircGods     :: [String]
     }
 
 -- | Represents the internal IRC state
@@ -94,6 +96,11 @@ getHost = ircHost . ircConfig <$> ask
 --
 getChannels :: Irc [String]
 getChannels = ircChannels . ircConfig <$> ask
+
+-- | Get the gods of the server
+--
+getGods :: Irc [String]
+getGods = ircGods . ircConfig <$> ask
 
 -- | Get the name of the current handler
 --
@@ -213,3 +220,12 @@ onCommand :: String  -- ^ Command to check for (lowercase!)
 onCommand command irc = do
     actualCommand <- getCommand
     when (actualCommand == command) irc
+
+-- | Execute an 'Irc' action only if the sender is a god
+--
+onGod :: Irc ()  -- ^ Irc action to execute if the sender is a god
+      -> Irc ()  -- ^ Result
+onGod irc = do
+    gods <- getGods
+    sender <- getSender
+    when (sender `elem` gods) irc

@@ -24,6 +24,7 @@ import qualified NumberSix.Handlers.Title
 import qualified NumberSix.Handlers.HackerNews
 import qualified NumberSix.Handlers.Shorten
 import qualified NumberSix.Handlers.Slap
+import qualified NumberSix.Handlers.Gods
 
 handlers :: [Handler]
 handlers =
@@ -47,4 +48,5 @@ handlers =
     , NumberSix.Handlers.HackerNews.handler
     , NumberSix.Handlers.Shorten.handler
     , NumberSix.Handlers.Slap.handler
+    , NumberSix.Handlers.Gods.handler
     ]
