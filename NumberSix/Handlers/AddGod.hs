@@ -9,7 +9,21 @@ import NumberSix.Bang
 import NumberSix.Util
 
 handler :: Handler
-handler = makeHandler "addgod" $ onBangCommand "!addgod" $ do
+handler = Handler
+    { handlerName = "addgod"
+    , handlerHooks = [addGodHook, removeGodHook]
+    }
+
+addGodHook :: Irc ()
+addGodHook = onBangCommand "!addgod" $ do
     password <- getBangCommandText
     sender <- getSender
-    addGod sender password
+    modifyGods (sender :) password
+
+removeGodHook :: Irc ()
+removeGodHook = onBangCommand "!removegod" $ onGod $ do
+    password <- getGodPassword
+    god <- getBangCommandText
+    sender <- getSender
+    let toRemove = if null god then sender else god
+    modifyGods (filter (/= toRemove)) password

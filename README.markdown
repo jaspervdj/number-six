@@ -17,6 +17,8 @@ Register a new user as god on a server. Commands:
 
 - `!addgod password`: This adds the sender as a god. Obviously, you should run
   this in a private query.
+- `!removegod`: Removes you as a god.
+- `!removegod nick`: Removes the given user as god.
 
 Binary
 ------

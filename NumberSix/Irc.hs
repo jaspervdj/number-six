@@ -11,6 +11,7 @@ module NumberSix.Irc
     , getRealName
     , getHost
     , getChannels
+    , getGodPassword
     , getGods
     , getHandlerName
     , getCommand
@@ -37,7 +38,7 @@ module NumberSix.Irc
     , onGod
 
       -- * Utility
-    , addGod
+    , modifyGods
     ) where
 
 import Control.Concurrent (MVar, readMVar, modifyMVar_)
@@ -245,16 +246,12 @@ onGod irc = do
         then irc
         else writeChannelReply "I laugh at your mortality."
 
--- | Add a god
+-- | Change the list of gods
 --
-addGod :: String  -- ^ Username
-       -> String  -- ^ Password
-       -> Irc ()
-addGod nick password = do
+modifyGods :: ([String] -> [String])  -- ^ Modification
+           -> String                  -- ^ Password
+           -> Irc ()
+modifyGods f password = do
     password' <- getGodPassword
     mvar <- ircGods . ircEnvironment <$> ask
-    if password == password'
-        then do
-            report $ "Adding god: " ++ nick
-            liftIO $ modifyMVar_ mvar $ return . (nick :)
-        else report $ "Failed god attempt by " ++ nick
+    when (password == password') $ liftIO $ modifyMVar_ mvar $ return . f
