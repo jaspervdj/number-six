@@ -105,6 +105,14 @@ Check what track a user last listened to on last.fm. Commands:
 
 - `!lastfm username`: Print the track the given user last listened to.
 
+Op
+--
+
+Give channel operator privileges. Commands:
+
+- `!op nick`: Given channel operator privileges to the specified user
+- `!deop nick`: Take away channel operator privileges from the specified user
+
 Ping
 ----
 
@@ -134,6 +142,13 @@ Shorten
 Shortens a URL using bit.ly. Commands:
 
 - `!shorten url`: Shorten the given URL
+
+Slap
+----
+
+Shows the bot's superiority to a user. Commands:
+
+- `!slap nick`: Slaps the specified user around a bit.
 
 Tell
 ----

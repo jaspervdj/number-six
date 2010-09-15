@@ -32,8 +32,9 @@ module NumberSix.Irc
     , makeHandler
     , runHandler
 
-      -- * Reacting on events
+      -- * Conditional execution
     , onCommand
+    , onGod
 
       -- * Utility
     , addGod
@@ -242,7 +243,7 @@ onGod irc = do
     sender <- getSender
     if sender `elem` gods
         then irc
-        else writeChannelReply "I laugh at your mortality"
+        else writeChannelReply "I laugh at your mortality."
 
 -- | Add a god
 --
