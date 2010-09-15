@@ -6,6 +6,7 @@ import NumberSix.Irc (Handler)
 
 import qualified NumberSix.Handlers.AddGod
 import qualified NumberSix.Handlers.Binary
+import qualified NumberSix.Handlers.Cubits
 import qualified NumberSix.Handlers.Down
 import qualified NumberSix.Handlers.EightBall
 import qualified NumberSix.Handlers.GitHub
@@ -33,6 +34,7 @@ handlers :: [Handler]
 handlers =
     [ NumberSix.Handlers.AddGod.handler
     , NumberSix.Handlers.Binary.handler
+    , NumberSix.Handlers.Cubits.handler
     , NumberSix.Handlers.Down.handler
     , NumberSix.Handlers.EightBall.handler
     , NumberSix.Handlers.GitHub.handler

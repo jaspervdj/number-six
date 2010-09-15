@@ -30,6 +30,15 @@ Binary conversions. Commands:
 - `!hex decimal`: Convert a decimal number to hex notation
 - `!unhex`: Convert a hex number to decimal notation
 
+Cubits
+------
+
+Give or take cubits from a user. Commands:
+
+- `!cubits`: Print the number of cubits of the sender
+- `!cubits nick`: Print the number of cubits of the specified user
+- `!cubits nick n`: Give `n` (possibly negative) cubits to the specified user
+
 Down
 ----
 
