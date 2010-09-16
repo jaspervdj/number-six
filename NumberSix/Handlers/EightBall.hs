@@ -1,5 +1,6 @@
 -- | Simple 8ball handler
 --
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.EightBall
     ( handler
     ) where

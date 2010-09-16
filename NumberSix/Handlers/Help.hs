@@ -1,5 +1,6 @@
 -- | Provide help information
 --
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Help
     ( handler
     ) where

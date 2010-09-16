@@ -1,8 +1,10 @@
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Ping
     ( handler
     ) where
 
 import NumberSix.Irc
+import NumberSix.Message
 import NumberSix.Bang
 
 handler :: Handler

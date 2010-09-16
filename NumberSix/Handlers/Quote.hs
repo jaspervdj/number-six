@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Quote
     ( handler
     ) where
@@ -10,7 +11,10 @@ import Data.List (isInfixOf)
 import Data.Maybe (fromMaybe, catMaybes)
 import System.Random (randomRIO)
 
+import qualified Data.ByteString.Char8 as SBC
+
 import NumberSix.Irc
+import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util.Redis
 
@@ -25,22 +29,22 @@ addQuoteHook = onBangCommand "!addquote" $ withRedis $ \redis -> do
     lastId <- getLastId
     text <- getBangCommandText
     let nextId = lastId + 1
-    setItem redis (show nextId) text
+    setItem redis (SBC.pack $ show nextId) text
     setItem redis "last-id" nextId
     showQuote nextId
 
 quoteHook :: Irc ()
 quoteHook = onBangCommand "!quote" $ do
     query <- getBangCommandText
-    if null query
+    if SBC.null query
         -- No query, return a random quote
         then do
             lastId <- getLastId
             r <- liftIO $ randomRIO (1, lastId)
             showQuote r
-        else if all isDigit query
+        else if SBC.all isDigit query
             -- A number was given, lookup the quote
-            then showQuote (read query)
+            then showQuote (read $ SBC.unpack query)
             -- A search term was given, search through quotes
             else do
                 lastId <- getLastId
@@ -49,9 +53,12 @@ quoteHook = onBangCommand "!quote" $ do
                 r <- liftIO $ randomRIO (1, length quotes)
                 showQuote $ quotes !! (r - 1)
   where
-    getQuote redis query n = getItem redis (show n) >>= \q -> return $ case q of
-        Just quote -> if query `isInfixOf` quote then Just n else Nothing
-        Nothing -> Nothing
+    getQuote redis query n = do
+        item <- getItem redis query
+        return $ case item of
+            Nothing -> Nothing
+            Just quote -> if query `SBC.isInfixOf` quote then Just n
+                                                         else Nothing
 
 lastQuoteHook :: Irc ()
 lastQuoteHook = onBangCommand "!lastquote" $ getLastId >>= showQuote
@@ -61,5 +68,6 @@ getLastId = withRedis $ \redis -> fromMaybe 0 <$> getItem redis "last-id"
 
 showQuote :: Integer -> Irc ()
 showQuote n = do
-    Just quote <- withRedis $ \redis -> getItem redis $ show n
-    writeChannel $ "Quote " ++ show n ++ ": " ++ quote
+    let sn = SBC.pack $ show n
+    Just quote <- withRedis $ \redis -> getItem redis sn
+    writeChannel $ "Quote " <> sn <> ": " <> quote

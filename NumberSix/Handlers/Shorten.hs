@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Shorten
     ( handler
     ) where

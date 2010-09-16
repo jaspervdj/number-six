@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Seen
     ( handler
     ) where
@@ -5,6 +6,7 @@ module NumberSix.Handlers.Seen
 import Control.Applicative ((<$>))
 
 import NumberSix.Irc
+import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Redis
@@ -29,6 +31,6 @@ loadHook = onBangCommand "!seen" $ do
     item <- withRedis $ \redis -> getItem redis who
     case item of
         Just (time, text) -> writeChannelReply $
-            "I last saw " ++ who ++ " on " ++ time
-                          ++ " saying: " ++ text
-        _ -> writeChannelReply $ "I ain't never seen " ++ who
+            "I last saw " <> who <> " on " <> time
+                          <> " saying: " <> text
+        _ -> writeChannelReply $ "I ain't never seen " <> who

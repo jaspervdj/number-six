@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Tell
     ( handler
     ) where
@@ -7,6 +8,7 @@ import Data.Maybe (fromMaybe)
 import Control.Monad (forM_)
 
 import NumberSix.Irc
+import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Redis
@@ -27,7 +29,7 @@ storeHook = onBangCommand "!tell" $ do
     withRedis $ \redis -> do
         messages <- fromMaybe [] <$> getItem redis recipient
         setItem redis recipient $ messages ++ [tell]
-    writeChannelReply $ "I'll pass that on when " ++ recipient ++ " is here."
+    writeChannelReply $ "I'll pass that on when " <> recipient <> " is here."
 
 loadHook :: Irc ()
 loadHook = onCommand "privmsg" $ withRedis $ \redis -> do
@@ -37,5 +39,5 @@ loadHook = onCommand "privmsg" $ withRedis $ \redis -> do
         Nothing -> return ()
         Just l -> do
             forM_ l $ \(from, time, message) ->
-                writeChannelReply $ from ++ " (" ++ time ++ "): " ++ message
+                writeChannelReply $ from <> " (" <> time <> "): " <> message
             deleteItem redis sender

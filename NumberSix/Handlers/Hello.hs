@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Hello
     ( handler
     ) where
