@@ -8,9 +8,15 @@ module NumberSix
 import Control.Applicative ((<$>))
 import Control.Concurrent (forkIO)
 import Control.Monad (forever, forM_)
+import Data.Monoid (mempty)
 import Control.DeepSeq (deepseq)
 import System.IO
-import Network (connectTo, withSocketsDo, PortID (PortNumber))
+import Network (withSocketsDo)
+import Network.BSD ( HostEntry (..), getProtocolNumber, getHostByName
+                   , hostAddress
+                   )
+import Network.Socket (Socket, SockAddr (..), SocketType (..), socket, connect)
+import Network.Socket.ByteString
 import Control.Monad.Reader (runReaderT)
 import Control.Concurrent.Chan (Chan, readChan, newChan, writeChan)
 import Control.Concurrent.MVar (newMVar)
@@ -31,19 +37,11 @@ runIrc :: IrcConfig   -- ^ Configuration
        -> IO ()
 runIrc config handlers' = do
     -- Connect to the IRC server
-    handle <- connectTo (SBC.unpack $ ircHost config)
-                        (PortNumber $ fromIntegral $ ircPort config)
-
-    -- Use UTF-8 by default
-    hSetEncoding handle utf8
-
-    -- Make sure we have no buffering, so we can access all lines immediately
-    -- when they are sent.
-    hSetBuffering handle NoBuffering
+    sock <- connect' (SBC.unpack $ ircHost config) $ ircPort config
 
     -- Spawn our thread to take care of the writes
     chan <- newChan
-    _ <- forkIO $ writer chan handle
+    _ <- forkIO $ writer chan sock
 
     -- Create a god container
     gods <- newMVar []
@@ -58,8 +56,35 @@ runIrc config handlers' = do
             , ircGods   = gods
             }
 
+    loop environment sock mempty
+  where
+    logger = SB.hPutStrLn stderr
+
+    -- Higher-level connect function
+    connect' hostname port = do
+        protocol <- getProtocolNumber "tcp"
+        entry <- getHostByName hostname
+        sock <- socket (hostFamily entry) Stream protocol
+        connect sock $ SockAddrInet (fromIntegral port) $ hostAddress entry
+        return sock
+
     -- Loop forever, consuming one line every loop
-    forever $ hGetLine handle >>= \line -> case decode (SBC.pack line) of
+    loop environment sock previous = do
+        chunk <- fmap (previous <>) $ recv sock 4096
+        consume environment sock chunk
+
+    -- Consume chunks and handle lines
+    consume environment sock chunk = do
+        let (line, rest) = SBC.breakSubstring "\r\n" chunk
+        if SB.null rest
+            -- Need more input
+            then loop environment sock chunk
+            -- Got a line
+            else do handleLine environment line
+                    consume environment sock $ SB.drop 2 rest
+
+    -- Processes one line
+    handleLine environment line = case decode line of
         Nothing -> logger "Parse error."
         Just message' -> do
             logger $ "RECEIVED: " <> (SBC.pack $ show message')
@@ -76,15 +101,13 @@ runIrc config handlers' = do
                 -- Run the handler in a separate thread
                 _ <- forkIO $ runReaderT (runHandler h) state
                 return ()
-  where
-    logger = SB.hPutStrLn stderr
 
 -- | A thread that writes messages from a channel
 --
-writer :: Chan Message -> Handle -> IO ()
-writer chan handle = forever $ do
+writer :: Chan Message -> Socket -> IO ()
+writer chan sock = forever $ do
     message <- encode <$> readChan chan
-    SB.unpack message `deepseq` SB.hPutStr handle $ message <> "\r\n"
+    SB.unpack message `deepseq` sendAll sock $ message <> "\r\n"
 
 -- | Launch multiple bots and block forever
 --

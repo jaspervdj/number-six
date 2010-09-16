@@ -11,7 +11,9 @@ import Control.Applicative ((<$>), (<|>))
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
-import Data.Attoparsec (Parser, Result (..), parse, feed, option, many)
+import Data.Attoparsec ( Parser, Result (..), parse, feed, option, manyTill
+                       , endOfInput
+                       )
 import Data.Attoparsec.Char8 (char8, takeTill, skipWhile)
 
 import NumberSix.Message
@@ -57,12 +59,14 @@ messageParser :: Parser Message
 messageParser = do
     prefix <- option Nothing $ Just <$> prefixParser
     command <- commandParser
-    parameters <- many parameterParser
+    parameters <- manyTill parameterParser endOfInput
     return $ Message prefix command parameters
 
 decode :: ByteString -> Maybe Message
 decode = resultToMaybe . parse messageParser
   where
     resultToMaybe (Done _ x) = Just x
-    resultToMaybe (Partial f) = resultToMaybe $ f mempty
     resultToMaybe (Fail _ _ _) = Nothing
+    resultToMaybe (Partial f) = case f mempty of
+        Done _ x -> Just x
+        _ -> Nothing
