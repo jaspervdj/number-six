@@ -33,7 +33,7 @@ prefixParser = do
     prefix <- takeTill $ \x -> isSpace x || x == '!' || x == '@'
     -- A dot denotes a server prefix
     if '.' `SBC.elem` prefix
-        then return $ ServerPrefix prefix
+        then skipWhile isSpace >> return (ServerPrefix prefix)
         else do
             user <- option Nothing $ Just <$> do
                         char8 '!'
