@@ -12,9 +12,6 @@ import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Message
 
-(<>) :: Monoid m => m -> m -> m
-(<>) = mappend
-
 encodePrefix :: Prefix -> ByteString
 encodePrefix (ServerPrefix s) = ":" <> s
 encodePrefix (NickPrefix n u h) = ":" <> n
@@ -35,6 +32,6 @@ encodeParameters (x : xs) = " " <> x <> encodeParameters xs
 
 encode :: Message -> ByteString
 encode (Message p c ps) =
-    encodePrefix' p <> " " <> encodeCommand c <> encodeParameters ps
+    encodePrefix' p <> encodeCommand c <> encodeParameters ps
   where
-    encodePrefix' = fromMaybe mempty . fmap ((" " <>) . encodePrefix)
+    encodePrefix' = fromMaybe mempty . fmap ((<> " ") . encodePrefix)

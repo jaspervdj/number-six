@@ -6,8 +6,6 @@ import Data.List (isInfixOf)
 import Control.Monad (when, forM_)
 import Data.Char (toUpper)
 
-import Network.IRC
-
 import NumberSix.Bang
 import NumberSix.Irc
 import NumberSix.Util
@@ -17,7 +15,7 @@ handler = makeHandler "identify" $ do
     params <- getParameters
     command' <- getCommand
     channels <- getChannels
-    when (command' == "notice" && isCheckIdent params) $ do
+    when (command' == "NOTICE" && isCheckIdent params) $ do
         nick' <- getNick
         realName' <- getRealName
         writeMessage $ nick nick'

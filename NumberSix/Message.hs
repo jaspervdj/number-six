@@ -3,7 +3,11 @@
 module NumberSix.Message
     ( Prefix (..)
     , Message (..)
+    , makeMessage
+    , (<>)
     ) where
+
+import Data.Monoid (Monoid, mappend)
 
 import Data.ByteString (ByteString)
 
@@ -16,3 +20,9 @@ data Message = Message
     , messageCommand    :: ByteString
     , messageParameters :: [ByteString]
     } deriving (Show)
+
+makeMessage :: ByteString -> [ByteString] -> Message
+makeMessage = Message Nothing
+
+(<>) :: Monoid m => m -> m -> m
+(<>) = mappend

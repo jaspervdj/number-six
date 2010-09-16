@@ -9,10 +9,9 @@ import Control.Monad (when)
 import NumberSix.Bang
 import NumberSix.Irc
 import NumberSix.Util
-import Network.IRC
 
 handler :: Handler
-handler = makeHandler "kick" $ onCommand "kick" $ do
+handler = makeHandler "kick" $ onCommand "KICK" $ do
     (channel : nick' : _) <- getParameters
     myNick <- getNick
     when (nick' == myNick) $ do

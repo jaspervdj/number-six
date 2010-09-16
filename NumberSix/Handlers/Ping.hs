@@ -4,10 +4,8 @@ module NumberSix.Handlers.Ping
 
 import NumberSix.Irc
 import NumberSix.Bang
-import Network.IRC
 
 handler :: Handler
-handler = makeHandler "ping" $ onCommand "ping" $ do
+handler = makeHandler "ping" $ onCommand "PING" $ do
     params <- getParameters
-    writeMessage $ Message Nothing "PONG" params
-
+    writeMessage $ makeMessage "PONG" params

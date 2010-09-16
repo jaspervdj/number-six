@@ -1,5 +1,6 @@
 -- | Utility functions
 --
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Util
     ( sleep
     , forkIrc
@@ -20,7 +21,11 @@ import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (formatTime)
 import System.Locale (defaultTimeLocale)
 
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as SBC
+
 import NumberSix.Irc
+import NumberSix.Message
 
 -- | Sleep a while.
 --
@@ -39,27 +44,28 @@ forkIrc irc = do
 -- | Take a word from a string, returing the word and the remainder.
 --
 breakWord :: ByteString -> (ByteString, ByteString)
-breakWord = second (drop 1) . break isSpace
+breakWord = second (SBC.drop 1) . SBC.break isSpace
 
 -- | Get the time in a pretty format
 --
 prettyTime :: Irc ByteString
-prettyTime = formatTime defaultTimeLocale "%F@%H:%M" <$> liftIO getCurrentTime
+prettyTime = SBC.pack . formatTime defaultTimeLocale "%F@%H:%M"
+           <$> liftIO getCurrentTime
 
 -- | Show a list of strings in a pretty format
 --
 prettyList :: [ByteString] -> ByteString
 prettyList [] = "none"
 prettyList (x : []) = x
-prettyList (x : y : []) = x ++ " and " ++ y
-prettyList (x : y : z : r) = x ++ ", " ++ prettyList (y : z : r)
+prettyList (x : y : []) = x <> " and " <> y
+prettyList (x : y : z : r) = x <> ", " <> prettyList (y : z : r)
 
 -- | Drop spaces around a string
 --
 trim :: ByteString -> ByteString
-trim = dropWhile isSpace . reverse . dropWhile isSpace . reverse
+trim = SBC.dropWhile isSpace . SBC.reverse . SBC.dropWhile isSpace . SBC.reverse
 
 -- | Make an action a /me command
 --
 meAction :: ByteString -> ByteString
-meAction x = "\SOHACTION " ++ x ++ "\SOH"
+meAction x = "\SOHACTION " <> x <> "\SOH"

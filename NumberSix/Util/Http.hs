@@ -1,8 +1,8 @@
 -- | HTTP utility functions
 --
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Util.Http
-    ( HttpMode (..)
-    , httpGet
+    ( httpGet
     , httpScrape
     , httpPrefix
     , nextTag
@@ -14,53 +14,45 @@ import Control.Applicative ((<$>))
 import Control.Monad.Trans (liftIO)
 import Data.List (isPrefixOf)
 
-import qualified Codec.Binary.UTF8.ByteString as Utf8
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as SB
+import qualified Data.ByteString.Char8 as SBC
 import qualified Codec.Binary.Url as Url
-import Network.HTTP (getRequest, getResponseBody, simpleHTTP)
-import Network.Browser (browse, request, setAllowRedirects)
 import Text.HTML.TagSoup
-import Network.Curl (curlGetString)
+import Network.Curl (curlGetString_)
+import Network.Curl.Opts
 
 import NumberSix.Irc
-
--- | The HTTP modes available
---
-data HttpMode = SimpleHttp  -- ^ Simple HTTP requests
-              | BrowseHttp  -- ^ Allows cookies and redirects
-              | CurlHttp    -- ^ Use cURL
+import NumberSix.Message
 
 -- | Perform an HTTP get request and return the response body. The response body
 -- is limited to 4096 characters, for security reasons.
 --
-httpGet :: HttpMode    -- ^ Mode to use
-        -> ByteString      -- ^ URL
+httpGet :: ByteString      -- ^ URL
         -> Irc ByteString  -- ^ Response body
-httpGet mode url = liftIO $ do
-    response <- case mode of
-        SimpleHttp -> getResponseBody =<< simpleHTTP (getRequest url')
-        BrowseHttp -> do
-            (_, browse') <- browse $ do
-                setAllowRedirects True
-                request $ getRequest url'
-            getResponseBody $ Right browse'
-        CurlHttp -> fmap snd $ curlGetString url' []
-    return $ take 32768 response
+httpGet url = liftIO $ do
+    response <- fmap snd $ curlGetString_ (SBC.unpack url') options
+    return $ SB.take 32768 response
   where
     url' = httpPrefix url
+    options = [ CurlFollowLocation True
+              , CurlTimeoutMS 10000
+              , CurlMaxFileSize 32000
+              ]
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
 -- function.
 --
-httpScrape :: HttpMode             -- ^ Mode to use
-           -> ByteString               -- ^ URL
+httpScrape :: ByteString               -- ^ URL
            -> ([Tag ByteString] -> a)  -- ^ Scrape function
            -> Irc a                -- ^ Result
-httpScrape mode url f = f . parseTags <$> httpGet mode url
+httpScrape url f = f . parseTags <$> httpGet url
 
 -- | Add @"http://"@ to the given URL, if needed
 --
 httpPrefix :: ByteString -> ByteString
-httpPrefix url = if "http://" `isPrefixOf` url then url else "http://" ++ url
+httpPrefix url = if "http://" `SBC.isPrefixOf` url then url
+                                                   else "http://" <> url
 
 -- | Get the tag following a certain tag
 --
@@ -80,4 +72,4 @@ nextTagText tags name = do
 -- | Encode a ByteString to an URL
 --
 urlEncode :: ByteString -> ByteString
-urlEncode = Url.encode . Utf8.encode
+urlEncode = SBC.pack . Url.encode . SB.unpack

@@ -1,5 +1,6 @@
 -- | Provides functions to deal with bang commands
 --
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Bang
     ( -- * Obtaining parameters
       getBangCommand
@@ -18,18 +19,21 @@ import Control.Applicative ((<$>))
 import Control.Monad (when, forM_)
 import Data.Char (toLower, isSpace)
 
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as SBC
+
 import NumberSix.Irc
 import NumberSix.Util
 
 -- | Get the bang commmand -- a user given command, for example, @!google@.
 --
 getBangCommand :: Irc ByteString
-getBangCommand = map toLower . head . words <$> getMessageText
+getBangCommand = SBC.map toLower . head . SBC.words <$> getMessageText
 
 -- | Get the text given to the bang command.
 --
 getBangCommandText :: Irc ByteString
-getBangCommandText = trim . dropWhile (not . isSpace) <$> getMessageText
+getBangCommandText = trim . SBC.dropWhile (not . isSpace) <$> getMessageText
 
 -- | Create a simple handler with one bang hook. You should provide this
 -- function with a function that produces a string to be written into the
@@ -54,6 +58,6 @@ onBangCommand command = onBangCommands [command]
 onBangCommands :: [ByteString]  -- ^ Bang commands (e.g. @!google@)
                -> Irc ()    -- ^ Irc action to execute if match
                -> Irc ()    -- ^ Result
-onBangCommands commands irc = onCommand "privmsg" $ do
+onBangCommands commands irc = onCommand "PRIVMSG" $ do
     actualCommand <- getBangCommand
     forM_ commands $ \c -> when (actualCommand == c) irc

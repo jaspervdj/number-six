@@ -1,8 +1,11 @@
 -- | Let users obtain god rights
 --
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.AddGod
     ( handler
     ) where
+
+import qualified Data.ByteString as SB
 
 import NumberSix.Irc
 import NumberSix.Bang
@@ -25,5 +28,5 @@ removeGodHook = onBangCommand "!removegod" $ onGod $ do
     password <- getGodPassword
     god <- getBangCommandText
     sender <- getSender
-    let toRemove = if null god then sender else god
+    let toRemove = if SB.null god then sender else god
     modifyGods (filter (/= toRemove)) password

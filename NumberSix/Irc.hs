@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Irc
     ( -- * Core types
       IrcConfig (..)
@@ -47,10 +48,14 @@ import Control.DeepSeq (deepseq)
 import Control.Monad (when)
 import Control.Monad.Reader (ReaderT, ask)
 import Control.Monad.Trans (liftIO)
-import Data.Char (toLower)
+import Data.Char (toUpper, toLower)
 import System.IO (Handle, hPutStr)
 
-import Network.IRC (Message (..), Prefix (..), privmsg, encode)
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as SBC
+
+import NumberSix.Message
+import NumberSix.Message.Encode
 
 -- | User-specified IRC configuration
 --
@@ -132,22 +137,22 @@ getHandlerName = handlerName . ircHandler <$> ask
 -- in lowercase.
 --
 getCommand :: Irc ByteString
-getCommand = map toLower . msg_command . ircMessage <$> ask
+getCommand = SBC.map toUpper . messageCommand . ircMessage <$> ask
 
 -- | Obtain the IRC parameters given
 --
 getParameters :: Irc [ByteString]
-getParameters = msg_params . ircMessage <$> ask
+getParameters = messageParameters . ircMessage <$> ask
 
 -- | Obtain the sender of the command to which this handler is reacting
 --
 getSender :: Irc ByteString
 getSender = do
-    prefix <- msg_prefix . ircMessage <$> ask
+    prefix <- messagePrefix . ircMessage <$> ask
     return $ case prefix of
         Nothing -> error "No sender"
-        Just (Server n) -> n
-        Just (NickName n _ _) -> n
+        Just (ServerPrefix n) -> n
+        Just (NickPrefix n _ _) -> n
 
 -- | Get the active channel
 --
@@ -171,7 +176,7 @@ report :: ByteString  -- ^ Message to log
        -> Irc ()  -- ^ Result
 report message = do
     logger <- ircLogger . ircEnvironment <$> ask
-    liftIO $ logger $ "REPORTED: " ++ message
+    liftIO $ logger $ "REPORTED: " <> message
 
 -- | Write a raw message to the IRC socket
 --
@@ -187,7 +192,7 @@ writeChannel :: ByteString  -- ^ Message text
              -> Irc ()  -- ^ Result
 writeChannel string = do
     channel <- getChannel
-    writeMessage $ privmsg channel string
+    writeMessage $ makeMessage "PRIVMSG" [channel, string]
 
 -- | Write a message to the active channel, addressed to a certain user
 --
@@ -202,7 +207,7 @@ writeChannel string = do
 writeChannelTo :: ByteString  -- ^ Username to address
                -> ByteString  -- ^ Message text
                -> Irc ()  -- ^ Result
-writeChannelTo userName message = writeChannel $ userName ++ ": " ++ message
+writeChannelTo userName message = writeChannel $ userName <> ": " <> message
 
 -- | Write a message to the active channel, addressed to the user who fired
 -- the current handler. See 'writeChannelTo' as well.

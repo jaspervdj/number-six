@@ -1,5 +1,6 @@
 -- | Utility functions for persistence
 --
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Util.Redis
     ( withRedis
     , getItem
@@ -11,7 +12,8 @@ module NumberSix.Util.Redis
 import Data.List (intercalate)
 import Control.Monad.Trans (liftIO)
 
-import qualified Data.ByteString.Lazy as LB
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as SBC
 import Data.Binary (Binary, encode, decode)
 import Database.Redis.Redis
 
@@ -21,14 +23,14 @@ import NumberSix.Irc
 -- it will be unique for different hosts and channels.
 --
 getKey :: ByteString             -- ^ Simple key
-       -> Irc LB.ByteString  -- ^ Fully qualified key
+       -> Irc ByteString  -- ^ Fully qualified key
 getKey key = do
     host <- getHost
     channel <- getChannel
     handler <- getHandlerName
-    return $ encode $ intercalate "-" [ "number-six", host
-                                      , channel, handler, key
-                                      ]
+    return $ SBC.intercalate "-" [ "number-six", host
+                                 , channel, handler, key
+                                 ]
 
 -- | Run a function with a redis connection
 --
