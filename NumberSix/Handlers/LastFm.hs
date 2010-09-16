@@ -9,7 +9,7 @@ import NumberSix.Bang
 import NumberSix.Util.Http
 import NumberSix.Util.BitLy
 
-lastFm :: String -> Irc String
+lastFm :: ByteString -> Irc ByteString
 lastFm query = do
     Just (text, longUrl) <- httpScrape SimpleHttp url $ \tags -> do
         artist <- nextTagText tags "artist"

@@ -11,7 +11,7 @@ import Data.Maybe (fromMaybe)
 import NumberSix.Irc
 import NumberSix.Util.Http
 
-shorten :: String -> Irc String
+shorten :: ByteString -> Irc ByteString
 shorten query = fromMaybe query <$> httpScrape SimpleHttp url getUrl
   where
     getUrl tags = nextTagText tags "url"
@@ -20,7 +20,7 @@ shorten query = fromMaybe query <$> httpScrape SimpleHttp url getUrl
         ++ "&longUrl=" ++ urlEncode (httpPrefix query)
         ++ "&format=xml"
 
-textAndUrl :: String -> String -> Irc String
+textAndUrl :: ByteString -> ByteString -> Irc ByteString
 textAndUrl text url = do
     shortUrl <- shorten url
     return $ text ++ " >> " ++ shortUrl

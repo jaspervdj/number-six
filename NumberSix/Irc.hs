@@ -55,12 +55,12 @@ import Network.IRC (Message (..), Prefix (..), privmsg, encode)
 -- | User-specified IRC configuration
 --
 data IrcConfig = IrcConfig
-    { ircNick        :: String
-    , ircRealName    :: String
-    , ircChannels    :: [String]
-    , ircHost        :: String
+    { ircNick        :: ByteString
+    , ircRealName    :: ByteString
+    , ircChannels    :: [ByteString]
+    , ircHost        :: ByteString
     , ircPort        :: Int
-    , ircGodPassword :: String
+    , ircGodPassword :: ByteString
     }
 
 -- | Represents the outer IRC state
@@ -68,8 +68,8 @@ data IrcConfig = IrcConfig
 data IrcEnvironment = IrcEnvironment
     { ircConfig   :: IrcConfig
     , ircWriter   :: Message -> IO ()
-    , ircLogger   :: String -> IO ()
-    , ircGods     :: MVar [String]
+    , ircLogger   :: ByteString -> IO ()
+    , ircGods     :: MVar [ByteString]
     }
 
 -- | Represents the internal IRC state
@@ -87,61 +87,61 @@ type Irc = ReaderT IrcState IO
 -- | Handler for IRC messages
 --
 data Handler = Handler
-    { handlerName  :: String
+    { handlerName  :: ByteString
     , handlerHooks :: [Irc ()]
     }
 
 -- | Get our own nick
 --
-getNick :: Irc String
+getNick :: Irc ByteString
 getNick = ircNick . ircConfig . ircEnvironment <$> ask
 
 -- | Get our real name
 --
-getRealName :: Irc String
+getRealName :: Irc ByteString
 getRealName = ircRealName . ircConfig . ircEnvironment <$> ask
 
 -- | Get the host we are connected to
 --
-getHost :: Irc String
+getHost :: Irc ByteString
 getHost = ircHost . ircConfig . ircEnvironment <$> ask
 
 -- | Get the channels we are supposed to join
 --
-getChannels :: Irc [String]
+getChannels :: Irc [ByteString]
 getChannels = ircChannels . ircConfig . ircEnvironment <$> ask
 
 -- | Get the god password
 --
-getGodPassword :: Irc String
+getGodPassword :: Irc ByteString
 getGodPassword = ircGodPassword . ircConfig . ircEnvironment <$> ask
 
 -- | Get the gods of the server
 --
-getGods :: Irc [String]
+getGods :: Irc [ByteString]
 getGods = do
     mvar <- ircGods . ircEnvironment <$> ask
     liftIO $ readMVar mvar
 
 -- | Get the name of the current handler
 --
-getHandlerName :: Irc String
+getHandlerName :: Irc ByteString
 getHandlerName = handlerName . ircHandler <$> ask
 
 -- | Obtain the actual IRC command: the result from this function will always be
 -- in lowercase.
 --
-getCommand :: Irc String
+getCommand :: Irc ByteString
 getCommand = map toLower . msg_command . ircMessage <$> ask
 
 -- | Obtain the IRC parameters given
 --
-getParameters :: Irc [String]
+getParameters :: Irc [ByteString]
 getParameters = msg_params . ircMessage <$> ask
 
 -- | Obtain the sender of the command to which this handler is reacting
 --
-getSender :: Irc String
+getSender :: Irc ByteString
 getSender = do
     prefix <- msg_prefix . ircMessage <$> ask
     return $ case prefix of
@@ -151,14 +151,14 @@ getSender = do
 
 -- | Get the active channel
 --
-getChannel :: Irc String
+getChannel :: Irc ByteString
 getChannel = do
     (channel : _) <- getParameters
     return channel
 
 -- | Obtain the message text of the command to which this handler is reacting
 --
-getMessageText :: Irc String
+getMessageText :: Irc ByteString
 getMessageText = do
     params <- getParameters
     return $ case params of
@@ -167,7 +167,7 @@ getMessageText = do
 
 -- | Report some message -- it will be logged
 --
-report :: String  -- ^ Message to log
+report :: ByteString  -- ^ Message to log
        -> Irc ()  -- ^ Result
 report message = do
     logger <- ircLogger . ircEnvironment <$> ask
@@ -183,7 +183,7 @@ writeMessage message = do
 
 -- | Write a message to the active channel
 --
-writeChannel :: String  -- ^ Message text
+writeChannel :: ByteString  -- ^ Message text
              -> Irc ()  -- ^ Result
 writeChannel string = do
     channel <- getChannel
@@ -199,15 +199,15 @@ writeChannel string = do
 --
 -- > jaspervdj: Hello there
 --
-writeChannelTo :: String  -- ^ Username to address
-               -> String  -- ^ Message text
+writeChannelTo :: ByteString  -- ^ Username to address
+               -> ByteString  -- ^ Message text
                -> Irc ()  -- ^ Result
 writeChannelTo userName message = writeChannel $ userName ++ ": " ++ message
 
 -- | Write a message to the active channel, addressed to the user who fired
 -- the current handler. See 'writeChannelTo' as well.
 --
-writeChannelReply :: String  -- ^ Message text
+writeChannelReply :: ByteString  -- ^ Message text
                   -> Irc ()  -- ^ Result
 writeChannelReply message = do
     sender <- getSender
@@ -215,7 +215,7 @@ writeChannelReply message = do
 
 -- | Create a simple handler with one hook
 --
-makeHandler :: String   -- ^ Handler name
+makeHandler :: ByteString   -- ^ Handler name
             -> Irc ()   -- ^ Hook
             -> Handler  -- ^ Resulting handler
 makeHandler name irc = Handler name [irc]
@@ -228,7 +228,7 @@ runHandler = sequence_ . handlerHooks
 
 -- | Execute an 'Irc' action only if the command given is the command received.
 --
-onCommand :: String  -- ^ Command to check for (lowercase!)
+onCommand :: ByteString  -- ^ Command to check for (lowercase!)
           -> Irc ()  -- ^ Irc action to execute if match
           -> Irc ()  -- ^ Result
 onCommand command irc = do
@@ -248,8 +248,8 @@ onGod irc = do
 
 -- | Change the list of gods
 --
-modifyGods :: ([String] -> [String])  -- ^ Modification
-           -> String                  -- ^ Password
+modifyGods :: ([ByteString] -> [ByteString])  -- ^ Modification
+           -> ByteString                  -- ^ Password
            -> Irc ()
 modifyGods f password = do
     password' <- getGodPassword

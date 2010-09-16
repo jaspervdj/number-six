@@ -10,7 +10,7 @@ import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util.Http
 
-title :: String -> Irc String
+title :: ByteString -> Irc ByteString
 title query = httpScrape BrowseHttp query $ \tags ->
     fromMaybe "Not now, I'm taking a break." $ do
         title' <- nextTagText tags "title"

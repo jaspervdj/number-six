@@ -20,7 +20,7 @@ import NumberSix.Irc
 -- | Construct a fully qualified key, given a simple key. This key ensures that
 -- it will be unique for different hosts and channels.
 --
-getKey :: String             -- ^ Simple key
+getKey :: ByteString             -- ^ Simple key
        -> Irc LB.ByteString  -- ^ Fully qualified key
 getKey key = do
     host <- getHost
@@ -40,27 +40,27 @@ withRedis irc = do
     liftIO $ disconnect redis
     return x
 
-getItem :: Binary a => Redis -> String -> Irc (Maybe a)
+getItem :: Binary a => Redis -> ByteString -> Irc (Maybe a)
 getItem redis key = do
     key' <- getKey key
     reply <- liftIO $ get redis key'
     return $ case reply of RBulk (Just r) -> Just $ decode r
                            _              -> Nothing
 
-existsItem :: Redis -> String -> Irc Bool
+existsItem :: Redis -> ByteString -> Irc Bool
 existsItem redis key = do
     key' <- getKey key
     reply <- liftIO $ exists redis key'
     return $ case reply of RInt 1 -> True
                            _      -> False
 
-setItem :: Binary a => Redis -> String -> a -> Irc ()
+setItem :: Binary a => Redis -> ByteString -> a -> Irc ()
 setItem redis key item = do
     key' <- getKey key
     _ <- liftIO $ set redis key' (encode item)
     return ()
 
-deleteItem :: Redis -> String -> Irc ()
+deleteItem :: Redis -> ByteString -> Irc ()
 deleteItem redis key = do
     key' <- getKey key
     _ <- liftIO $ del redis key'

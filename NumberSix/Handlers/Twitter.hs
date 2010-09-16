@@ -12,13 +12,13 @@ import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util.Http
 
-getTweet :: Maybe String -> [Tag String] -> String
+getTweet :: Maybe ByteString -> [Tag ByteString] -> ByteString
 getTweet muser tags = fromMaybe "Not found" $ do
     text <- nextTagText tags "text"
     user <- muser `mplus` nextTagText tags "screen_name"
     return $ "@" ++ user ++ ": " ++ text
 
-twitter :: String -> Irc String
+twitter :: ByteString -> Irc ByteString
 twitter argument = if all isDigit argument
     then httpScrape SimpleHttp tweet $ getTweet Nothing
     else httpScrape SimpleHttp user $ getTweet $ Just argument

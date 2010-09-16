@@ -38,17 +38,17 @@ forkIrc irc = do
 
 -- | Take a word from a string, returing the word and the remainder.
 --
-breakWord :: String -> (String, String)
+breakWord :: ByteString -> (ByteString, ByteString)
 breakWord = second (drop 1) . break isSpace
 
 -- | Get the time in a pretty format
 --
-prettyTime :: Irc String
+prettyTime :: Irc ByteString
 prettyTime = formatTime defaultTimeLocale "%F@%H:%M" <$> liftIO getCurrentTime
 
 -- | Show a list of strings in a pretty format
 --
-prettyList :: [String] -> String
+prettyList :: [ByteString] -> ByteString
 prettyList [] = "none"
 prettyList (x : []) = x
 prettyList (x : y : []) = x ++ " and " ++ y
@@ -56,10 +56,10 @@ prettyList (x : y : z : r) = x ++ ", " ++ prettyList (y : z : r)
 
 -- | Drop spaces around a string
 --
-trim :: String -> String
+trim :: ByteString -> ByteString
 trim = dropWhile isSpace . reverse . dropWhile isSpace . reverse
 
 -- | Make an action a /me command
 --
-meAction :: String -> String
+meAction :: ByteString -> ByteString
 meAction x = "\SOHACTION " ++ x ++ "\SOH"

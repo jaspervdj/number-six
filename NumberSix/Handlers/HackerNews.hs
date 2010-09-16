@@ -11,7 +11,7 @@ import NumberSix.Bang
 import NumberSix.Util.Http
 import NumberSix.Util.BitLy
 
-hackerNews :: String -> Irc String
+hackerNews :: ByteString -> Irc ByteString
 hackerNews query = do
     (title, url) <- httpScrape CurlHttp "news.ycombinator.com" $ \tags ->
         let (_ : TagOpen _ attrs : TagText text : _)

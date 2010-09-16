@@ -14,7 +14,7 @@ import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util.Http
 
-eval :: String -> Irc String
+eval :: ByteString -> Irc ByteString
 eval query = do
     json <- decode . take 200 <$> httpGet SimpleHttp url
     return $ either (const complain) id $ resultToEither $ do

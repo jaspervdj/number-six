@@ -28,7 +28,7 @@ cubitsHook = onBangCommand "!cubits" $ do
                 else "takes " ++ show (- n) ++ " cubits from " ++ nick ++ "."
             withCubits (+ n) nick
 
-withCubits :: (Int -> Int) -> String -> Irc ()
+withCubits :: (Int -> Int) -> ByteString -> Irc ()
 withCubits f nick = withRedis $ \redis -> do
     cubits <- f . fromMaybe 0 <$> getItem redis nick
     setItem redis nick cubits

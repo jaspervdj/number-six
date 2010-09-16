@@ -13,7 +13,7 @@ import NumberSix.Bang
 import NumberSix.Util.Http
 import NumberSix.Util.BitLy
 
-gitHub :: String -> Irc String
+gitHub :: ByteString -> Irc ByteString
 gitHub query = do
     Just (text, longUrl) <- httpScrape SimpleHttp url $ \tags -> do
         let tags' = dropWhile (~/= TagOpen "entry" []) tags

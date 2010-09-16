@@ -12,7 +12,7 @@ import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util.Http
 
-down :: String -> Irc String
+down :: ByteString -> Irc ByteString
 down query = do
     env <- ask
     result <- liftIO $ try $ runReaderT (httpGet SimpleHttp query) env
