@@ -37,7 +37,7 @@ httpGet url = liftIO $ do
     url' = httpPrefix url
     options = [ CurlFollowLocation True
               , CurlTimeoutMS 10000
-              , CurlMaxFileSize 32000
+              , CurlMaxFileSize 128000
               ]
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
