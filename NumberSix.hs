@@ -1,5 +1,6 @@
 -- | Main module, containing the 'numberSix' function needed to launch your bot.
 --
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix
     ( numberSix
     ) where
@@ -14,9 +15,13 @@ import Control.Monad.Reader (runReaderT)
 import Control.Concurrent.Chan (Chan, readChan, newChan, writeChan)
 import Control.Concurrent.MVar (newMVar)
 
-import Network.IRC
+import qualified Data.ByteString as SB
+import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc
+import NumberSix.Message
+import NumberSix.Message.Encode
+import NumberSix.Message.Decode
 import NumberSix.Handlers
 
 -- | Run a single IRC connection
@@ -26,7 +31,7 @@ runIrc :: IrcConfig   -- ^ Configuration
        -> IO ()
 runIrc config handlers' = do
     -- Connect to the IRC server
-    handle <- connectTo (ircHost config)
+    handle <- connectTo (SBC.unpack $ ircHost config)
                         (PortNumber $ fromIntegral $ ircPort config)
 
     -- Use UTF-8 by default
@@ -45,7 +50,7 @@ runIrc config handlers' = do
 
     let writer m = do
             writeChan chan m
-            logger $ "SENT: " ++ show m
+            logger $ "SENT: " <> (SBC.pack $ show m)
         environment = IrcEnvironment
             { ircConfig = config
             , ircWriter = writer
@@ -54,10 +59,10 @@ runIrc config handlers' = do
             }
 
     -- Loop forever, consuming one line every loop
-    forever $ hGetLine handle >>= \line -> case decode line of
+    forever $ hGetLine handle >>= \line -> case decode (SBC.pack line) of
         Nothing -> logger "Parse error."
         Just message' -> do
-            logger $ "RECEIVED: " ++ show message'
+            logger $ "RECEIVED: " <> (SBC.pack $ show message')
 
                 -- Build an IRC state
             -- Run every handler on the message
@@ -72,14 +77,14 @@ runIrc config handlers' = do
                 _ <- forkIO $ runReaderT (runHandler h) state
                 return ()
   where
-    logger = hPutStrLn stderr
+    logger = SB.hPutStrLn stderr
 
 -- | A thread that writes messages from a channel
 --
 writer :: Chan Message -> Handle -> IO ()
 writer chan handle = forever $ do
     message <- encode <$> readChan chan
-    message `deepseq` hPutStr handle $ message ++ "\r\n"
+    SB.unpack message `deepseq` SB.hPutStr handle $ message <> "\r\n"
 
 -- | Launch multiple bots and block forever
 --
