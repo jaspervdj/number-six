@@ -14,13 +14,14 @@ import qualified Data.ByteString.Char8 as SBC
 import NumberSix.Irc
 import NumberSix.Message
 import NumberSix.Bang
+import NumberSix.Util
 import NumberSix.Util.Http
 
 getTweet :: Maybe ByteString -> [Tag ByteString] -> ByteString
 getTweet muser tags = fromMaybe "Not found" $ do
     text <- nextTagText tags "text"
     user <- muser `mplus` nextTagText tags "screen_name"
-    return $ "@" <> user <> ": " <> text
+    return $ "@" <> user <> ": " <> removeNewlines text
 
 twitter :: ByteString -> Irc ByteString
 twitter argument = if SBC.all isDigit argument

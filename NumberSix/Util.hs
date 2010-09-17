@@ -9,6 +9,7 @@ module NumberSix.Util
     , prettyList
     , trim
     , meAction
+    , removeNewlines
     ) where
 
 import Control.Applicative ((<$>))
@@ -69,3 +70,8 @@ trim = SBC.dropWhile isSpace . SBC.reverse . SBC.dropWhile isSpace . SBC.reverse
 --
 meAction :: ByteString -> ByteString
 meAction x = "\SOHACTION " <> x <> "\SOH"
+
+-- | Replace newlines by spaces
+--
+removeNewlines :: ByteString -> ByteString
+removeNewlines = SBC.map (\x -> if x `elem` "\r\n" then ' ' else x)
