@@ -7,9 +7,10 @@ module NumberSix.Handlers.Down
 
 import Control.Exception (try, SomeException (..))
 import Control.Monad.Trans (liftIO)
-import Control.Monad.Reader (runReaderT, ask)
 
 import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as SBC
+import Network.Curl
 
 import NumberSix.Irc
 import NumberSix.Message
@@ -18,13 +19,21 @@ import NumberSix.Util.Http
 
 down :: ByteString -> Irc ByteString
 down query = do
-    env <- ask
-    result <- liftIO $ try $ runReaderT (httpGet query) env
-    return $ case result of
-        -- Catch all exceptions
-        Left (SomeException _)  -> query <> " looks down from Caprica."
-        -- All is fine
-        Right _ -> query <> " seems to be working fine, stop whining."
+    result <- liftIO $ try $
+        curlGetResponse_ (SBC.unpack $ httpPrefix query) curlOptions
+    return $ query <> case result of
+        -- Catch all ugly stuff
+        Left (SomeException _) -> " looks down from Caprica."
+        -- Got a response
+        Right response -> case respCurlCode (fixType' response) of
+            CurlOK -> " seems to be working fine, stop whining."
+            _ -> " gave a nasty " <> SBC.pack (show $ respStatus response)
+                                  <> "."
+  where
+    -- Fix the ambigious types
+    fixType' :: CurlResponse_ [(String, String)] String ->
+                CurlResponse_ [(String, String)] String
+    fixType' = id
 
 handler :: Handler
 handler = makeBangHandler "down" ["!down"] down

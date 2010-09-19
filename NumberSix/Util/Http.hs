@@ -5,6 +5,7 @@ module NumberSix.Util.Http
     ( httpGet
     , httpScrape
     , httpPrefix
+    , curlOptions
     , nextTag
     , nextTagText
     , urlEncode
@@ -12,7 +13,6 @@ module NumberSix.Util.Http
 
 import Control.Applicative ((<$>))
 import Control.Monad.Trans (liftIO)
-import Data.List (isPrefixOf)
 
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as SB
@@ -31,14 +31,10 @@ import NumberSix.Message
 httpGet :: ByteString      -- ^ URL
         -> Irc ByteString  -- ^ Response body
 httpGet url = liftIO $ do
-    response <- fmap snd $ curlGetString_ (SBC.unpack url') options
+    response <- fmap snd $ curlGetString_ (SBC.unpack url') curlOptions
     return $ SB.take 32768 response
   where
     url' = httpPrefix url
-    options = [ CurlFollowLocation True
-              , CurlTimeoutMS 10000
-              , CurlMaxFileSize 128000
-              ]
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
 -- function.
@@ -53,6 +49,14 @@ httpScrape url f = f . parseTags <$> httpGet url
 httpPrefix :: ByteString -> ByteString
 httpPrefix url = if "http://" `SBC.isPrefixOf` url then url
                                                    else "http://" <> url
+
+-- | Some sensible default curl optionsfor an IRC bot
+--
+curlOptions :: [CurlOption]
+curlOptions = [ CurlFollowLocation True
+              , CurlTimeoutMS 10000
+              , CurlMaxFileSize 128000
+              ]
 
 -- | Get the tag following a certain tag
 --

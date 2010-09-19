@@ -4,9 +4,8 @@
 module NumberSix.Message.Encode where
 
 import Data.Maybe (isJust, fromMaybe)
-import Data.Monoid (Monoid, mappend, mempty)
+import Data.Monoid (Monoid, mempty)
 import Data.ByteString (ByteString)
-import qualified Data.ByteString as SB
 import Data.ByteString.Char8 ()
 import qualified Data.ByteString.Char8 as SBC
 

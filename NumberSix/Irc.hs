@@ -44,18 +44,15 @@ module NumberSix.Irc
 
 import Control.Concurrent (MVar, readMVar, modifyMVar_)
 import Control.Applicative ((<$>))
-import Control.DeepSeq (deepseq)
 import Control.Monad (when)
 import Control.Monad.Reader (ReaderT, ask)
 import Control.Monad.Trans (liftIO)
-import Data.Char (toUpper, toLower)
-import System.IO (Handle, hPutStr)
+import Data.Char (toUpper)
 
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Message
-import NumberSix.Message.Encode
 
 -- | User-specified IRC configuration
 --
