@@ -26,13 +26,11 @@ import NumberSix.Irc
 import NumberSix.Message
 
 -- | Perform an HTTP get request and return the response body. The response body
--- is limited to 4096 characters, for security reasons.
+-- is limited in size, for security reasons.
 --
 httpGet :: ByteString      -- ^ URL
         -> Irc ByteString  -- ^ Response body
-httpGet url = liftIO $ do
-    response <- fmap snd $ curlGetString_ (SBC.unpack url') curlOptions
-    return $ SB.take 32768 response
+httpGet url = liftIO $ fmap snd $ curlGetString_ (SBC.unpack url') curlOptions
   where
     url' = httpPrefix url
 
