@@ -22,7 +22,7 @@ hackerNews query = do
                 = dropWhile (~/= TagOpen "td" [(SBC.pack "class", "title")])
                 $ dropWhile (~/= TagText (query <> ".")) tags
             Just href = lookup "href" attrs
-        in (text, href)
+        in (text, "http://news.ycombinator.com/" <> href)
     textAndUrl title url
 
 handler :: Handler
