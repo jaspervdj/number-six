@@ -37,6 +37,7 @@ loadHook = onCommand "PRIVMSG" $ withRedis $ \redis -> do
     case items of
         Nothing -> return ()
         Just l -> do
-            forM_ l $ \(from, time, message) ->
-                writeChannelReply $ from <> " (" <> time <> "): " <> message
             deleteItem redis sender
+            forM_ l $ \(from, time, message) -> do
+                writeChannelReply $ from <> " (" <> time <> "): " <> message
+                sleep 1
