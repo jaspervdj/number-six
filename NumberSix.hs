@@ -3,6 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix
     ( numberSix
+    , numberSixWith
     ) where
 
 import Control.Applicative ((<$>))
@@ -108,13 +109,19 @@ writer chan sock = forever $ do
     message <- encode <$> readChan chan
     SB.unpack message `deepseq` sendAll sock $ message <> "\r\n"
 
--- | Launch multiple bots and block forever
+-- | Launch multiple bots and block forever. All default handlers will be
+-- activated.
 --
 numberSix :: [IrcConfig] -> IO ()
-numberSix configs = withSocketsDo $ do
+numberSix configs = numberSixWith handlers
+
+-- | Launch multiple bots with given 'SomeHandler's and block forever
+--
+numberSixWith :: [SomeHandler] -> [IrcConfig] -> IO ()
+numberSixWith handlers' configs = $ do
     -- Spawn a thread for every config
     forM_ configs $ \config -> do
-        _ <- forkIO $ irc config handlers
+        _ <- forkIO $ irc config handlers'
         return ()
 
     -- Wait forever
