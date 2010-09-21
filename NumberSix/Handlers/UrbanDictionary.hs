@@ -1,25 +1,22 @@
 -- | Provides term lookup on urbandictionary.com
 --
-{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.UrbanDictionary
     ( handler
     ) where
 
 import Text.HTML.TagSoup
-import Data.ByteString (ByteString)
-import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc
 import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util.Http
 
-urban :: ByteString -> Irc ByteString
+urban :: String -> Irc String String
 urban query = httpScrape url $
-    innerText . takeWhile (~/= TagClose (SBC.pack "div"))
-              . dropWhile (~/= TagOpen "div" [(SBC.pack "class", "definition")])
+    innerText . takeWhile (~/= TagClose "div")
+              . dropWhile (~/= TagOpen "div" [("class", "definition")])
   where
     url = "http://www.urbandictionary.com/define.php?term=" <> urlEncode query
 
-handler :: Handler
+handler :: Handler String
 handler = makeBangHandler "urbandictionary" ["!urban"] urban

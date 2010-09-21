@@ -14,7 +14,6 @@ module NumberSix.Util.Http
 import Control.Applicative ((<$>))
 import Control.Monad.Trans (liftIO)
 
-import Data.ByteString (ByteString)
 import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
 import qualified Codec.Binary.Url as Url

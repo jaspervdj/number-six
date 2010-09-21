@@ -7,19 +7,18 @@ import Control.Applicative ((<$>))
 import Data.Maybe (fromMaybe)
 import Control.Monad (forM_)
 
+import Data.ByteString (ByteString)
+
 import NumberSix.Irc
 import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Redis
 
-handler :: Handler
-handler = Handler
-    { handlerName = "tell"
-    , handlerHooks = [storeHook, loadHook]
-    }
+handler :: Handler ByteString
+handler = makeHandler "tell" [storeHook, loadHook]
 
-storeHook :: Irc ()
+storeHook :: Irc ByteString ()
 storeHook = onBangCommand "!tell" $ do
     text <- getBangCommandText
     sender <- getSender
@@ -31,7 +30,7 @@ storeHook = onBangCommand "!tell" $ do
         setItem redis recipient $ messages ++ [tell]
     writeChannelReply $ "I'll pass that on when " <> recipient <> " is here."
 
-loadHook :: Irc ()
+loadHook :: Irc ByteString ()
 loadHook = onCommand "privmsg" $ withRedis $ \redis -> do
     sender <- getSender
     items <- getItem redis sender

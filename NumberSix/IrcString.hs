@@ -13,7 +13,7 @@ module NumberSix.IrcString
     ) where
 
 import Data.Monoid (Monoid)
-import Data.Char (chr, ord)
+import Data.Char (chr)
 
 import Data.ByteString (ByteString)
 import Data.ByteString.Char8 ()
@@ -40,14 +40,14 @@ byteStringToString byteString =
     -- Check if the input is UTF-8 encoded
     if Utf8.isUTF8Encoded simpleString
         -- If so, decode
-        then Utf8.decode words
+        then Utf8.decode word8s
         -- Otherwise, return the simple string we found
         else simpleString
   where
     -- Construct a simple string by literally taking all the character codes
     -- from the bytestring.
-    words = SB.unpack byteString
-    simpleString = map (chr . fromIntegral) words
+    word8s = SB.unpack byteString
+    simpleString = map (chr . fromIntegral) word8s
 
 -- | To convert a 'String' to a 'ByteString', we use simple UTF-8 encoding
 --

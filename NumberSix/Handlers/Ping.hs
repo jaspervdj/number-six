@@ -3,11 +3,11 @@ module NumberSix.Handlers.Ping
     ( handler
     ) where
 
-import NumberSix.Irc
-import NumberSix.Message
-import NumberSix.Bang
+import Data.ByteString (ByteString)
 
-handler :: Handler
-handler = makeHandler "ping" $ onCommand "PING" $ do
+import NumberSix.Irc
+
+handler :: Handler ByteString
+handler = makeHandler "ping" $ return $ onCommand "PING" $ do
     params <- getParameters
-    writeMessage $ makeMessage "PONG" params
+    writeMessage "PONG" params

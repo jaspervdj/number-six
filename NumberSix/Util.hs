@@ -15,14 +15,13 @@ module NumberSix.Util
 import Control.Applicative ((<$>))
 import Control.Arrow (first, second)
 import Control.Concurrent (threadDelay, forkIO)
-import Control.Monad.Reader (runReaderT, ask)
+import Control.Monad.Reader (ask)
 import Control.Monad.Trans (liftIO)
 import Data.Char (isSpace)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (formatTime)
 import System.Locale (defaultTimeLocale)
 
-import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc

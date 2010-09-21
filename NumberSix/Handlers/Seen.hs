@@ -5,19 +5,18 @@ module NumberSix.Handlers.Seen
 
 import Control.Applicative ((<$>))
 
+import Data.ByteString (ByteString)
+
 import NumberSix.Irc
 import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Redis
 
-handler :: Handler
-handler = Handler
-    { handlerName = "seen"
-    , handlerHooks = [storeHook, loadHook]
-    }
+handler :: Handler ByteString
+handler = makeHandler "seen" [storeHook, loadHook]
 
-storeHook :: Irc ()
+storeHook :: Irc ByteString ()
 storeHook = onCommand "privmsg" $ do
     sender <- getSender
     time <- prettyTime
@@ -25,7 +24,7 @@ storeHook = onCommand "privmsg" $ do
     let lastSeen = (time, text)
     withRedis $ \redis -> setItem redis sender lastSeen
 
-loadHook :: Irc ()
+loadHook :: Irc ByteString ()
 loadHook = onBangCommand "!seen" $ do
     (who, _) <- breakWord <$> getBangCommandText
     item <- withRedis $ \redis -> getItem redis who

@@ -8,8 +8,6 @@ module NumberSix.Util.BitLy
 import Control.Applicative ((<$>))
 import Data.Maybe (fromMaybe)
 
-import Data.ByteString (ByteString)
-
 import NumberSix.Irc
 import NumberSix.Message
 import NumberSix.Util.Http

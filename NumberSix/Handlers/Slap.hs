@@ -1,6 +1,5 @@
 -- | Handler to express superiority
 --
-{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Slap
     ( handler
     ) where
@@ -10,7 +9,7 @@ import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
 
-handler :: Handler
+handler :: Handler String
 handler = makeBangHandler "slap" ["!slap"] $ \nick -> do
     myNick <- getNick
     sender <- getSender

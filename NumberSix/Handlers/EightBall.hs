@@ -1,6 +1,5 @@
 -- | Simple 8ball handler
 --
-{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.EightBall
     ( handler
     ) where
@@ -11,8 +10,8 @@ import System.Random (randomRIO)
 import NumberSix.Irc
 import NumberSix.Bang
 
-handler :: Handler
-handler = makeHandler "eightball" $ onBangCommand "!8ball" $ do
+handler :: Handler String
+handler = makeHandler "eightball" $ return $ onBangCommand "!8ball" $ do
     r <- liftIO $ randomRIO (0, length answers - 1)
     writeChannelReply $ answers !! r
   where

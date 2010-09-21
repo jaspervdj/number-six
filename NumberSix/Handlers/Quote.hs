@@ -7,10 +7,10 @@ import Control.Applicative ((<$>))
 import Control.Monad (forM)
 import Control.Monad.Trans (liftIO)
 import Data.Char (isDigit)
-import Data.List (isInfixOf)
 import Data.Maybe (fromMaybe, catMaybes)
 import System.Random (randomRIO)
 
+import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc
@@ -18,13 +18,10 @@ import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util.Redis
 
-handler :: Handler
-handler = Handler
-    { handlerName = "quote"
-    , handlerHooks = [addQuoteHook, quoteHook, lastQuoteHook]
-    }
+handler :: Handler ByteString
+handler = makeHandler "quote" [addQuoteHook, quoteHook, lastQuoteHook]
 
-addQuoteHook :: Irc ()
+addQuoteHook :: Irc ByteString ()
 addQuoteHook = onBangCommand "!addquote" $ withRedis $ \redis -> do
     lastId <- getLastId
     text <- getBangCommandText
@@ -33,7 +30,7 @@ addQuoteHook = onBangCommand "!addquote" $ withRedis $ \redis -> do
     setItem redis "last-id" nextId
     showQuote nextId
 
-quoteHook :: Irc ()
+quoteHook :: Irc ByteString ()
 quoteHook = onBangCommand "!quote" $ do
     query <- getBangCommandText
     if SBC.null query
@@ -60,13 +57,13 @@ quoteHook = onBangCommand "!quote" $ do
             Just quote -> if query `SBC.isInfixOf` quote then Just n
                                                          else Nothing
 
-lastQuoteHook :: Irc ()
+lastQuoteHook :: Irc ByteString ()
 lastQuoteHook = onBangCommand "!lastquote" $ getLastId >>= showQuote
 
-getLastId :: Irc Integer
+getLastId :: Irc ByteString Integer
 getLastId = withRedis $ \redis -> fromMaybe 0 <$> getItem redis "last-id"
 
-showQuote :: Integer -> Irc ()
+showQuote :: Integer -> Irc ByteString ()
 showQuote n = do
     let sn = SBC.pack $ show n
     Just quote <- withRedis $ \redis -> getItem redis sn

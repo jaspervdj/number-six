@@ -19,7 +19,6 @@ import Control.Applicative ((<$>))
 import Control.Monad (when, forM_)
 import Data.Char (toLower, isSpace)
 
-import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc
@@ -47,8 +46,8 @@ makeBangHandler :: IrcString s
                 -> [s]             -- ^ Bang commands
                 -> (s -> Irc s s)  -- ^ Function
                 -> Handler s       -- ^ Resulting handler
-makeBangHandler name commands f = makeHandler name $ onBangCommands commands $
-    getBangCommandText >>= f >>= writeChannel
+makeBangHandler name commands f = makeHandler name $ return $
+    onBangCommands commands $ getBangCommandText >>= f >>= writeChannel
 
 -- | Execute an 'Irc' action only if the given bang command is executed.
 --

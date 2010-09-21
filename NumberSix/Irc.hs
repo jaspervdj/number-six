@@ -5,7 +5,7 @@ module NumberSix.Irc
       IrcConfig (..)
     , IrcEnvironment (..)
     , IrcState (..)
-    , Irc
+    , Irc (..)
     , Handler (..)
 
       -- * Running Irc actions
@@ -239,13 +239,13 @@ writeChannelReply message = do
     sender <- getSender
     writeChannelTo sender message
 
--- | Create a simple handler with one hook
+-- | Create a handler
 --
 makeHandler :: IrcString s
             => s            -- ^ Handler name
-            -> Irc s ()     -- ^ Hook
+            -> [Irc s ()]   -- ^ Hooks
             -> Handler s    -- ^ Resulting handler
-makeHandler name irc = Handler (toByteString name) [irc]
+makeHandler name hooks = Handler (toByteString name) hooks
 
 -- | Run a handler
 --

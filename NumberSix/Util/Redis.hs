@@ -9,11 +9,8 @@ module NumberSix.Util.Redis
     , deleteItem
     ) where
 
-import Data.List (intercalate)
 import Control.Monad.Trans (liftIO)
 
-import Data.ByteString (ByteString)
-import qualified Data.ByteString.Char8 as SBC
 import Data.Binary (Binary, encode, decode)
 import Database.Redis.Redis
 
