@@ -18,52 +18,56 @@ import Data.Binary (Binary, encode, decode)
 import Database.Redis.Redis
 
 import NumberSix.Irc
+import NumberSix.Message
+import NumberSix.IrcString
 
 -- | Construct a fully qualified key, given a simple key. This key ensures that
 -- it will be unique for different hosts and channels.
 --
-getKey :: ByteString             -- ^ Simple key
-       -> Irc ByteString  -- ^ Fully qualified key
+getKey :: IrcString s
+       => s            -- ^ Simple key
+       -> Irc s s      -- ^ Fully qualified key
 getKey key = do
     host <- getHost
     channel <- getChannel
     handler <- getHandlerName
-    return $ SBC.intercalate "-" [ "number-six", host
-                                 , channel, handler, key
-                                 ]
+    return $ "number-six" <> "-" <> host
+                          <> "-" <> channel
+                          <> "-" <> handler
+                          <> "-" <> key
 
 -- | Run a function with a redis connection
 --
-withRedis :: (Redis -> Irc a)  -- ^ Function to run with redis support
-          -> Irc a             -- ^ Result
+withRedis :: (Redis -> Irc s a)  -- ^ Function to run with redis support
+          -> Irc s a             -- ^ Result
 withRedis irc = do
     redis <- liftIO $ connect localhost defaultPort
     x <- irc redis
     liftIO $ disconnect redis
     return x
 
-getItem :: Binary a => Redis -> ByteString -> Irc (Maybe a)
+getItem :: (IrcString s, Binary a) => Redis -> s -> Irc s (Maybe a)
 getItem redis key = do
     key' <- getKey key
-    reply <- liftIO $ get redis key'
+    reply <- liftIO $ get redis $ toByteString key'
     return $ case reply of RBulk (Just r) -> Just $ decode r
                            _              -> Nothing
 
-existsItem :: Redis -> ByteString -> Irc Bool
+existsItem :: IrcString s => Redis -> s -> Irc s Bool
 existsItem redis key = do
     key' <- getKey key
-    reply <- liftIO $ exists redis key'
+    reply <- liftIO $ exists redis $ toByteString key'
     return $ case reply of RInt 1 -> True
                            _      -> False
 
-setItem :: Binary a => Redis -> ByteString -> a -> Irc ()
+setItem :: (IrcString s, Binary a) => Redis -> s -> a -> Irc s ()
 setItem redis key item = do
     key' <- getKey key
-    _ <- liftIO $ set redis key' (encode item)
+    _ <- liftIO $ set redis (toByteString key') (encode item)
     return ()
 
-deleteItem :: Redis -> ByteString -> Irc ()
+deleteItem :: IrcString s => Redis -> s -> Irc s ()
 deleteItem redis key = do
     key' <- getKey key
-    _ <- liftIO $ del redis key'
+    _ <- liftIO $ del redis $ toByteString key'
     return ()

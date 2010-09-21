@@ -23,30 +23,29 @@ import Network.Curl (curlGetString_)
 import Network.Curl.Opts
 
 import NumberSix.Irc
+import NumberSix.IrcString
 import NumberSix.Message
 
 -- | Perform an HTTP get request and return the response body. The response body
 -- is limited in size, for security reasons.
 --
-httpGet :: ByteString      -- ^ URL
-        -> Irc ByteString  -- ^ Response body
-httpGet url = liftIO $ fmap snd $ curlGetString_ (SBC.unpack url') curlOptions
-  where
-    url' = httpPrefix url
+httpGet :: String             -- ^ URL
+        -> Irc String String  -- ^ Response body
+httpGet url = liftIO $ fmap snd $ curlGetString_ (httpPrefix url) curlOptions
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
 -- function.
 --
-httpScrape :: ByteString               -- ^ URL
-           -> ([Tag ByteString] -> a)  -- ^ Scrape function
-           -> Irc a                -- ^ Result
+httpScrape :: String               -- ^ URL
+           -> ([Tag String] -> a)  -- ^ Scrape function
+           -> Irc String a         -- ^ Result
 httpScrape url f = f . parseTags <$> httpGet url
 
 -- | Add @"http://"@ to the given URL, if needed
 --
-httpPrefix :: ByteString -> ByteString
-httpPrefix url = if "http://" `SBC.isPrefixOf` url then url
-                                                   else "http://" <> url
+httpPrefix :: IrcString s => s -> s
+httpPrefix = withIrcByteString $ \url ->
+    if "http://" `SBC.isPrefixOf` url then url else "http://" <> url
 
 -- | Some sensible default curl optionsfor an IRC bot
 --
@@ -58,14 +57,14 @@ curlOptions = [ CurlFollowLocation True
 
 -- | Get the tag following a certain tag
 --
-nextTag :: [Tag ByteString] -> Tag ByteString -> Maybe (Tag ByteString)
+nextTag :: [Tag String] -> Tag String -> Maybe (Tag String)
 nextTag tags tag = case dropWhile (~/= tag) tags of
     (_ : x : _) -> Just x
     _ -> Nothing
 
 -- | Get the text chunk following an opening tag with the given name
 --
-nextTagText :: [Tag ByteString] -> ByteString -> Maybe ByteString
+nextTagText :: [Tag String] -> String -> Maybe String
 nextTagText tags name = do
     tag <- nextTag tags (TagOpen name [])
     case tag of TagText t -> return t
@@ -73,5 +72,5 @@ nextTagText tags name = do
 
 -- | Encode a ByteString to an URL
 --
-urlEncode :: ByteString -> ByteString
-urlEncode = SBC.pack . Url.encode . SB.unpack
+urlEncode :: IrcString s => s -> s
+urlEncode = withIrcByteString $ SBC.pack . Url.encode . SB.unpack
