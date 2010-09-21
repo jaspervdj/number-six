@@ -32,10 +32,10 @@ import NumberSix.Handlers
 
 -- | Run a single IRC connection
 --
-runIrc :: IrcConfig   -- ^ Configuration
-       -> [Handler]   -- ^ Handlers
-       -> IO ()
-runIrc config handlers' = do
+irc :: IrcConfig      -- ^ Configuration
+    -> [SomeHandler]  -- ^ Handlers
+    -> IO ()
+irc config handlers' = do
     -- Connect to the IRC server
     sock <- connect' (SBC.unpack $ ircHost config) $ ircPort config
 
@@ -99,7 +99,7 @@ runIrc config handlers' = do
                         }
 
                 -- Run the handler in a separate thread
-                _ <- forkIO $ runReaderT (runHandler h) state
+                _ <- forkIO $ runSomeHandler h state
                 return ()
 
 -- | A thread that writes messages from a channel
@@ -115,7 +115,7 @@ numberSix :: [IrcConfig] -> IO ()
 numberSix configs = withSocketsDo $ do
     -- Spawn a thread for every config
     forM_ configs $ \config -> do
-        _ <- forkIO $ runIrc config handlers
+        _ <- forkIO $ irc config handlers
         return ()
 
     -- Wait forever

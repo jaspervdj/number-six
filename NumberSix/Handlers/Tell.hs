@@ -31,7 +31,7 @@ storeHook = onBangCommand "!tell" $ do
     writeChannelReply $ "I'll pass that on when " <> recipient <> " is here."
 
 loadHook :: Irc ByteString ()
-loadHook = onCommand "privmsg" $ withRedis $ \redis -> do
+loadHook = onCommand "PRIVMSG" $ withRedis $ \redis -> do
     sender <- getSender
     items <- getItem redis sender
     case items of

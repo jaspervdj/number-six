@@ -1,8 +1,9 @@
+{-# LANGUAGE Rank2Types #-}
 module NumberSix.Handlers
     ( handlers
     ) where
 
-import NumberSix.Irc (Handler)
+import NumberSix.Irc (Handler, SomeHandler (..))
 
 import qualified NumberSix.Handlers.AddGod
 import qualified NumberSix.Handlers.Binary
@@ -30,31 +31,31 @@ import qualified NumberSix.Handlers.TryHaskell
 import qualified NumberSix.Handlers.Twitter
 import qualified NumberSix.Handlers.UrbanDictionary
 
-handlers :: [Handler]
+handlers :: [SomeHandler]
 handlers =
-    [ NumberSix.Handlers.AddGod.handler
-    , NumberSix.Handlers.Binary.handler
-    , NumberSix.Handlers.Cubits.handler
-    , NumberSix.Handlers.Down.handler
-    , NumberSix.Handlers.EightBall.handler
-    , NumberSix.Handlers.GitHub.handler
-    , NumberSix.Handlers.Gods.handler
-    , NumberSix.Handlers.Google.handler
-    , NumberSix.Handlers.HackerNews.handler
-    , NumberSix.Handlers.Hello.handler
-    , NumberSix.Handlers.Help.handler
-    , NumberSix.Handlers.Identify.handler
-    , NumberSix.Handlers.Kick.handler
-    , NumberSix.Handlers.LastFm.handler
-    , NumberSix.Handlers.Op.handler
-    , NumberSix.Handlers.Ping.handler
-    , NumberSix.Handlers.Quote.handler
-    , NumberSix.Handlers.Seen.handler
-    , NumberSix.Handlers.Shorten.handler
-    , NumberSix.Handlers.Slap.handler
-    , NumberSix.Handlers.Tell.handler
-    , NumberSix.Handlers.Title.handler
-    , NumberSix.Handlers.TryHaskell.handler
-    , NumberSix.Handlers.Twitter.handler
-    , NumberSix.Handlers.UrbanDictionary.handler
+    [ SomeHandler NumberSix.Handlers.AddGod.handler
+    , SomeHandler NumberSix.Handlers.Binary.handler
+    , SomeHandler NumberSix.Handlers.Cubits.handler
+    , SomeHandler NumberSix.Handlers.Down.handler
+    , SomeHandler NumberSix.Handlers.EightBall.handler
+    , SomeHandler NumberSix.Handlers.GitHub.handler
+    , SomeHandler NumberSix.Handlers.Gods.handler
+    , SomeHandler NumberSix.Handlers.Google.handler
+    , SomeHandler NumberSix.Handlers.HackerNews.handler
+    , SomeHandler NumberSix.Handlers.Hello.handler
+    , SomeHandler NumberSix.Handlers.Help.handler
+    , SomeHandler NumberSix.Handlers.Identify.handler
+    , SomeHandler NumberSix.Handlers.Kick.handler
+    , SomeHandler NumberSix.Handlers.LastFm.handler
+    , SomeHandler NumberSix.Handlers.Op.handler
+    , SomeHandler NumberSix.Handlers.Ping.handler
+    , SomeHandler NumberSix.Handlers.Quote.handler
+    , SomeHandler NumberSix.Handlers.Seen.handler
+    , SomeHandler NumberSix.Handlers.Shorten.handler
+    , SomeHandler NumberSix.Handlers.Slap.handler
+    , SomeHandler NumberSix.Handlers.Tell.handler
+    , SomeHandler NumberSix.Handlers.Title.handler
+    , SomeHandler NumberSix.Handlers.TryHaskell.handler
+    , SomeHandler NumberSix.Handlers.Twitter.handler
+    , SomeHandler NumberSix.Handlers.UrbanDictionary.handler
     ]

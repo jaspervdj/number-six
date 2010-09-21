@@ -17,7 +17,7 @@ handler :: Handler ByteString
 handler = makeHandler "seen" [storeHook, loadHook]
 
 storeHook :: Irc ByteString ()
-storeHook = onCommand "privmsg" $ do
+storeHook = onCommand "PRIVMSG" $ do
     sender <- getSender
     time <- prettyTime
     text <- getMessageText

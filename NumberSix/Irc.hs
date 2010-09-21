@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings, GeneralizedNewtypeDeriving,
-    Rank2Types #-}
+    Rank2Types, ExistentialQuantification #-}
 module NumberSix.Irc
     ( -- * Core types
       IrcConfig (..)
@@ -7,6 +7,7 @@ module NumberSix.Irc
     , IrcState (..)
     , Irc (..)
     , Handler (..)
+    , SomeHandler (..)
 
       -- * Running Irc actions
     , runIrc
@@ -37,6 +38,7 @@ module NumberSix.Irc
       -- * Handlers
     , makeHandler
     , runHandler
+    , runSomeHandler
 
       -- * Conditional execution
     , onCommand
@@ -84,7 +86,7 @@ data IrcEnvironment = IrcEnvironment
 data IrcState = IrcState
     { ircEnvironment :: IrcEnvironment
     , ircMessage     :: Message
-    , ircHandler     :: forall s. Handler s
+    , ircHandler     :: SomeHandler
     }
 
 -- | Monad stack for the IRC bot
@@ -100,6 +102,10 @@ data Handler s = Handler
     { handlerName  :: ByteString
     , handlerHooks :: [Irc s ()]
     }
+
+-- | Wrapper type for handlers
+--
+data SomeHandler = forall s. SomeHandler (Handler s)
 
 -- | Run an 'Irc' action
 --
@@ -144,7 +150,9 @@ getGods = do
 -- | Get the name of the current handler
 --
 getHandlerName :: IrcString s => Irc s s
-getHandlerName = fromByteString . handlerName . ircHandler <$> ask
+getHandlerName = do
+    (SomeHandler handler) <- ircHandler <$> ask
+    return $ fromByteString $ handlerName handler
 
 -- | Obtain the actual IRC command: the result from this function will always be
 -- in lowercase.
@@ -252,6 +260,15 @@ makeHandler name hooks = Handler (toByteString name) hooks
 runHandler :: Handler s  -- ^ Handler to run
            -> Irc s ()   -- ^ Result
 runHandler = sequence_ . handlerHooks
+
+-- | Run some handler
+--
+runSomeHandler :: SomeHandler  -- ^ Handler to run
+               -> IrcState     -- ^ Irc state
+               -> IO ()        -- ^ Result
+runSomeHandler someHandler state = do
+    (SomeHandler handler) <- return someHandler
+    runIrc (runHandler handler) state
 
 -- | Execute an 'Irc' action only if the command given is the command received.
 --
