@@ -56,6 +56,7 @@ import Control.Monad.Trans (MonadIO, liftIO)
 import Data.Char (toUpper)
 
 import Data.ByteString (ByteString)
+import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Message
@@ -219,7 +220,11 @@ writeChannel :: IrcString s
              -> Irc s ()     -- ^ Result
 writeChannel string = do
     channel <- getChannel
-    writeMessage "PRIVMSG" [channel, string]
+    writeMessage "PRIVMSG" [channel, string']
+  where
+    bs = toByteString string
+    string' | SB.length bs <= 400 = string
+            | otherwise = fromByteString (SB.take 400 bs) <> "..."
 
 -- | Write a message to the active channel, addressed to a certain user
 --

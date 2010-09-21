@@ -17,7 +17,7 @@ import NumberSix.Util.Http
 
 eval :: String -> Irc String String
 eval query = do
-    json <- decode . take 200 <$> httpGet url
+    json <- decode <$> httpGet url
     return $ either (const complain) id $ resultToEither $ do
         JSObject object <- json
         flip valFromObj object $ if ":t" `isPrefixOf` query then "type"
