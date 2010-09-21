@@ -116,6 +116,18 @@ Check what track a user last listened to on last.fm. Commands:
 
 - `!lastfm username`: Print the track the given user last listened to.
 
+NowPlaying
+----------
+
+Show the currently playing track on a radio station. Commands:
+
+- `!nowplaying station`: Print the currently playing track on the given radio
+  station
+
+Supported radio stations:
+
+- `stubru`
+
 Op
 --
 

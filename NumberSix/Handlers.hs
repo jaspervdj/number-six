@@ -19,6 +19,7 @@ import qualified NumberSix.Handlers.Help
 import qualified NumberSix.Handlers.Identify
 import qualified NumberSix.Handlers.Kick
 import qualified NumberSix.Handlers.LastFm
+import qualified NumberSix.Handlers.NowPlaying
 import qualified NumberSix.Handlers.Op
 import qualified NumberSix.Handlers.Ping
 import qualified NumberSix.Handlers.Quote
@@ -47,6 +48,7 @@ handlers =
     , SomeHandler NumberSix.Handlers.Identify.handler
     , SomeHandler NumberSix.Handlers.Kick.handler
     , SomeHandler NumberSix.Handlers.LastFm.handler
+    , SomeHandler NumberSix.Handlers.NowPlaying.handler
     , SomeHandler NumberSix.Handlers.Op.handler
     , SomeHandler NumberSix.Handlers.Ping.handler
     , SomeHandler NumberSix.Handlers.Quote.handler

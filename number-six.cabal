@@ -28,6 +28,7 @@ Library
                      NumberSix.Handlers.Identify
                      NumberSix.Handlers.Kick
                      NumberSix.Handlers.LastFm
+                     NumberSix.Handlers.NowPlaying
                      NumberSix.Handlers.Op
                      NumberSix.Handlers.Ping
                      NumberSix.Handlers.Quote
