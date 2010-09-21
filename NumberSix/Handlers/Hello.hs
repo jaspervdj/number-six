@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Hello
     ( handler
     ) where
@@ -6,5 +5,4 @@ module NumberSix.Handlers.Hello
 import NumberSix.Irc
 import NumberSix.Bang
 
-handler :: Handler
 handler = makeBangHandler "hello" ["!hello"] $ const $ return "O hai!"

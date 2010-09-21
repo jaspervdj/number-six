@@ -8,16 +8,20 @@
 {-# LANGUAGE FlexibleInstances #-}
 module NumberSix.IrcString
     ( IrcString (..)
+    , withIrcByteString
+    , withIrcString
     ) where
 
 import Data.Monoid (Monoid)
 import Data.Char (chr, ord)
 
 import Data.ByteString (ByteString)
+import Data.ByteString.Char8 ()
 import qualified Data.ByteString as SB
 import qualified Codec.Binary.UTF8.String as Utf8
+import GHC.Exts (IsString)
 
-class Monoid a => IrcString a where
+class (Monoid a, Eq a, Ord a, IsString a) => IrcString a where
     fromByteString :: ByteString -> a
     toByteString :: a -> ByteString
 
@@ -49,3 +53,15 @@ byteStringToString byteString =
 --
 stringToByteString :: String -> ByteString
 stringToByteString = SB.pack . Utf8.encode
+
+withIrcByteString :: IrcString s
+                  => (ByteString -> ByteString)
+                  -> s
+                  -> s
+withIrcByteString f = fromByteString . f . toByteString
+
+withIrcString :: IrcString s
+              => (String -> String)
+              -> s
+              -> s
+withIrcString f = withIrcByteString $ toByteString . f . fromByteString
