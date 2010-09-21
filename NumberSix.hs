@@ -113,12 +113,12 @@ writer chan sock = forever $ do
 -- activated.
 --
 numberSix :: [IrcConfig] -> IO ()
-numberSix configs = numberSixWith handlers
+numberSix = numberSixWith handlers
 
 -- | Launch multiple bots with given 'SomeHandler's and block forever
 --
 numberSixWith :: [SomeHandler] -> [IrcConfig] -> IO ()
-numberSixWith handlers' configs = $ do
+numberSixWith handlers' configs = do
     -- Spawn a thread for every config
     forM_ configs $ \config -> do
         _ <- forkIO $ irc config handlers'
