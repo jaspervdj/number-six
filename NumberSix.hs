@@ -17,7 +17,6 @@ import Network.BSD ( HostEntry (..), getProtocolNumber, getHostByName
                    )
 import Network.Socket (Socket, SockAddr (..), SocketType (..), socket, connect)
 import Network.Socket.ByteString
-import Control.Monad.Reader (runReaderT)
 import Control.Concurrent.Chan (Chan, readChan, newChan, writeChan)
 import Control.Concurrent.MVar (newMVar)
 
@@ -46,12 +45,12 @@ irc config handlers' = do
     -- Create a god container
     gods <- newMVar []
 
-    let writer m = do
+    let writer' m = do
             writeChan chan m
             logger $ "SENT: " <> (SBC.pack $ show m)
         environment = IrcEnvironment
             { ircConfig = config
-            , ircWriter = writer
+            , ircWriter = writer'
             , ircLogger = logger
             , ircGods   = gods
             }

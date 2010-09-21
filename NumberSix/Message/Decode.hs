@@ -9,9 +9,8 @@ import Data.Monoid (mempty)
 import Control.Applicative ((<$>), (<|>))
 
 import Data.ByteString (ByteString)
-import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
-import Data.Attoparsec ( Parser, Result (..), parse, feed, option, manyTill
+import Data.Attoparsec ( Parser, Result (..), parse, option, manyTill
                        , endOfInput
                        )
 import Data.Attoparsec.Char8 (char8, takeTill, skipWhile)
@@ -36,10 +35,10 @@ prefixParser = do
         then skipWhile isSpace >> return (ServerPrefix prefix)
         else do
             user <- option Nothing $ Just <$> do
-                        char8 '!'
+                        _ <- char8 '!'
                         takeTill $ \x -> isSpace x || x == '@'
             host <- option Nothing $ Just <$> do
-                        char8 '@'
+                        _ <- char8 '@'
                         takeTill isSpace
             skipWhile isSpace
             return $ NickPrefix prefix user host

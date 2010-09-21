@@ -1,6 +1,6 @@
 Name:                number-six
 Version:             0.1
-Synopsis:            A sexy IRC bot
+Synopsis:            A sexy IRC bot library
 License-file:        LICENSE
 Author:              Jasper Van der Jeugt
 Maintainer:          jaspervdj@gmail.com
@@ -12,32 +12,57 @@ Cabal-version:       >= 1.2
 Library
   Ghc-Options:       -Wall
   Exposed-Modules:   NumberSix
+                     NumberSix.Bang
                      NumberSix.Handlers
+                     NumberSix.Handlers.AddGod
+                     NumberSix.Handlers.Binary
+                     NumberSix.Handlers.Cubits
+                     NumberSix.Handlers.Down
+                     NumberSix.Handlers.EightBall
+                     NumberSix.Handlers.GitHub
+                     NumberSix.Handlers.Gods
                      NumberSix.Handlers.Google
+                     NumberSix.Handlers.HackerNews
                      NumberSix.Handlers.Hello
+                     NumberSix.Handlers.Help
                      NumberSix.Handlers.Identify
                      NumberSix.Handlers.Kick
+                     NumberSix.Handlers.LastFm
+                     NumberSix.Handlers.Op
                      NumberSix.Handlers.Ping
+                     NumberSix.Handlers.Quote
                      NumberSix.Handlers.Seen
+                     NumberSix.Handlers.Shorten
+                     NumberSix.Handlers.Slap
                      NumberSix.Handlers.Tell
+                     NumberSix.Handlers.Title
+                     NumberSix.Handlers.TryHaskell
                      NumberSix.Handlers.Twitter
+                     NumberSix.Handlers.UrbanDictionary
                      NumberSix.Irc
+                     NumberSix.IrcString
+                     NumberSix.Message
+                     NumberSix.Message.Decode
+                     NumberSix.Message.Encode
                      NumberSix.Util
+                     NumberSix.Util.BitLy
                      NumberSix.Util.Http
                      NumberSix.Util.Redis
   Build-depends:     base >= 4 && < 5,
                      monads-fd >= 0.1,
                      random >= 1,
                      containers >= 0.3,
-                     HTTP >= 4000,
                      bytestring >= 0.9,
-                     utf8-string >= 0.3,
+                     utf8-string >= 0.3.6,
                      redis >= 0.7,
                      binary >= 0.5,
                      tagsoup >= 0.10,
-                     irc >= 0.4,
                      old-locale >= 1,
                      time >= 1,
                      dataenc >= 0.13,
                      network >= 2.2,
-                     json >= 0.4
+                     json >= 0.4,
+                     attoparsec >= 0.8,
+                     network-bytestring >= 0.1,
+                     deepseq >= 1.0,
+                     curl >= 1.3

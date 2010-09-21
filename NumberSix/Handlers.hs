@@ -3,7 +3,7 @@ module NumberSix.Handlers
     ( handlers
     ) where
 
-import NumberSix.Irc (Handler, SomeHandler (..))
+import NumberSix.Irc (SomeHandler (..))
 
 import qualified NumberSix.Handlers.AddGod
 import qualified NumberSix.Handlers.Binary
