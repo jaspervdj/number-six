@@ -220,7 +220,11 @@ writeChannel :: IrcString s
              -> Irc s ()     -- ^ Result
 writeChannel string = do
     channel <- getChannel
-    writeMessage "PRIVMSG" [channel, string']
+    nick <- getNick
+    -- If the channel equals our own nick, we are talking in a query, and we
+    -- want to responsd privately to the sender.
+    destination <- if nick == channel then getSender else return channel
+    writeMessage "PRIVMSG" [destination, string']
   where
     bs = toByteString string
     string' | SB.length bs <= 400 = string

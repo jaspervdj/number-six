@@ -21,8 +21,8 @@ cubitsHook = onBangCommand "!cubits" $ do
     sender <- getSender
     case args of
         [] -> withCubits id sender
-        [nick] -> withCubits id nick
-        [nick, n'] -> onGod $ unless (nick == sender) $ do
+        (nick : []) -> withCubits id nick
+        (nick : n' : []) -> onGod $ unless (nick == sender) $ do
             let n = read n'
                 sn = show $ abs n
             writeChannel $ meAction $ if n >= 0

@@ -10,16 +10,6 @@ Handlers
 Handlers are plugins which react to IRC messages. Here, we give a short listing
 of the available Handlers, together with the commands they provide.
 
-AddGod
-------
-
-Register a new user as god on a server. Commands:
-
-- `!addgod password`: This adds the sender as a god. Obviously, you should run
-  this in a private query.
-- `!removegod`: Removes you as a god.
-- `!removegod nick`: Removes the given user as god.
-
 Binary
 ------
 
@@ -63,9 +53,13 @@ Provides the latest action of a GitHub user. Commands:
 Gods
 ----
 
-Check who the gods are on this server. Commands:
+Check who the gods are on this server, and manage them. Commands:
 
 - `!gods`: Show the gods on this server
+- `!addgod password`: This adds the sender as a god. Obviously, you should run
+  this in a private query.
+- `!removegod`: Removes you as a god.
+- `!removegod nick`: Removes the given user as god.
 
 Google
 ------

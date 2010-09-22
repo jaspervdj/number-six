@@ -5,7 +5,6 @@ module NumberSix.Handlers
 
 import NumberSix.Irc (SomeHandler (..))
 
-import qualified NumberSix.Handlers.AddGod
 import qualified NumberSix.Handlers.Binary
 import qualified NumberSix.Handlers.Cubits
 import qualified NumberSix.Handlers.Down
@@ -34,8 +33,7 @@ import qualified NumberSix.Handlers.UrbanDictionary
 
 handlers :: [SomeHandler]
 handlers =
-    [ SomeHandler NumberSix.Handlers.AddGod.handler
-    , SomeHandler NumberSix.Handlers.Binary.handler
+    [ SomeHandler NumberSix.Handlers.Binary.handler
     , SomeHandler NumberSix.Handlers.Cubits.handler
     , SomeHandler NumberSix.Handlers.Down.handler
     , SomeHandler NumberSix.Handlers.EightBall.handler

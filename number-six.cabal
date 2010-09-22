@@ -14,7 +14,6 @@ Library
   Exposed-Modules:   NumberSix
                      NumberSix.Bang
                      NumberSix.Handlers
-                     NumberSix.Handlers.AddGod
                      NumberSix.Handlers.Binary
                      NumberSix.Handlers.Cubits
                      NumberSix.Handlers.Down
