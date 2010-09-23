@@ -23,7 +23,8 @@ Binary conversions. Commands:
 Cubits
 ------
 
-Give or take cubits from a user. Commands:
+Give or take cubits from a user. God is required for giving or taking cubits.
+Commands:
 
 - `!cubits`: Print the number of cubits of the sender
 - `!cubits nick`: Print the number of cubits of the specified user
@@ -145,6 +146,13 @@ Interface to the epic quote database. Commands:
 - `!quote pattern`: Prints a random quote matching the given pattern
 - `!lastquote`: Prints the most recently added quote
 - `!addquote quote`: Adds a quote to the database
+
+Say
+---
+
+Make the bot say arbitrary text. God is required. Commands:
+
+- `!say channel text`: Say the given text in the given channel
 
 Seen
 ----

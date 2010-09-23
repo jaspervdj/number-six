@@ -32,6 +32,8 @@ module NumberSix.Irc
       -- * Sending responses
     , writeMessage
     , writeChannel
+
+      -- * Simple responses
     , write
     , writeTo
     , writeReply

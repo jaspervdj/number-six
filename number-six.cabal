@@ -31,6 +31,7 @@ Library
                      NumberSix.Handlers.Op
                      NumberSix.Handlers.Ping
                      NumberSix.Handlers.Quote
+                     NumberSix.Handlers.Say
                      NumberSix.Handlers.Seen
                      NumberSix.Handlers.Shorten
                      NumberSix.Handlers.Slap
