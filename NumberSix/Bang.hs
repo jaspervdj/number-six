@@ -47,7 +47,7 @@ makeBangHandler :: IrcString s
                 -> (s -> Irc s s)  -- ^ Function
                 -> Handler s       -- ^ Resulting handler
 makeBangHandler name commands f = makeHandler name $ return $
-    onBangCommands commands $ getBangCommandText >>= f >>= writeChannel
+    onBangCommands commands $ getBangCommandText >>= f >>= write
 
 -- | Execute an 'Irc' action only if the given bang command is executed.
 --

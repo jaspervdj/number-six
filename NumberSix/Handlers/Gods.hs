@@ -34,4 +34,4 @@ removeGodHook = onBangCommand "!removegod" $ onGod $ do
 printGods :: Irc String ()
 printGods = do
     gods <- getGods
-    writeChannel $ "My gods are " <> prettyList gods <> "."
+    write $ "My gods are " <> prettyList gods <> "."

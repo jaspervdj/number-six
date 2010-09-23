@@ -67,4 +67,4 @@ showQuote :: Integer -> Irc ByteString ()
 showQuote n = do
     let sn = SBC.pack $ show n
     Just quote <- withRedis $ \redis -> getItem redis sn
-    writeChannel $ "Quote " <> sn <> ": " <> quote
+    write $ "Quote " <> sn <> ": " <> quote

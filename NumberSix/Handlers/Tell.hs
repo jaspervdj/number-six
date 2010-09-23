@@ -28,7 +28,7 @@ storeHook = onBangCommand "!tell" $ do
     withRedis $ \redis -> do
         messages <- fromMaybe [] <$> getItem redis recipient
         setItem redis recipient $ messages ++ [tell]
-    writeChannelReply $ "I'll pass that on when " <> recipient <> " is here."
+    writeReply $ "I'll pass that on when " <> recipient <> " is here."
 
 loadHook :: Irc ByteString ()
 loadHook = onCommand "PRIVMSG" $ withRedis $ \redis -> do
@@ -39,5 +39,5 @@ loadHook = onCommand "PRIVMSG" $ withRedis $ \redis -> do
         Just l -> do
             deleteItem redis sender
             forM_ l $ \(from, time, message) -> do
-                writeChannelReply $ from <> " (" <> time <> "): " <> message
+                writeReply $ from <> " (" <> time <> "): " <> message
                 sleep 1

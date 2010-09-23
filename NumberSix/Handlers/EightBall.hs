@@ -13,7 +13,7 @@ import NumberSix.Bang
 handler :: Handler String
 handler = makeHandler "eightball" $ return $ onBangCommand "!8ball" $ do
     r <- liftIO $ randomRIO (0, length answers - 1)
-    writeChannelReply $ answers !! r
+    writeReply $ answers !! r
   where
     answers = [ "As I see it, yes"
               , "It is certain"

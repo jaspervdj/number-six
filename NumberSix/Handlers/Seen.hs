@@ -29,7 +29,7 @@ loadHook = onBangCommand "!seen" $ do
     (who, _) <- breakWord <$> getBangCommandText
     item <- withRedis $ \redis -> getItem redis who
     case item of
-        Just (time, text) -> writeChannelReply $
+        Just (time, text) -> writeReply $
             "I last saw " <> who <> " on " <> time
                           <> " saying: " <> text
-        _ -> writeChannelReply $ "I ain't never seen " <> who
+        _ -> writeReply $ "I ain't never seen " <> who

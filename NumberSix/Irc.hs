@@ -32,8 +32,9 @@ module NumberSix.Irc
       -- * Sending responses
     , writeMessage
     , writeChannel
-    , writeChannelTo
-    , writeChannelReply
+    , write
+    , writeTo
+    , writeReply
 
       -- * Handlers
     , makeHandler
@@ -213,48 +214,57 @@ writeMessage command parameters = do
     let m = makeMessage (toByteString command) $ map toByteString parameters
     liftIO $ writer m
 
--- | Write a message to the active channel
+-- | Write a message in a specific channel
 --
 writeChannel :: IrcString s
-             => s            -- ^ Message text
+             => s            -- ^ Channel to write in
+             -> s            -- ^ Message text
              -> Irc s ()     -- ^ Result
-writeChannel string = do
-    channel <- getChannel
-    nick <- getNick
-    -- If the channel equals our own nick, we are talking in a query, and we
-    -- want to responsd privately to the sender.
-    destination <- if nick == channel then getSender else return channel
+writeChannel destination string =
     writeMessage "PRIVMSG" [destination, string']
   where
     bs = toByteString string
     string' | SB.length bs <= 400 = string
             | otherwise = fromByteString (SB.take 400 bs) <> "..."
 
+-- | Write a message to the active channel
+--
+write :: IrcString s
+      => s            -- ^ Message text
+      -> Irc s ()     -- ^ Result
+write string = do
+    channel <- getChannel
+    nick <- getNick
+    -- If the channel equals our own nick, we are talking in a query, and we
+    -- want to responsd privately to the sender.
+    destination <- if nick == channel then getSender else return channel
+    writeChannel destination string
+
 -- | Write a message to the active channel, addressed to a certain user
 --
 -- Example:
 --
--- > writeChannelTo "jaspervdj" "Hello there"
+-- > writeTo "jaspervdj" "Hello there"
 --
 -- Will make the bot say, in the active channel:
 --
 -- > jaspervdj: Hello there
 --
-writeChannelTo :: IrcString s
-               => s            -- ^ Username to address
-               -> s            -- ^ Message text
-               -> Irc s ()     -- ^ Result
-writeChannelTo userName message = writeChannel $ userName <> ": " <> message
+writeTo :: IrcString s
+        => s            -- ^ Username to address
+        -> s            -- ^ Message text
+        -> Irc s ()     -- ^ Result
+writeTo userName message = write $ userName <> ": " <> message
 
 -- | Write a message to the active channel, addressed to the user who fired
 -- the current handler. See 'writeChannelTo' as well.
 --
-writeChannelReply :: IrcString s
-                  => s            -- ^ Message text
-                  -> Irc s ()     -- ^ Result
-writeChannelReply message = do
+writeReply :: IrcString s
+           => s            -- ^ Message text
+           -> Irc s ()     -- ^ Result
+writeReply message = do
     sender <- getSender
-    writeChannelTo sender message
+    writeTo sender message
 
 -- | Create a handler
 --
@@ -299,7 +309,7 @@ onGod irc = do
     sender <- getSender
     if sender `elem` gods
         then irc
-        else writeChannelReply "I laugh at your mortality."
+        else writeReply "I laugh at your mortality."
 
 -- | Change the list of gods
 --

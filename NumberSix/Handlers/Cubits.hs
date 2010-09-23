@@ -25,7 +25,7 @@ cubitsHook = onBangCommand "!cubits" $ do
         (nick : n' : []) -> onGod $ unless (nick == sender) $ do
             let n = read n'
                 sn = show $ abs n
-            writeChannel $ meAction $ if n >= 0
+            write $ meAction $ if n >= 0
                 then "gives " <> nick <> " " <> sn <> " cubits."
                 else "takes " <> sn <> " cubits from " <> nick <> "."
             withCubits (+ n) nick
@@ -35,4 +35,4 @@ withCubits :: (Integer -> Integer) -> String -> Irc String ()
 withCubits f nick = withRedis $ \redis -> do
     cubits <- f . fromMaybe 0 <$> getItem redis nick
     setItem redis nick cubits
-    writeChannel $ nick <> " has " <> (show cubits) <> " cubits."
+    write $ nick <> " has " <> (show cubits) <> " cubits."
