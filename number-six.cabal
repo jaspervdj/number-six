@@ -56,6 +56,7 @@ Library
                      bytestring >= 0.9,
                      utf8-string >= 0.3.6,
                      redis >= 0.7,
+                     redis-simple >= 0.1,
                      binary >= 0.5,
                      tagsoup >= 0.10,
                      old-locale >= 1,
