@@ -4,16 +4,13 @@ module NumberSix.Handlers.EightBall
     ( handler
     ) where
 
-import Control.Monad.Trans (liftIO)
-import System.Random (randomRIO)
-
 import NumberSix.Irc
 import NumberSix.Bang
+import NumberSix.Util
 
 handler :: Handler String
-handler = makeHandler "eightball" $ return $ onBangCommand "!8ball" $ do
-    r <- liftIO $ randomRIO (0, length answers - 1)
-    writeReply $ answers !! r
+handler = makeHandler "eightball" $ return $ onBangCommand "!8ball" $
+    randomElement answers >>= writeReply
   where
     answers = [ "As I see it, yes"
               , "It is certain"

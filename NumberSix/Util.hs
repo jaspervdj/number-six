@@ -10,6 +10,7 @@ module NumberSix.Util
     , trim
     , meAction
     , removeNewlines
+    , randomElement
     ) where
 
 import Control.Applicative ((<$>))
@@ -21,6 +22,7 @@ import Data.Char (isSpace)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (formatTime)
 import System.Locale (defaultTimeLocale)
+import System.Random (randomRIO)
 
 import qualified Data.ByteString.Char8 as SBC
 
@@ -79,3 +81,8 @@ meAction x = "\SOHACTION " <> x <> "\SOH"
 removeNewlines :: IrcString s => s -> s
 removeNewlines = withIrcByteString $
     SBC.map (\x -> if x `elem` "\r\n" then ' ' else x)
+
+-- | Random element from a list
+--
+randomElement :: [a] -> Irc s a
+randomElement ls = fmap (ls !!) $ liftIO $ randomRIO (0, length ls - 1)

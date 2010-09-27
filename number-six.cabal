@@ -30,6 +30,7 @@ Library
                      NumberSix.Handlers.NowPlaying
                      NumberSix.Handlers.Op
                      NumberSix.Handlers.Ping
+                     NumberSix.Handlers.Reddit
                      NumberSix.Handlers.Quote
                      NumberSix.Handlers.Say
                      NumberSix.Handlers.Seen

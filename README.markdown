@@ -136,6 +136,13 @@ Ping
 
 Replies to IRC ping's. This handler has no commands.
 
+Reddit
+------
+
+Print a random item from a subreddit. Commands:
+
+- `!reddit name`: Prints a random item from the given subreddit
+
 Quote
 -----
 
