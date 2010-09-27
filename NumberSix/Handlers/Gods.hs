@@ -4,6 +4,8 @@ module NumberSix.Handlers.Gods
     ( handler
     ) where
 
+import Data.List (nub)
+
 import NumberSix.Irc
 import NumberSix.Message
 import NumberSix.Bang
@@ -19,8 +21,10 @@ addGodHook :: Irc String ()
 addGodHook = onBangCommand "!addgod" $ do
     password <- getBangCommandText
     sender <- getSender
-    modifyGods (sender :) password
+    modifyGods (add sender) password
     printGods
+  where
+    add x = nub . (x :)
 
 removeGodHook :: Irc String ()
 removeGodHook = onBangCommand "!removegod" $ onGod $ do
