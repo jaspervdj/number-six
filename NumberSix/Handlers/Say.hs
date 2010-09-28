@@ -6,7 +6,6 @@ module NumberSix.Handlers.Say
     ) where
 
 import Data.ByteString (ByteString)
-import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc
 import NumberSix.Bang

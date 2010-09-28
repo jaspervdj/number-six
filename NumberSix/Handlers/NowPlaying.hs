@@ -6,13 +6,10 @@ module NumberSix.Handlers.NowPlaying
 
 import Data.Maybe (fromMaybe)
 import Text.HTML.TagSoup
-import Data.List (isPrefixOf)
 
 import NumberSix.Irc
-import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util.Http
-import NumberSix.Util.BitLy
 
 stubru :: Irc String String
 stubru = httpScrape url $ \tags ->

@@ -7,12 +7,11 @@ module NumberSix
     ) where
 
 import Control.Applicative ((<$>))
-import Control.Concurrent (forkIO)
+import Control.Concurrent (forkIO, threadDelay)
 import Control.Monad (forever, forM_)
 import Data.Monoid (mempty)
 import Control.DeepSeq (deepseq)
 import System.IO
-import Network (withSocketsDo)
 import Network.BSD ( HostEntry (..), getProtocolNumber, getHostByName
                    , hostAddress
                    )
@@ -70,6 +69,7 @@ irc config handlers' = do
 
     -- Loop forever, consuming one line every loop
     loop environment sock previous = do
+        threadDelay 100000
         chunk <- fmap (previous <>) $ recv sock 4096
         consume environment sock chunk
 
