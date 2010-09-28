@@ -8,6 +8,7 @@ module NumberSix
 
 import Control.Applicative ((<$>))
 import Control.Concurrent (forkIO, threadDelay)
+import Control.Exception (try, SomeException (..))
 import Control.Monad (forever, forM_)
 import Data.Monoid (mempty)
 import Control.DeepSeq (deepseq)
@@ -107,7 +108,10 @@ irc config handlers' = do
 writer :: Chan Message -> Socket -> IO ()
 writer chan sock = forever $ do
     message <- encode <$> readChan chan
-    SB.unpack message `deepseq` sendAll sock $ message <> "\r\n"
+    result <- try $ SB.unpack message `deepseq` return message
+    case result of
+        Left (SomeException _) -> return ()
+        Right m -> sendAll sock $ m <> "\r\n"
 
 -- | Launch multiple bots and block forever. All default handlers will be
 -- activated.
