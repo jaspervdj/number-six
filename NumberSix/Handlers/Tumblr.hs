@@ -34,27 +34,12 @@ dropUntil f xss@(x:xs)
   | otherwise = dropUntil f xs
 
 
-
--- | Get the last tumbl from the user specified in the query
 --
-lastTumble :: String -> Irc String String
-lastTumble query = do
-  result <- (decode . (\s -> case cleanTumblrJSON s of
-                              Just s' -> s'
-                              Nothing -> "")) `fmap` httpGet url :: Irc String (Result JSValue)
-  case result of
-    Ok (JSObject root) -> let Ok dest = do JSArray (JSObject post:_) <- valFromObj "posts" root
-                                           url' <- valFromObj "url" post
-                                           slug <- valFromObj "slug" post
-                                           return (fromJSString slug, fromJSString url')
-                          in uncurry textAndUrl dest
-    Error s -> textAndUrl ("Oops!" ++ s) url
-  where url = "http://" ++ query ++ ".tumblr.com/api/read/json?num=1"
+-- | Get a random tumble from the user, taken from the last 'count' tumbles. To
+-- obtain the last tumble, just pass 1 as the count.
 --
--- | Get a random tumbl from the user, taken from the last 50 tumbls
---
-randomTumble :: String -> Irc String String
-randomTumble query = do
+randomTumble :: String -> Int -> Irc String String
+randomTumble query count = do
   result <- (decode . (\s -> case cleanTumblrJSON s of
                               Just s' -> s'
                               Nothing -> "")) `fmap` httpGet url :: Irc String (Result JSValue)
@@ -66,12 +51,12 @@ randomTumble query = do
                                                 return (fromJSString slug, fromJSString url')
                             in randomElement dest >>= uncurry textAndUrl
       Error s -> textAndUrl ("Oops!" ++ s) url
-  where url = "http://" ++ query ++ ".tumblr.com/api/read/json?num=50"
+  where url = "http://" ++ query ++ ".tumblr.com/api/read/json?num=" ++ show count
 
 tumblr :: String -> Irc String String
 tumblr query = case words query of
-                "last":_ -> lastTumble $ dropWhile isSpace . drop 4 $ query 
-                _ -> randomTumble query
+                "last":_ -> let query' = dropWhile isSpace . drop 4 $ query in randomTumble query' 1 
+                _ -> randomTumble query 50
 
 handler :: Handler String
 handler = makeBangHandler "tumblr" ["!tumblr"] tumblr
