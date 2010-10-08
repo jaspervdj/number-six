@@ -6,7 +6,7 @@ module NumberSix.Handlers.Tumblr
 
 import Control.Monad(forM, liftM)
 import Data.Char(isSpace)
-import Data.List(stripPrefix)
+import Data.List(dropWhile, stripPrefix)
 import Text.JSON
 
 import NumberSix.Irc
@@ -23,16 +23,8 @@ import NumberSix.Util.Http
 -- to clean the returned string before passing it on to the JSON decoder.
 -- 
 cleanTumblrJSON :: String -> Maybe String
-cleanTumblrJSON xs = stripPrefix tumblrPrefix xs >>= Just . reverse . tail . dropUntil (== ';') . reverse
+cleanTumblrJSON xs = stripPrefix tumblrPrefix xs >>= Just . reverse . tail . dropWhile (/= ';') . reverse
   where tumblrPrefix = "var tumblr_api_read = "
-
-
-dropUntil :: (a -> Bool) -> [a] -> [a]
-dropUntil _ [] = []
-dropUntil f xss@(x:xs)
-  | f x  = xss
-  | otherwise = dropUntil f xs
-
 
 --
 -- | Get a random tumble from the user, taken from the last 'count' tumbles. To
@@ -50,13 +42,15 @@ randomTumble query count = do
                                                 slug <- valFromObj "slug" post
                                                 return (fromJSString slug, fromJSString url')
                             in randomElement dest >>= uncurry textAndUrl
-      Error s -> textAndUrl ("Oops!" ++ s) url
+      Error s -> textAndUrl ("Something went wrong when fetching " ++ url) ""
   where url = "http://" ++ query ++ ".tumblr.com/api/read/json?num=" ++ show count
 
 tumblr :: String -> Irc String String
-tumblr query = case words query of
-                "last":_ -> let query' = dropWhile isSpace . drop 4 $ query in randomTumble query' 1 
-                _ -> randomTumble query 50
+tumblr query = 
+  let command:user = words query
+  in case command of
+        "last" -> randomTumble (head user) 1
+        _ -> randomTumble query 50
 
 handler :: Handler String
 handler = makeBangHandler "tumblr" ["!tumblr"] tumblr
