@@ -30,6 +30,7 @@ import qualified NumberSix.Handlers.Slap
 import qualified NumberSix.Handlers.Tell
 import qualified NumberSix.Handlers.Title
 import qualified NumberSix.Handlers.TryHaskell
+import qualified NumberSix.Handlers.Tumblr
 import qualified NumberSix.Handlers.Twitter
 import qualified NumberSix.Handlers.UrbanDictionary
 
@@ -60,6 +61,7 @@ handlers =
     , SomeHandler NumberSix.Handlers.Tell.handler
     , SomeHandler NumberSix.Handlers.Title.handler
     , SomeHandler NumberSix.Handlers.TryHaskell.handler
+    , SomeHandler NumberSix.Handlers.Tumblr.handler
     , SomeHandler NumberSix.Handlers.Twitter.handler
     , SomeHandler NumberSix.Handlers.UrbanDictionary.handler
     ]
