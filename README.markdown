@@ -204,6 +204,14 @@ Bindings to the haskell evaluation service of tryhaskell.org. Commands:
 
 - `> expression`, `!haskell expression`: Evaluate the given expression
 
+Tumblr
+------
+
+Get either a random tumble from the specified user of his last tumble.
+
+- `!tumblr last username`: Print the slug and the URL for the last tumble user posted
+- `!tumblr username`: Print the slug and the URL from a random tumble made by the user, currently only taking the last 50 into account
+
 Twitter
 -------
 
