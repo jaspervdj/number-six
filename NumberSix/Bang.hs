@@ -28,14 +28,14 @@ import NumberSix.Util
 -- | Get the bang commmand -- a user given command, for example, @!google@.
 --
 getBangCommand :: IrcString s => Irc s s
-getBangCommand = withIrcByteString (SBC.map toLower . head . SBC.words)
-               <$> getMessageText
+getBangCommand = flip fmap getMessageText $ withIrcByteString $
+    SBC.map toLower . SBC.takeWhile (not .  isSpace)
 
 -- | Get the text given to the bang command.
 --
 getBangCommandText :: IrcString s => Irc s s
-getBangCommandText = withIrcByteString (trim . SBC.dropWhile (not . isSpace))
-                   <$> getMessageText
+getBangCommandText = flip fmap getMessageText $ withIrcByteString $
+    trim . SBC.dropWhile (not . isSpace)
 
 -- | Create a simple handler with one bang hook. You should provide this
 -- function with a function that produces a string to be written into the
