@@ -10,16 +10,17 @@ import Control.Applicative ((<$>))
 import Control.Concurrent (forkIO, threadDelay)
 import Control.Exception (try, SomeException (..))
 import Control.Monad (forever, forM_)
-import Data.Monoid (mempty)
+import Data.Monoid (mempty, mappend)
 import Control.DeepSeq (deepseq)
-import System.IO
 import Network.BSD ( HostEntry (..), getProtocolNumber, getHostByName
                    , hostAddress
                    )
-import Network.Socket (Socket, SockAddr (..), SocketType (..), socket, connect)
+import Network.Socket ( Socket, SockAddr (..), SocketType (..), socket, connect
+                      , sClose )
 import Network.Socket.ByteString
 import Control.Concurrent.Chan (Chan, readChan, newChan, writeChan)
 import Control.Concurrent.MVar (newMVar)
+import System.Environment (getProgName)
 
 import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
@@ -32,10 +33,10 @@ import NumberSix.Handlers
 
 -- | Run a single IRC connection
 --
-irc :: IrcConfig      -- ^ Configuration
-    -> [SomeHandler]  -- ^ Handlers
+irc :: [SomeHandler]  -- ^ Handlers
+    -> IrcConfig      -- ^ Configuration
     -> IO ()
-irc config handlers' = do
+irc handlers' config = do
     -- Connect to the IRC server
     sock <- connect' (SBC.unpack $ ircHost config) $ ircPort config
 
@@ -56,9 +57,15 @@ irc config handlers' = do
             , ircGods   = gods
             }
 
-    loop environment sock mempty
+    _ <- loop environment sock mempty
+
+    -- Close the socket and start again!
+    sClose sock
   where
-    logger = SB.hPutStrLn stderr
+    logger message = do
+        -- Create a logger
+        logFileName <- (++ ".log") <$> getProgName
+        SB.appendFile logFileName $ message `mappend` "\n"
 
     -- Higher-level connect function
     connect' hostname port = do
@@ -72,7 +79,9 @@ irc config handlers' = do
     loop environment sock previous = do
         threadDelay 100000
         chunk <- fmap (previous <>) $ recv sock 4096
-        consume environment sock chunk
+        if (SB.null chunk)
+            then logger "Connection broke, restarting"
+            else consume environment sock chunk
 
     -- Consume chunks and handle lines
     consume environment sock chunk = do
@@ -113,20 +122,17 @@ writer chan sock = forever $ do
         Left (SomeException _) -> return ()
         Right m -> sendAll sock $ m <> "\r\n"
 
--- | Launch multiple bots and block forever. All default handlers will be
--- activated.
+-- | Launch a bots and block forever. All default handlers will be activated.
 --
-numberSix :: [IrcConfig] -> IO ()
+numberSix :: IrcConfig -> IO ()
 numberSix = numberSixWith handlers
 
--- | Launch multiple bots with given 'SomeHandler's and block forever
+-- | Launch a bot with given 'SomeHandler's and block forever
 --
-numberSixWith :: [SomeHandler] -> [IrcConfig] -> IO ()
-numberSixWith handlers' configs = do
-    -- Spawn a thread for every config
-    forM_ configs $ \config -> do
-        _ <- forkIO $ irc config handlers'
-        return ()
-
-    -- Wait forever
-    interact id
+numberSixWith :: [SomeHandler] -> IrcConfig -> IO ()
+numberSixWith handlers' config = do
+    _ <- forever $ do
+        e <- try $ irc handlers' config
+        putStrLn $ (show (e :: Either SomeException ()))
+        threadDelay 10000
+    return ()

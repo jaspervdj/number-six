@@ -15,7 +15,6 @@ module NumberSix.Bang
     , onBangCommands
     ) where
 
-import Control.Applicative ((<$>))
 import Control.Monad (when, forM_)
 import Data.Char (toLower, isSpace)
 
