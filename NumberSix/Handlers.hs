@@ -17,13 +17,13 @@ import qualified NumberSix.Handlers.HackerNews
 import qualified NumberSix.Handlers.Hello
 import qualified NumberSix.Handlers.Help
 import qualified NumberSix.Handlers.Identify
-import qualified NumberSix.Handlers.Kick
 import qualified NumberSix.Handlers.LastFm
 import qualified NumberSix.Handlers.NowPlaying
 import qualified NumberSix.Handlers.Op
 import qualified NumberSix.Handlers.Ping
 import qualified NumberSix.Handlers.Quote
 import qualified NumberSix.Handlers.Reddit
+import qualified NumberSix.Handlers.Rejoin
 import qualified NumberSix.Handlers.Say
 import qualified NumberSix.Handlers.Seen
 import qualified NumberSix.Handlers.Shorten
@@ -49,13 +49,13 @@ handlers =
     , SomeHandler NumberSix.Handlers.Hello.handler
     , SomeHandler NumberSix.Handlers.Help.handler
     , SomeHandler NumberSix.Handlers.Identify.handler
-    , SomeHandler NumberSix.Handlers.Kick.handler
     , SomeHandler NumberSix.Handlers.LastFm.handler
     , SomeHandler NumberSix.Handlers.NowPlaying.handler
     , SomeHandler NumberSix.Handlers.Op.handler
     , SomeHandler NumberSix.Handlers.Ping.handler
     , SomeHandler NumberSix.Handlers.Quote.handler
     , SomeHandler NumberSix.Handlers.Reddit.handler
+    , SomeHandler NumberSix.Handlers.Rejoin.handler
     , SomeHandler NumberSix.Handlers.Say.handler
     , SomeHandler NumberSix.Handlers.Seen.handler
     , SomeHandler NumberSix.Handlers.Shorten.handler

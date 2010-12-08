@@ -1,6 +1,6 @@
--- | Handler to reconnect on kick
+-- | Handler to rejoin channel on kick
 --
-module NumberSix.Handlers.Kick
+module NumberSix.Handlers.Rejoin
     ( handler
     ) where
 
@@ -11,7 +11,7 @@ import NumberSix.Irc
 import NumberSix.Util
 
 handler :: Handler String
-handler = makeHandler "kick" $ return $ onCommand "KICK" $ do
+handler = makeHandler "rejoin" $ return $ onCommand "KICK" $ do
     (channel : nick' : _) <- getParameters
     myNick <- getNick
     when (nick' == myNick) $ do

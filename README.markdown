@@ -104,12 +104,6 @@ Identify
 System handler which sets the nickname and the real name of the bot. This
 handler has no commands.
 
-Kick
-----
-
-System handler which rejoins a channel after being kicked. This handler has no
-commands.
-
 LastFm
 ------
 
@@ -148,6 +142,12 @@ Reddit
 Print a random item from a subreddit. Commands:
 
 - `!reddit name`: Prints a random item from the given subreddit
+
+Rejoin
+------
+
+System handler which rejoins a channel after being kicked. This handler has no
+commands.
 
 Quote
 -----
