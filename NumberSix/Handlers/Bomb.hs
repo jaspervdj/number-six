@@ -49,7 +49,7 @@ bombHook = onBangCommand "!bomb" $ do
 -- | Pass the bomb!
 --
 passHook :: Irc ByteString ()
-passHook = withBomb $ \(target, attacker) -> do
+passHook = onBangCommand "!pass" $ withBomb $ \(target, attacker) -> do
     sender <- getSender
     text <- getBangCommandText
     let newTarget = if SBC.null text then attacker else text
