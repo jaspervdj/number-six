@@ -51,9 +51,11 @@ bombHook = onBangCommand "!bomb" $ do
 passHook :: Irc ByteString ()
 passHook = withBomb $ \(target, attacker) -> do
     sender <- getSender
+    text <- getBangCommandText
+    let newTarget = if SBC.null text then attacker else text
     when (sender == target) $ do
-        withRedis $ \r -> setItem r "bomb" (attacker, sender)
-        write $ sender <> " passes the bomb to " <> attacker <> "!"
+        withRedis $ \r -> setItem r "bomb" (newTarget, sender)
+        write $ sender <> " passes the bomb to " <> newTarget <> "!"
 
 -- | Utility, execute a certain action with (target, attacker)
 --

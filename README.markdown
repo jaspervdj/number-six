@@ -35,6 +35,7 @@ A cool IRC game.
   user in a certain amount of time (a countdown will be visible).
 - `!pass`: Passes the bomb to the user who placed the bomb. This command can
   only be issued by the current person owning them bomb.
+- `!pass nick`: Passes the bomb to an arbitrary user.
 
 Cubits
 ------
