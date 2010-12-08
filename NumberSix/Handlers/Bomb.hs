@@ -6,6 +6,7 @@ module NumberSix.Handlers.Bomb
     ) where
 
 import Control.Monad (when)
+import Control.Applicative ((<$>))
 
 import Data.ByteString.Char8 as SBC
 
@@ -25,7 +26,7 @@ bombHook = onBangCommand "!bomb" $ do
     if exists
         then writeReply "A bomb is already set."
         else do
-            target <- getBangCommandText
+            (target, _) <- breakWord <$> getBangCommandText
             sender <- getSender
             withRedis $ \r -> setItem r "bomb" (target, sender)
             bomb intervals
@@ -51,7 +52,7 @@ bombHook = onBangCommand "!bomb" $ do
 passHook :: Irc ByteString ()
 passHook = onBangCommand "!pass" $ withBomb $ \(target, attacker) -> do
     sender <- getSender
-    text <- getBangCommandText
+    (text, _) <- breakWord <$> getBangCommandText
     let newTarget = if SBC.null text then attacker else text
     when (sender == target) $ do
         withRedis $ \r -> setItem r "bomb" (newTarget, sender)
