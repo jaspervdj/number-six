@@ -133,6 +133,6 @@ numberSixWith :: [SomeHandler] -> IrcConfig -> IO ()
 numberSixWith handlers' config = do
     _ <- forever $ do
         e <- try $ irc handlers' config
-        putStrLn $ (show (e :: Either SomeException ()))
+        putStrLn $ "Error: " ++ show (e :: Either SomeException ())
         threadDelay 10000
     return ()

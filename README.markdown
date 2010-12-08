@@ -10,6 +10,12 @@ Handlers
 Handlers are plugins which react to IRC messages. Here, we give a short listing
 of the available Handlers, together with the commands they provide.
 
+AutoVoice
+---------
+
+When people join the channel, the bot will give them voice (`+v`). This handler
+has no commands.
+
 Binary
 ------
 
