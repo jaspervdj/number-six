@@ -3,6 +3,7 @@
 module NumberSix.Irc
     ( -- * Core types
       IrcConfig (..)
+    , God (..)
     , IrcEnvironment (..)
     , IrcState (..)
     , Irc (..)
@@ -20,6 +21,7 @@ module NumberSix.Irc
     , getGodPassword
     , getGods
     , getHandlerName
+    , getPrefix
     , getCommand
     , getParameters
     , getSender
@@ -63,6 +65,7 @@ import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Message
+import NumberSix.Message.Encode (encodePrefix)
 import NumberSix.IrcString
 
 -- | User-specified IRC configuration
@@ -76,13 +79,21 @@ data IrcConfig = IrcConfig
     , ircGodPassword :: ByteString
     }
 
+-- | An IRC God
+--
+newtype God = God {unGod :: Prefix}
+            deriving (Eq)
+
+instance Show God where
+    show = SBC.unpack . encodePrefix . unGod
+
 -- | Represents the outer IRC state
 --
 data IrcEnvironment = IrcEnvironment
     { ircConfig   :: IrcConfig
     , ircWriter   :: Message -> IO ()
     , ircLogger   :: ByteString -> IO ()
-    , ircGods     :: MVar [ByteString]
+    , ircGods     :: MVar [God]
     }
 
 -- | Represents the internal IRC state
@@ -145,11 +156,10 @@ getGodPassword =
 
 -- | Get the gods of the server
 --
-getGods :: IrcString s => Irc s [s]
+getGods :: IrcString s => Irc s [God]
 getGods = do
     mvar <- ircGods . ircEnvironment <$> ask
-    gods <- liftIO $ readMVar mvar
-    return $ map fromByteString gods
+    liftIO $ readMVar mvar
 
 -- | Get the name of the current handler
 --
@@ -157,6 +167,13 @@ getHandlerName :: IrcString s => Irc s s
 getHandlerName = do
     (SomeHandler handler) <- ircHandler <$> ask
     return $ fromByteString $ handlerName handler
+
+-- | Get the IRC prefix
+--
+getPrefix :: Irc s Prefix
+getPrefix = do
+    Just prefix <- messagePrefix . ircMessage <$> ask
+    return prefix
 
 -- | Obtain the actual IRC command: the result from this function will always be
 -- in lowercase.
@@ -308,20 +325,18 @@ onGod :: IrcString s
       -> Irc s ()     -- ^ Result
 onGod irc = do
     gods <- getGods
-    sender <- getSender
-    if sender `elem` gods
+    prefix <- getPrefix
+    if God prefix `elem` gods
         then irc
         else writeReply "I laugh at your mortality."
 
 -- | Change the list of gods
 --
 modifyGods :: IrcString s
-           => ([s] -> [s])  -- ^ Modification
+           => ([God] -> [God])  -- ^ Modification
            -> s             -- ^ Password
            -> Irc s ()
 modifyGods f password = do
     password' <- getGodPassword
     mvar <- ircGods . ircEnvironment <$> ask
-    when (password == password') $ liftIO $ modifyMVar_ mvar $ return . f'
-  where
-    f' = map toByteString . f . map fromByteString
+    when (password == password') $ liftIO $ modifyMVar_ mvar $ return . f

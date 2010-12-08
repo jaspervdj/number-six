@@ -13,8 +13,7 @@ handler :: Handler String
 handler = makeBangHandler "slap" ["!slap"] $ \nick -> do
     myNick <- getNick
     sender <- getSender
-    gods <- getGods
-    let bitch = if nick == myNick || nick `elem` gods then sender else nick
+    let bitch = if nick == myNick then sender else nick
     return $ meAction $
         "slaps " <> bitch <> " around a bit with a large trout, out of sheer "
                  <> "superiority."
