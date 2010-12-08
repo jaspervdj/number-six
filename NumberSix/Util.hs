@@ -8,12 +8,14 @@ module NumberSix.Util
     , prettyList
     , trim
     , meAction
+    , kick
     , removeNewlines
     , randomElement
     ) where
 
 import Control.Arrow (first, second)
 import Control.Concurrent (threadDelay, forkIO)
+import Control.Monad (when)
 import Control.Monad.Reader (ask)
 import Control.Monad.Trans (liftIO)
 import Data.Char (isSpace)
@@ -64,6 +66,17 @@ trim = withIrcByteString $
 --
 meAction :: IrcString s => s -> s
 meAction x = "\SOHACTION " <> x <> "\SOH"
+
+-- | Kick someone
+--
+kick :: IrcString s
+     => s         -- ^ Nick to kick
+     -> s         -- ^ Reason
+     -> Irc s ()
+kick nick reason = do
+    channel <- getChannel
+    myNick <- getNick
+    when (nick /= myNick) $ writeMessage "KICK" [channel, nick, reason]
 
 -- | Replace newlines by spaces
 --

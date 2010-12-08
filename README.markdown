@@ -26,6 +26,16 @@ Binary conversions. Commands:
 - `!hex decimal`: Convert a decimal number to hex notation
 - `!unhex`: Convert a hex number to decimal notation
 
+Bomb
+----
+
+A cool IRC game.
+
+- `!bomb nick`: Attach a bomb to the specified user. This bomb will kick the
+  user in a certain amount of time (a countdown will be visible).
+- `!pass`: Passes the bomb to the user who placed the bomb. This command can
+  only be issued by the current person owning them bomb.
+
 Cubits
 ------
 
@@ -66,7 +76,7 @@ Check who the gods are on this server, and manage them. Commands:
 - `!addgod password`: This adds the sender as a god. Obviously, you should run
   this in a private query.
 - `!removegod`: Removes you as a god.
-- `!removegod nick`: Removes the given user as god.
+- `!removegod pattern`: Removes all gods which match the given pattern.
 
 Google
 ------
