@@ -5,7 +5,6 @@ module NumberSix.Util
     ( sleep
     , forkIrc
     , breakWord
-    , prettyTime
     , prettyList
     , trim
     , meAction
@@ -13,15 +12,11 @@ module NumberSix.Util
     , randomElement
     ) where
 
-import Control.Applicative ((<$>))
 import Control.Arrow (first, second)
 import Control.Concurrent (threadDelay, forkIO)
 import Control.Monad.Reader (ask)
 import Control.Monad.Trans (liftIO)
 import Data.Char (isSpace)
-import Data.Time.Clock (getCurrentTime)
-import Data.Time.Format (formatTime)
-import System.Locale (defaultTimeLocale)
 import System.Random (randomRIO)
 
 import qualified Data.ByteString.Char8 as SBC
@@ -50,12 +45,6 @@ breakWord :: IrcString s => s -> (s, s)
 breakWord = first fromByteString
           . second (fromByteString . SBC.drop 1)
           . SBC.break isSpace . toByteString
-
--- | Get the time in a pretty format
---
-prettyTime :: IrcString s => Irc s s
-prettyTime = fromByteString . SBC.pack . formatTime defaultTimeLocale "%F@%H:%M"
-           <$> liftIO getCurrentTime
 
 -- | Show a list of strings in a pretty format
 --

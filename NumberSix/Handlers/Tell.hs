@@ -13,6 +13,7 @@ import NumberSix.Irc
 import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
+import NumberSix.Util.Time
 import NumberSix.Util.Redis
 
 handler :: Handler ByteString
@@ -22,7 +23,7 @@ storeHook :: Irc ByteString ()
 storeHook = onBangCommand "!tell" $ do
     text <- getBangCommandText
     sender <- getSender
-    time <- prettyTime
+    time <- getTime
     let (recipient, message) = breakWord text
         tell = (sender, time, message)
     withRedis $ \redis -> do
@@ -39,5 +40,6 @@ loadHook = onCommand "PRIVMSG" $ withRedis $ \redis -> do
         Just l -> do
             deleteItem redis sender
             forM_ l $ \(from, time, message) -> do
-                writeReply $ from <> " (" <> time <> "): " <> message
+                pretty <- prettyTime time
+                writeReply $ from <> " (" <> pretty <> "): " <> message
                 sleep 1

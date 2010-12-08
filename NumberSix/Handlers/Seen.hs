@@ -12,6 +12,7 @@ import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Redis
+import NumberSix.Util.Time
 
 handler :: Handler ByteString
 handler = makeHandler "seen" [storeHook, loadHook]
@@ -19,7 +20,7 @@ handler = makeHandler "seen" [storeHook, loadHook]
 storeHook :: Irc ByteString ()
 storeHook = onCommand "PRIVMSG" $ do
     sender <- getSender
-    time <- prettyTime
+    time <- getTime
     text <- getMessageText
     let lastSeen = (time, text)
     withRedis $ \redis -> setItem redis sender lastSeen
@@ -29,7 +30,8 @@ loadHook = onBangCommand "!seen" $ do
     (who, _) <- breakWord <$> getBangCommandText
     item <- withRedis $ \redis -> getItem redis who
     case item of
-        Just (time, text) -> writeReply $
-            "I last saw " <> who <> " on " <> time
-                          <> " saying: " <> text
+        Just (time, text) -> do
+            pretty <- prettyTime time
+            writeReply $ "I last saw " <> who <> " " <> pretty
+                <> " saying: " <> text
         _ -> writeReply $ "I ain't never seen " <> who
