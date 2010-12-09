@@ -28,8 +28,9 @@ bombHook = onBangCommand "!bomb" $ do
         else do
             (target, _) <- breakWord <$> getBangCommandText
             sender <- getSender
-            withRedis $ \r -> setItem r "bomb" (target, sender)
-            bomb intervals
+            when (target /= sender) $ do
+                withRedis $ \r -> setItem r "bomb" (target, sender)
+                bomb intervals
   where
     -- Recursively counts down
     bomb [] = do
