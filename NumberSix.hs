@@ -134,5 +134,5 @@ numberSixWith handlers' config = do
     _ <- forever $ do
         e <- try $ irc handlers' config
         putStrLn $ "Error: " ++ show (e :: Either SomeException ())
-        threadDelay 10000
+        threadDelay (30 * 1000000)
     return ()
