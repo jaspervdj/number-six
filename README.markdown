@@ -2,7 +2,15 @@ Number Six
 ==========
 
 Number six is a custom IRC bot, developped for the `#ghentfpg` IRC channels.
-It's still a work in progress and very alpha.
+
+Compiling & Running
+===================
+
+The best way to get started is to copy `Sample.hs` and start from there.
+Configure it, then compile & run using:
+
+    `ghc --make Sample.hs`
+    `./Sample`
 
 Handlers
 ========
