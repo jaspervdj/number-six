@@ -29,6 +29,7 @@ import qualified NumberSix.Handlers.Say
 import qualified NumberSix.Handlers.Seen
 import qualified NumberSix.Handlers.Shorten
 import qualified NumberSix.Handlers.Slap
+import qualified NumberSix.Handlers.Sup
 import qualified NumberSix.Handlers.Tell
 import qualified NumberSix.Handlers.Title
 import qualified NumberSix.Handlers.TryHaskell
@@ -62,6 +63,7 @@ handlers =
     , SomeHandler NumberSix.Handlers.Seen.handler
     , SomeHandler NumberSix.Handlers.Shorten.handler
     , SomeHandler NumberSix.Handlers.Slap.handler
+    , SomeHandler NumberSix.Handlers.Sup.handler
     , SomeHandler NumberSix.Handlers.Tell.handler
     , SomeHandler NumberSix.Handlers.Title.handler
     , SomeHandler NumberSix.Handlers.TryHaskell.handler

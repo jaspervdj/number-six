@@ -207,6 +207,12 @@ Shows the bot's superiority to a user. Commands:
 
 - `!slap nick`: Slaps the specified user around a bit.
 
+Sup
+---
+
+When the user greets the bot with `sup botname`, the bot will respond with
+`sup username`.
+
 Tell
 ----
 
