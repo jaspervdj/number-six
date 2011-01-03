@@ -25,6 +25,6 @@ handler = makeHandler "identify" $ return $ do
                             , "*", "*", realName'
                             ]
         sleep 10
-        forM_ channels $ writeMessage "JOIN" . return
+        -- forM_ channels $ writeMessage "JOIN" . return
   where
     isCheckIdent = any ("Checking Ident" `SBC.isInfixOf`) 

@@ -1,0 +1,92 @@
+-- | Low-level socket code for the IRC bot
+--
+{-# LANGUAGE OverloadedStrings #-}
+module NumberSix.Socket
+    ( withConnection
+    ) where
+
+import Control.Applicative ((<$>))
+import Control.Concurrent (forkIO, threadDelay, killThread)
+import Control.Exception (try, SomeException (..))
+import Control.Monad (forever)
+import Data.Monoid (mempty, mappend)
+import Control.DeepSeq (deepseq)
+import Network.Socket ( Socket, SocketType (..), socket, connect
+                      , sClose, getAddrInfo, addrFamily, addrAddress
+                      , defaultProtocol
+                      )
+import Network.Socket.ByteString
+import Control.Concurrent.Chan (Chan, readChan, newChan, writeChan)
+
+import qualified Data.ByteString as SB
+import qualified Data.ByteString.Char8 as SBC
+
+-- | Run a single IRC connection
+--
+withConnection :: String
+               -> Int
+               -> (Chan SB.ByteString -> Chan SB.ByteString -> IO ())
+               -> IO ()
+withConnection host port application = do
+    -- Connect to the server
+    sock <- connect'
+
+    -- Spawn out thread to take care of the reads
+    inChan <- newChan
+
+    -- Spawn our thread to take care of the writes
+    outChan <- newChan
+    writerThreadId <- forkIO $ writer outChan sock
+
+    -- Fork the actual application
+    applicationThreadId <- forkIO $ application inChan outChan
+
+    -- Run the reader in this thread
+    reader inChan sock
+
+    -- Close the socket and start again!
+    killThread applicationThreadId
+    killThread writerThreadId
+    sClose sock
+  where
+    -- Higher-level connect function
+    connect' = do
+        addrInfo <- head <$> getAddrInfo Nothing (Just host) (Just $ show port)
+        sock <- socket (addrFamily addrInfo) Stream defaultProtocol
+        connect sock $ addrAddress addrInfo
+        return sock
+
+-- | Socket -> Chan
+--
+reader :: Chan SB.ByteString -> Socket -> IO ()
+reader chan sock = loop mempty
+  where
+    loop previous = do
+        threadDelay 100000 
+        chunk <- recv sock 4096
+        if SB.null chunk
+            then -- Socket closed
+                 return ()
+            else -- We got some bytes
+                 let toConsume = mappend previous chunk
+                     (line, rest) = SBC.breakSubstring "\r\n" toConsume
+                 in if SB.null rest
+                        then -- We don't have a line yet
+                             loop toConsume
+                        else -- We have a line to consume
+                             writeChan chan line >> loop (SB.drop 2 rest)
+
+-- | Chan -> Socket
+--
+writer :: Chan SB.ByteString -> Socket -> IO ()
+writer chan sock = forever $ do
+    -- Fully evaluate the message first
+    message <- readChan chan
+    result <- try $ SB.unpack message `deepseq` return message
+
+    -- Now send it over the socket
+    case result of
+        Left (SomeException _) -> return ()
+        Right m -> sendAll sock $ m `mappend` "\r\n"
+
+    putStrLn $ "Send: " ++ show result
