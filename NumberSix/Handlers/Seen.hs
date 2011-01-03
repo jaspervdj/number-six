@@ -23,12 +23,12 @@ storeHook = onCommand "PRIVMSG" $ do
     time <- getTime
     text <- getMessageText
     let lastSeen = (time, text)
-    withRedis $ \redis -> setItem redis sender lastSeen
+    withRedis $ \redis -> setItem redis ChannelRealm sender lastSeen
 
 loadHook :: Irc ByteString ()
 loadHook = onBangCommand "!seen" $ do
     (who, _) <- breakWord <$> getBangCommandText
-    item <- withRedis $ \redis -> getItem redis who
+    item <- withRedis $ \redis -> getItem redis ChannelRealm who
     case item of
         Just (time, text) -> do
             pretty <- prettyTime time

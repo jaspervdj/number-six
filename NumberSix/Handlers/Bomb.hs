@@ -22,14 +22,14 @@ handler = makeHandler "bomb" [bombHook, passHook]
 bombHook :: Irc ByteString ()
 bombHook = onBangCommand "!bomb" $ do
     -- No bomb action should be running
-    exists <- withRedis $ \redis -> existsItem redis "bomb"
+    exists <- withRedis $ \redis -> existsItem redis ChannelRealm "bomb"
     if exists
         then writeReply "A bomb is already set."
         else do
             (target, _) <- breakWord <$> getBangCommandText
             sender <- getSender
             when (target /= sender) $ do
-                withRedis $ \r -> setItem r "bomb" (target, sender)
+                withRedis $ \r -> setItem r ChannelRealm "bomb" (target, sender)
                 bomb intervals
   where
     -- Recursively counts down
@@ -38,7 +38,7 @@ bombHook = onBangCommand "!bomb" $ do
             write $ "The bomb explodes. Pieces of " <> target
                 <> " fly in all directions."
             kick target "Ka-boom"
-        withRedis $ \redis -> deleteItem redis "bomb"
+        withRedis $ \redis -> deleteItem redis ChannelRealm "bomb"
     bomb (x : xs) = withBomb $ \(target, _) -> do
         write $  "Bomb attached to " <> target <> ", blowing up in "
               <> SBC.pack (show $ sum $ x : xs) <> " seconds."
@@ -56,7 +56,7 @@ passHook = onBangCommand "!pass" $ withBomb $ \(target, attacker) -> do
     (text, _) <- breakWord <$> getBangCommandText
     let newTarget = if SBC.null text then attacker else text
     when (sender == target) $ do
-        withRedis $ \r -> setItem r "bomb" (newTarget, sender)
+        withRedis $ \r -> setItem r ChannelRealm "bomb" (newTarget, sender)
         write $ sender <> " passes the bomb to " <> newTarget <> "!"
 
 -- | Utility, execute a certain action with (target, attacker)
@@ -64,6 +64,6 @@ passHook = onBangCommand "!pass" $ withBomb $ \(target, attacker) -> do
 withBomb :: ((ByteString, ByteString) -> Irc ByteString ())
            -> Irc ByteString ()
 withBomb f = do
-    tupple <- withRedis $ \redis -> getItem redis "bomb"
+    tupple <- withRedis $ \redis -> getItem redis ChannelRealm "bomb"
     case tupple of Just t  -> f t
                    Nothing -> return ()

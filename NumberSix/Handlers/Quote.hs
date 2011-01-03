@@ -26,8 +26,8 @@ addQuoteHook = onBangCommand "!addquote" $ withRedis $ \redis -> do
     lastId <- getLastId
     text <- getBangCommandText
     let nextId = lastId + 1
-    setItem redis (SBC.pack $ show nextId) text
-    setItem redis "last-id" nextId
+    setItem redis ChannelRealm (SBC.pack $ show nextId) text
+    setItem redis ChannelRealm "last-id" nextId
     showQuote nextId
 
 quoteHook :: Irc ByteString ()
@@ -51,7 +51,7 @@ quoteHook = onBangCommand "!quote" $ do
                 showQuote $ quotes !! (r - 1)
   where
     getQuote redis query n = do
-        item <- getItem redis query
+        item <- getItem redis ChannelRealm query
         return $ case item of
             Nothing -> Nothing
             Just quote -> if query `SBC.isInfixOf` quote then Just n
@@ -61,10 +61,11 @@ lastQuoteHook :: Irc ByteString ()
 lastQuoteHook = onBangCommand "!lastquote" $ getLastId >>= showQuote
 
 getLastId :: Irc ByteString Integer
-getLastId = withRedis $ \redis -> fromMaybe 0 <$> getItem redis "last-id"
+getLastId = withRedis $ \redis ->
+    fromMaybe 0 <$> getItem redis ChannelRealm "last-id"
 
 showQuote :: Integer -> Irc ByteString ()
 showQuote n = do
     let sn = SBC.pack $ show n
-    Just quote <- withRedis $ \redis -> getItem redis sn
+    Just quote <- withRedis $ \redis -> getItem redis ChannelRealm sn
     write $ "Quote " <> sn <> ": " <> quote

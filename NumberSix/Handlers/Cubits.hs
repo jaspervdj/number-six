@@ -33,6 +33,6 @@ cubitsHook = onBangCommand "!cubits" $ do
 
 withCubits :: (Integer -> Integer) -> String -> Irc String ()
 withCubits f nick = withRedis $ \redis -> do
-    cubits <- f . fromMaybe 0 <$> getItem redis nick
-    setItem redis nick cubits
+    cubits <- f . fromMaybe 0 <$> getItem redis ChannelRealm nick
+    setItem redis ChannelRealm nick cubits
     write $ nick <> " has " <> (show cubits) <> " cubits."
