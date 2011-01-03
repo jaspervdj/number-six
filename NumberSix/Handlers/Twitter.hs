@@ -26,7 +26,7 @@ twitter argument = if all isDigit argument
     else httpScrape user $ getTweet $ Just argument
   where
     user  =  "http://api.twitter.com/1/statuses/user_timeline.xml?screen_name="
-          <> urlEncode argument <> "&include_rts=1"
+          <> urlEncode argument <> "&include_rts=1&count=1"
     tweet =  "http://api.twitter.com/1/statuses/show/"
           <> urlEncode argument <> ".xml"
 
