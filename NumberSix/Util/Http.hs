@@ -44,7 +44,8 @@ httpScrape url f = f . parseTags <$> httpGet url
 --
 httpPrefix :: IrcString s => s -> s
 httpPrefix = withIrcByteString $ \url ->
-    if "http://" `SBC.isPrefixOf` url then url else "http://" <> url
+    if "http://" `SBC.isPrefixOf` url || "https://" `SBC.isPrefixOf` url
+        then url else "http://" <> url
 
 -- | Some sensible default curl optionsfor an IRC bot
 --
