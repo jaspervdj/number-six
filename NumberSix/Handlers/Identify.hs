@@ -3,15 +3,13 @@ module NumberSix.Handlers.Identify
     ( handler
     ) where
 
-import Control.Concurrent (threadDelay)
-import Control.Monad (when, forM_)
+import Control.Monad (forM_)
 import Data.Char (toUpper)
 
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc
-import NumberSix.Util
 
 handler :: Handler ByteString
 handler = makeHandlerWith "identify" [joinHook] initialize
@@ -27,7 +25,5 @@ initialize = do
 
 joinHook :: Irc ByteString ()
 joinHook = onCommand "376" $ do
-    params <- getParameters
-    command' <- getCommand
     channels <- getChannels
     forM_ channels $ writeMessage "JOIN" . return
