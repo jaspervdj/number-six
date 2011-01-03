@@ -3,6 +3,7 @@ module NumberSix.Handlers.Identify
     ( handler
     ) where
 
+import Control.Concurrent (threadDelay)
 import Control.Monad (when, forM_)
 import Data.Char (toUpper)
 
@@ -25,13 +26,8 @@ initialize = do
                         ]
 
 joinHook :: Irc ByteString ()
-joinHook = do
+joinHook = onCommand "376" $ do
     params <- getParameters
     command' <- getCommand
     channels <- getChannels
-    when (command' == "NOTICE" && isCheckIdent params) $ do
-        return ()
-        -- sleep 10
-        -- forM_ channels $ writeMessage "JOIN" . return
-  where
-    isCheckIdent = any ("Checking Ident" `SBC.isInfixOf`) 
+    forM_ channels $ writeMessage "JOIN" . return

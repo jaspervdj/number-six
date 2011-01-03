@@ -62,19 +62,21 @@ reader :: Chan SB.ByteString -> Socket -> IO ()
 reader chan sock = loop mempty
   where
     loop previous = do
-        threadDelay 100000 
+        threadDelay 1000
         chunk <- recv sock 4096
         if SB.null chunk
             then -- Socket closed
                  return ()
             else -- We got some bytes
-                 let toConsume = mappend previous chunk
-                     (line, rest) = SBC.breakSubstring "\r\n" toConsume
-                 in if SB.null rest
-                        then -- We don't have a line yet
-                             loop toConsume
-                        else -- We have a line to consume
-                             writeChan chan line >> loop (SB.drop 2 rest)
+                 consume $ mappend previous chunk
+
+    consume chunk =
+        let (line, rest) = SBC.breakSubstring "\r\n" chunk
+        in if SB.null rest
+                then -- We don't have a line yet
+                     loop chunk
+                else -- We have at least one line to consume
+                     writeChan chan line >> consume (SB.drop 2 rest)
 
 -- | Chan -> Socket
 --
@@ -88,5 +90,3 @@ writer chan sock = forever $ do
     case result of
         Left (SomeException _) -> return ()
         Right m -> sendAll sock $ m `mappend` "\r\n"
-
-    putStrLn $ "Send: " ++ show result
