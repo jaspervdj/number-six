@@ -13,18 +13,25 @@ import NumberSix.Irc
 import NumberSix.Util
 
 handler :: Handler ByteString
-handler = makeHandler "identify" $ return $ do
+handler = makeHandlerWith "identify" [joinHook] initialize
+
+initialize :: Irc ByteString ()
+initialize = do
+    nick' <- getNick
+    realName' <- getRealName
+    writeMessage "NICK" [nick']
+    writeMessage "USER" [ SBC.map toUpper nick'
+                        , "*", "*", realName'
+                        ]
+
+joinHook :: Irc ByteString ()
+joinHook = do
     params <- getParameters
     command' <- getCommand
     channels <- getChannels
     when (command' == "NOTICE" && isCheckIdent params) $ do
-        nick' <- getNick
-        realName' <- getRealName
-        writeMessage "NICK" [nick']
-        writeMessage "USER" [ SBC.map toUpper nick'
-                            , "*", "*", realName'
-                            ]
-        sleep 10
+        return ()
+        -- sleep 10
         -- forM_ channels $ writeMessage "JOIN" . return
   where
     isCheckIdent = any ("Checking Ident" `SBC.isInfixOf`) 

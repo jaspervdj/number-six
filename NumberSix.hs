@@ -46,6 +46,15 @@ irc handlers' config = withConnection' $ \inChan outChan -> do
             , ircGods   = gods
             }
 
+    -- Initialize handlers
+    forM_ handlers' $ \h ->
+        let state = IrcState
+                { ircEnvironment = environment
+                , ircMessage = error "NumberSix: message not known yet"
+                , ircHandler = h
+                }
+        in initializeSomeHandler h state
+
     forever $ handleLine environment inChan
   where
     withConnection' =
@@ -62,7 +71,6 @@ irc handlers' config = withConnection' $ \inChan outChan -> do
         Just message' -> do
             logger $ "RECEIVED: " <> (SBC.pack $ show message')
 
-                -- Build an IRC state
             -- Run every handler on the message
             forM_ handlers' $ \h -> do
                 let state = IrcState

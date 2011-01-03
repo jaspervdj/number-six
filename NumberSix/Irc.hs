@@ -42,8 +42,10 @@ module NumberSix.Irc
 
       -- * Handlers
     , makeHandler
+    , makeHandlerWith
     , runHandler
     , runSomeHandler
+    , initializeSomeHandler
 
       -- * Conditional execution
     , onCommand
@@ -114,8 +116,9 @@ newtype Irc s a = Irc {unIrc :: ReaderT IrcState IO a}
 -- | Handler for IRC messages
 --
 data Handler s = Handler
-    { handlerName  :: ByteString
-    , handlerHooks :: [Irc s ()]
+    { handlerName       :: ByteString
+    , handlerHooks      :: [Irc s ()]
+    , handlerInitialize :: Irc s ()
     }
 
 -- | Wrapper type for handlers
@@ -291,7 +294,16 @@ makeHandler :: IrcString s
             => s            -- ^ Handler name
             -> [Irc s ()]   -- ^ Hooks
             -> Handler s    -- ^ Resulting handler
-makeHandler name hooks = Handler (toByteString name) hooks
+makeHandler name hooks = makeHandlerWith name hooks (return ())
+
+-- | Create a handler with an initialization procedure
+--
+makeHandlerWith :: IrcString s
+                => s            -- ^ Handler name
+                -> [Irc s ()]   -- ^ Hooks
+                -> Irc s ()     -- ^ Initialization
+                -> Handler s    -- ^ Resulting handler
+makeHandlerWith name = Handler (toByteString name)
 
 -- | Run a handler
 --
@@ -307,6 +319,15 @@ runSomeHandler :: SomeHandler  -- ^ Handler to run
 runSomeHandler someHandler state = do
     (SomeHandler handler) <- return someHandler
     runIrc (runHandler handler) state
+
+-- | Initialize some handler
+--
+initializeSomeHandler :: SomeHandler  -- ^ Handler to initialize
+                      -> IrcState     -- ^ Irc state
+                      -> IO ()        -- ^ Result
+initializeSomeHandler someHandler state = do
+    (SomeHandler handler) <- return someHandler
+    runIrc (handlerInitialize handler) state
 
 -- | Execute an 'Irc' action only if the command given is the command received.
 --
