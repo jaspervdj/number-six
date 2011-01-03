@@ -7,7 +7,7 @@ module NumberSix
     ) where
 
 import Control.Applicative ((<$>))
-import Control.Concurrent (forkIO, threadDelay)
+import Control.Concurrent (forkIO)
 import Control.Exception (try, SomeException (..))
 import Control.Monad (forever, forM_)
 import Data.Monoid (mappend)
@@ -24,6 +24,7 @@ import NumberSix.Message.Encode
 import NumberSix.Message.Decode
 import NumberSix.Handlers
 import NumberSix.Socket
+import NumberSix.ExponentialBackoff
 
 -- | Run a single IRC connection
 --
@@ -91,9 +92,6 @@ numberSix = numberSixWith handlers
 -- | Launch a bot with given 'SomeHandler's and block forever
 --
 numberSixWith :: [SomeHandler] -> IrcConfig -> IO ()
-numberSixWith handlers' config = do
-    _ <- forever $ do
-        e <- try $ irc handlers' config
-        putStrLn $ "Error: " ++ show (e :: Either SomeException ())
-        threadDelay (30 * 1000000)
-    return ()
+numberSixWith handlers' config = exponentialBackoff 30 $ do
+    e <- try $ irc handlers' config
+    putStrLn $ "Error: " ++ show (e :: Either SomeException ())
