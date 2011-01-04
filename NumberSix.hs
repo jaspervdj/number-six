@@ -14,6 +14,9 @@ import Data.Monoid (mappend)
 import Control.Concurrent.Chan (readChan, writeChan)
 import Control.Concurrent.MVar (newMVar)
 import System.Environment (getProgName)
+import Data.Time.Clock (getCurrentTime)
+import Data.Time.Format (formatTime)
+import System.Locale (defaultTimeLocale)
 
 import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
@@ -37,8 +40,9 @@ irc handlers' config = withConnection' $ \inChan outChan -> do
     gods <- newMVar []
 
     let writer' m = do
-            writeChan outChan $ encode m
-            logger $ "SENT: " <> (SBC.pack $ show m)
+            let out = encode m
+            writeChan outChan out
+            logger $ "OUT: " <> out
 
         environment = IrcEnvironment
             { ircConfig = config
@@ -63,14 +67,16 @@ irc handlers' config = withConnection' $ \inChan outChan -> do
 
     logger message = do
         -- Create a logger
+        stamp <- SBC.pack . formatTime defaultTimeLocale "%c" <$> getCurrentTime
         logFileName <- (++ ".log") <$> getProgName
-        SB.appendFile logFileName $ message `mappend` "\n"
+        SB.appendFile logFileName $
+            stamp `mappend` " " `mappend` message `mappend` "\n"
 
     -- Processes one line
     handleLine environment inChan = readChan inChan >>= \l -> case decode l of
         Nothing -> logger "Parse error."
         Just message' -> do
-            logger $ "RECEIVED: " <> (SBC.pack $ show message')
+            logger $ "IN: " <> l
 
             -- Run every handler on the message
             forM_ handlers' $ \h -> do
