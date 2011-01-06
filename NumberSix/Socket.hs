@@ -83,10 +83,13 @@ reader chan sock = loop mempty
 writer :: Chan SB.ByteString -> Socket -> IO ()
 writer chan sock = forever $ do
     -- Fully evaluate the message first
-    message <- readChan chan
+    message <- sanitize <$> readChan chan
     result <- try $ SB.unpack message `deepseq` return message
 
     -- Now send it over the socket
     case result of
         Left (SomeException _) -> return ()
         Right m -> sendAll sock $ m `mappend` "\r\n"
+  where
+    -- Remove everything after a newline
+    sanitize = SB.takeWhile (not . (`SB.elem` "\r\n"))
