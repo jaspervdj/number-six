@@ -14,11 +14,13 @@ module NumberSix.Util.Http
 import Control.Applicative ((<$>))
 import Control.Monad.Trans (liftIO)
 
+import Data.ByteString (ByteString)
 import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
 import qualified Codec.Binary.Url as Url
 import Text.HTML.TagSoup
-import Network.Curl (curlGetString_)
+import Text.StringLike (StringLike)
+import Network.Curl (curlGetResponse_, respBody, CurlResponse_)
 import Network.Curl.Opts
 
 import NumberSix.Irc
@@ -28,16 +30,23 @@ import NumberSix.Message
 -- | Perform an HTTP get request and return the response body. The response body
 -- is limited in size, for security reasons.
 --
-httpGet :: String             -- ^ URL
-        -> Irc String String  -- ^ Response body
-httpGet url = liftIO $ fmap snd $ curlGetString_ (httpPrefix url) curlOptions
+httpGet :: (StringLike s, IrcString s)
+        => String   -- ^ URL
+        -> Irc s s  -- ^ Response body
+httpGet url = do
+    response <- liftIO $ curlGetResponse_ (httpPrefix url) curlOptions
+    return $ getBody response
+  where
+    getBody :: IrcString s => CurlResponse_ [(String, String)] ByteString -> s
+    getBody = fromByteString . respBody
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
 -- function.
 --
-httpScrape :: String               -- ^ URL
-           -> ([Tag String] -> a)  -- ^ Scrape function
-           -> Irc String a         -- ^ Result
+httpScrape :: (StringLike s, IrcString s)
+           => String          -- ^ URL
+           -> ([Tag s] -> a)  -- ^ Scrape function
+           -> Irc s a         -- ^ Result
 httpScrape url f = f . parseTags <$> httpGet url
 
 -- | Add @"http://"@ to the given URL, if needed
