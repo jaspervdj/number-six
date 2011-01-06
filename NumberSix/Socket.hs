@@ -92,4 +92,4 @@ writer chan sock = forever $ do
         Right m -> sendAll sock $ m `mappend` "\r\n"
   where
     -- Remove everything after a newline
-    sanitize = SB.takeWhile (not . (`SB.elem` "\r\n"))
+    sanitize = SB.takeWhile (`SB.notElem` "\r\n")
