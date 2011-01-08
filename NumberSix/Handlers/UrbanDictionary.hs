@@ -19,4 +19,8 @@ urban query = httpScrape url $
     url = "http://www.urbandictionary.com/define.php?term=" <> urlEncode query
 
 handler :: Handler String
-handler = makeBangHandler "urbandictionary" ["!urban"] urban
+handler = makeBangHandler "urbandictionary" ["!urban"] $ \query -> do
+    result <- urban query
+    return $ case result of
+        "" -> "Not found"
+        x  -> x
