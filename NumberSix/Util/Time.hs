@@ -38,10 +38,13 @@ prettyTime (IrcTime time) = do
     format :: Integer -> String
     format d
         | d < minute = "less than a minute ago"
-        | d < hour = show (d `div` minute) ++ " minutes ago"
-        | d < day = show (d `div` hour) ++ " hours ago"
-        | otherwise = show (d `div` day) ++ " days ago"
+        | d < hour   = pluralize (d `div` minute) "minute"
+        | d < day    = pluralize (d `div` hour)   "hour"
+        | otherwise  = pluralize (d `div` day)    "day"
 
     minute = 60
     hour = 60 * minute
     day = 24 * hour
+
+    pluralize 1 x = "1"    ++ " " ++ x ++        " ago"
+    pluralize n x = show n ++ " " ++ x ++ "s" ++ " ago"
