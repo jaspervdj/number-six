@@ -7,10 +7,8 @@ module NumberSix.Socket
 
 import Control.Applicative ((<$>))
 import Control.Concurrent (forkIO, threadDelay, killThread)
-import Control.Exception (try, SomeException (..))
 import Control.Monad (forever)
 import Data.Monoid (mempty, mappend)
-import Control.DeepSeq (deepseq)
 import Network.Socket ( Socket, SocketType (..), socket, connect
                       , sClose, getAddrInfo, addrFamily, addrAddress
                       , defaultProtocol
@@ -84,12 +82,7 @@ writer :: Chan SB.ByteString -> Socket -> IO ()
 writer chan sock = forever $ do
     -- Fully evaluate the message first
     message <- sanitize <$> readChan chan
-    result <- try $ SB.unpack message `deepseq` return message
-
-    -- Now send it over the socket
-    case result of
-        Left (SomeException _) -> return ()
-        Right m -> sendAll sock $ m `mappend` "\r\n"
+    sendAll sock $ message `mappend` "\r\n"
   where
     -- Remove everything after a newline
     sanitize = SB.takeWhile (`SB.notElem` "\r\n")

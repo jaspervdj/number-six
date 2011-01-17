@@ -17,6 +17,7 @@ import System.Environment (getProgName)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (formatTime)
 import System.Locale (defaultTimeLocale)
+import Control.DeepSeq (deepseq)
 
 import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
@@ -39,14 +40,9 @@ irc handlers' config = withConnection' $ \inChan outChan -> do
     -- Create a god container
     gods <- newMVar []
 
-    let writer' m = do
-            let out = encode m
-            writeChan outChan out
-            logger $ "OUT: " <> out
-
-        environment = IrcEnvironment
+    let environment = IrcEnvironment
             { ircConfig = config
-            , ircWriter = writer'
+            , ircWriter = writer outChan
             , ircLogger = logger
             , ircGods   = gods
             }
@@ -71,6 +67,20 @@ irc handlers' config = withConnection' $ \inChan outChan -> do
         logFileName <- (++ ".log") <$> getProgName
         SB.appendFile logFileName $
             stamp `mappend` " " `mappend` message `mappend` "\n"
+
+    -- Writer to the out channel
+    writer chan message = do
+        -- Fully evaluate the result
+        let bs = encode message
+        result <- try $ SB.unpack bs `deepseq` return bs
+
+        -- Write the result to the channel (if everything went OK)
+        case result of
+            Left (SomeException _) -> return ()
+            Right m -> writeChan chan m
+
+        -- Log our output as well
+        logger $ "OUT: " <> bs
 
     -- Processes one line
     handleLine environment inChan = readChan inChan >>= \l -> case decode l of
