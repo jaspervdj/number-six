@@ -259,7 +259,7 @@ write string = do
     nick <- getNick
     -- If the channel equals our own nick, we are talking in a query, and we
     -- want to responsd privately to the sender.
-    destination <- if nick == channel then getSender else return channel
+    destination <- if nick ==? channel then getSender else return channel
     writeChannel destination string
 
 -- | Write a message to the active channel, addressed to a certain user
@@ -332,12 +332,12 @@ initializeSomeHandler someHandler state = do
 -- | Execute an 'Irc' action only if the command given is the command received.
 --
 onCommand :: IrcString s
-          => s            -- ^ Command to check for (lowercase!)
+          => s            -- ^ Command to check for
           -> Irc s ()     -- ^ Irc action to execute if match
           -> Irc s ()     -- ^ Result
 onCommand command irc = do
     actualCommand <- getCommand
-    when (actualCommand == command) irc
+    when (actualCommand ==? command) irc
 
 -- | Execute an 'Irc' action only if the sender is a god
 --

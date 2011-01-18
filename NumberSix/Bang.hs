@@ -16,7 +16,7 @@ module NumberSix.Bang
     ) where
 
 import Control.Monad (when, forM_)
-import Data.Char (toLower, isSpace)
+import Data.Char (isSpace)
 
 import qualified Data.ByteString.Char8 as SBC
 
@@ -28,7 +28,7 @@ import NumberSix.Util
 --
 getBangCommand :: IrcString s => Irc s s
 getBangCommand = flip fmap getMessageText $ withIrcByteString $
-    SBC.map toLower . SBC.takeWhile (not .  isSpace)
+    SBC.takeWhile (not .  isSpace)
 
 -- | Get the text given to the bang command.
 --
@@ -64,4 +64,4 @@ onBangCommands :: IrcString s
                -> Irc s ()     -- ^ Result
 onBangCommands commands irc = onCommand "PRIVMSG" $ do
     actualCommand <- getBangCommand
-    forM_ commands $ \c -> when (actualCommand == c) irc
+    forM_ commands $ \c -> when (actualCommand ==? c) irc

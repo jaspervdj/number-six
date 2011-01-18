@@ -7,11 +7,11 @@ module NumberSix.Handlers.Bomb
 
 import Control.Monad (when)
 import Control.Applicative ((<$>))
-import Data.Char (toLower)
 
 import Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc
+import NumberSix.IrcString
 import NumberSix.Bang
 import NumberSix.Message
 import NumberSix.Util
@@ -57,7 +57,7 @@ passHook = onBangCommand "!pass" $ withBomb $ \(target, attacker) -> do
     (text, _) <- breakWord <$> getBangCommandText
     let newTarget = if SBC.null text then attacker else text
     -- Only the current holder of the bomb is allowed to pass it
-    when (SBC.map toLower sender == SBC.map toLower target) $ do
+    when (sender ==? target) $ do
         withRedis $ \r -> setItem r ChannelRealm "bomb" (newTarget, sender)
         write $ sender <> " passes the bomb to " <> newTarget <> "!"
 

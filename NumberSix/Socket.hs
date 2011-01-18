@@ -80,9 +80,9 @@ reader chan sock = loop mempty
 --
 writer :: Chan SB.ByteString -> Socket -> IO ()
 writer chan sock = forever $ do
-    -- Fully evaluate the message first
+    threadDelay 1000
     message <- sanitize <$> readChan chan
     sendAll sock $ message `mappend` "\r\n"
   where
     -- Remove everything after a newline
-    sanitize = SB.takeWhile (`SB.notElem` "\r\n")
+    sanitize = SB.take 450 . SB.takeWhile (`SB.notElem` "\r\n")

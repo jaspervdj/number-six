@@ -7,6 +7,7 @@ import Control.Monad (unless)
 import Data.Maybe (fromMaybe)
 
 import NumberSix.Irc
+import NumberSix.IrcString
 import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
@@ -22,7 +23,7 @@ cubitsHook = onBangCommand "!cubits" $ do
     case args of
         [] -> withCubits id sender
         (nick : []) -> withCubits id nick
-        (nick : n' : []) -> onGod $ unless (nick == sender) $ do
+        (nick : n' : []) -> onGod $ unless (nick ==? sender) $ do
             let n = read n'
                 sn = show $ abs n
             write $ meAction $ if n >= 0
