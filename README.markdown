@@ -18,12 +18,6 @@ Handlers
 Handlers are plugins which react to IRC messages. Here, we give a short listing
 of the available Handlers, together with the commands they provide.
 
-AutoVoice
----------
-
-When people join the channel, the bot will give them voice (`+v`). This handler
-has no commands.
-
 Binary
 ------
 
@@ -259,3 +253,12 @@ UrbanDictionary
 Lookup an expression on urbandictionary.com. Commands:
 
 - `!urban term`: Looks up the given term on urban dictionary
+
+Voice
+-----
+
+When people join the channel, the bot will give them voice (`+v`). This can also
+be set manually, altough this requires god privileges:
+
+- `!voice nick`: Give a user voice
+- `!devoice nick`, `!stfu nick`: Take voice from a user
