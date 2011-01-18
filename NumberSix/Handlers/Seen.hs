@@ -4,10 +4,12 @@ module NumberSix.Handlers.Seen
     ) where
 
 import Control.Applicative ((<$>))
+import Control.Arrow (first)
 
 import Data.ByteString (ByteString)
 
 import NumberSix.Irc
+import NumberSix.IrcString
 import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
@@ -19,7 +21,7 @@ handler = makeHandler "seen" [storeHook, loadHook]
 
 storeHook :: Irc ByteString ()
 storeHook = onCommand "PRIVMSG" $ do
-    sender <- getSender
+    sender <- toLower <$> getSender
     time <- getTime
     text <- getMessageText
     let lastSeen = (time, text)
@@ -27,7 +29,7 @@ storeHook = onCommand "PRIVMSG" $ do
 
 loadHook :: Irc ByteString ()
 loadHook = onBangCommand "!seen" $ do
-    (who, _) <- breakWord <$> getBangCommandText
+    (who, _) <- first toLower . breakWord <$> getBangCommandText
     item <- withRedis $ \redis -> getItem redis ChannelRealm who
     case item of
         Just (time, text) -> do
