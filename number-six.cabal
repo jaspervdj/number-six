@@ -12,7 +12,6 @@ Cabal-version:       >= 1.2
 Library
   Ghc-Options:       -Wall
   Exposed-Modules:   NumberSix.Bang
-                     NumberSix.Handlers.AutoVoice
                      NumberSix.Handlers.Binary
                      NumberSix.Handlers.Bomb
                      NumberSix.Handlers.Cubits
@@ -44,6 +43,7 @@ Library
                      NumberSix.Handlers.Tumblr
                      NumberSix.Handlers.Twitter
                      NumberSix.Handlers.UrbanDictionary
+                     NumberSix.Handlers.Voice
                      NumberSix
                      NumberSix.Irc
                      NumberSix.IrcString
@@ -55,6 +55,7 @@ Library
                      NumberSix.Util.Http
                      NumberSix.Util.Redis
                      NumberSix.Util.Time
+                     NumberSix.Util.Mode
   Build-depends:     base >= 4 && < 5,
                      mtl >= 2 && < 3,
                      random >= 1,

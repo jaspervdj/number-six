@@ -5,7 +5,6 @@ module NumberSix.Handlers
 
 import NumberSix.Irc (SomeHandler (..))
 
-import qualified NumberSix.Handlers.AutoVoice
 import qualified NumberSix.Handlers.Binary
 import qualified NumberSix.Handlers.Bomb
 import qualified NumberSix.Handlers.Cubits
@@ -36,11 +35,11 @@ import qualified NumberSix.Handlers.TryHaskell
 import qualified NumberSix.Handlers.Tumblr
 import qualified NumberSix.Handlers.Twitter
 import qualified NumberSix.Handlers.UrbanDictionary
+import qualified NumberSix.Handlers.Voice
 
 handlers :: [SomeHandler]
 handlers =
-    [ SomeHandler NumberSix.Handlers.AutoVoice.handler
-    , SomeHandler NumberSix.Handlers.Binary.handler
+    [ SomeHandler NumberSix.Handlers.Binary.handler
     , SomeHandler NumberSix.Handlers.Bomb.handler
     , SomeHandler NumberSix.Handlers.Cubits.handler
     , SomeHandler NumberSix.Handlers.Down.handler
@@ -70,4 +69,5 @@ handlers =
     , SomeHandler NumberSix.Handlers.Tumblr.handler
     , SomeHandler NumberSix.Handlers.Twitter.handler
     , SomeHandler NumberSix.Handlers.UrbanDictionary.handler
+    , SomeHandler NumberSix.Handlers.Voice.handler
     ]
