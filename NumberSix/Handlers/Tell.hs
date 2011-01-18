@@ -6,10 +6,12 @@ module NumberSix.Handlers.Tell
 import Control.Applicative ((<$>))
 import Data.Maybe (fromMaybe)
 import Control.Monad (forM_)
+import Control.Arrow (first)
 
 import Data.ByteString (ByteString)
 
 import NumberSix.Irc
+import NumberSix.IrcString
 import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
@@ -24,7 +26,7 @@ storeHook = onBangCommand "!tell" $ do
     text <- getBangCommandText
     sender <- getSender
     time <- getTime
-    let (recipient, message) = breakWord text
+    let (recipient, message) = first toLower $ breakWord text
         tell = (sender, time, message)
     withRedis $ \redis -> do
         messages <- fromMaybe [] <$> getItem redis ChannelRealm recipient
@@ -33,7 +35,7 @@ storeHook = onBangCommand "!tell" $ do
 
 loadHook :: Irc ByteString ()
 loadHook = onCommand "PRIVMSG" $ withRedis $ \redis -> do
-    sender <- getSender
+    sender <- toLower <$> getSender
     items <- getItem redis ChannelRealm sender
     case items of
         Nothing -> return ()
