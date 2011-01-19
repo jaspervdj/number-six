@@ -12,13 +12,12 @@ import Control.Concurrent (forkIO)
 import Control.Exception (try, SomeException (..), catch)
 import Control.Monad (forever, forM_)
 import Data.Monoid (mappend)
-import Control.Concurrent.Chan (readChan, writeChan)
+import Control.Concurrent.Chan.Strict (readChan, writeChan)
 import Control.Concurrent.MVar (newMVar)
-import System.Environment (getProgName)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (formatTime)
 import System.Locale (defaultTimeLocale)
-import Control.DeepSeq (deepseq)
+import System.Environment (getProgName)
 
 import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
@@ -64,7 +63,6 @@ irc handlers' config = withConnection' $ \inChan outChan -> do
         withConnection (SBC.unpack $ ircHost config) (ircPort config)
 
     logger message = do
-        -- Create a logger
         stamp <- SBC.pack . formatTime defaultTimeLocale "%c" <$> getCurrentTime
         logFileName <- (++ ".log") <$> getProgName
         SB.appendFile logFileName $
@@ -72,35 +70,29 @@ irc handlers' config = withConnection' $ \inChan outChan -> do
 
     -- Writer to the out channel
     writer chan message = do
-        -- Fully evaluate the result
         let bs = encode message
-        result <- try $ SB.unpack bs `deepseq` return bs
-
-        -- Write the result to the channel (if everything went OK)
-        case result of
-            Left (SomeException _) -> return ()
-            Right m -> writeChan chan m
-
-        -- Log our output as well
+        writeChan chan $ SocketData bs
         logger $ "OUT: " <> bs
 
     -- Processes one line
-    handleLine environment inChan = readChan inChan >>= \l -> case decode l of
-        Nothing -> logger "Parse error."
-        Just message' -> do
-            logger $ "IN: " <> l
+    handleLine environment inChan = do
+        SocketData l <- readChan inChan
+        case decode l of
+            Nothing -> logger "Parse error."
+            Just message' -> do
+                logger $ "IN: " <> l
 
-            -- Run every handler on the message
-            forM_ handlers' $ \h -> do
-                let state = IrcState
-                        { ircEnvironment = environment
-                        , ircMessage = message'
-                        , ircHandler = h
-                        }
+                -- Run every handler on the message
+                forM_ handlers' $ \h -> do
+                    let state = IrcState
+                            { ircEnvironment = environment
+                            , ircMessage = message'
+                            , ircHandler = h
+                            }
 
-                -- Run the handler in a separate thread
-                _ <- forkIO $ runSomeHandler h state
-                return ()
+                    -- Run the handler in a separate thread
+                    _ <- forkIO $ runSomeHandler h state
+                    return ()
 
 -- | Launch a bots and block forever. All default handlers will be activated.
 --

@@ -2,28 +2,40 @@
 --
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Socket
-    ( withConnection
+    ( SocketData (..)
+    , withConnection
     ) where
 
 import Control.Applicative ((<$>))
-import Control.Concurrent (forkIO, threadDelay, killThread)
-import Control.Monad (forever)
+import Control.Concurrent (forkIO, killThread)
+import Control.Monad (forever, unless)
 import Data.Monoid (mempty, mappend)
+import Control.Concurrent.Chan.Strict (Chan, readChan, newChan, writeChan)
+
+import Data.ByteString (ByteString)
+import Control.DeepSeq (NFData (..))
 import Network.Socket ( Socket, SocketType (..), socket, connect
                       , sClose, getAddrInfo, addrFamily, addrAddress
                       , defaultProtocol
                       )
 import Network.Socket.ByteString
-import Control.Concurrent.Chan (Chan, readChan, newChan, writeChan)
 
 import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
+
+-- | Newtype for data sent to a socket
+--
+newtype SocketData = SocketData {unSocketData :: ByteString}
+                   deriving (Show)
+
+instance NFData SocketData where
+    rnf = rnf . SB.unpack . unSocketData
 
 -- | Run a single IRC connection
 --
 withConnection :: String
                -> Int
-               -> (Chan SB.ByteString -> Chan SB.ByteString -> IO ())
+               -> (Chan SocketData -> Chan SocketData -> IO ())
                -> IO ()
 withConnection host port application = do
     -- Connect to the server
@@ -56,16 +68,12 @@ withConnection host port application = do
 
 -- | Socket -> Chan
 --
-reader :: Chan SB.ByteString -> Socket -> IO ()
+reader :: Chan SocketData -> Socket -> IO ()
 reader chan sock = loop mempty
   where
     loop previous = do
         chunk <- recv sock 4096
-        if SB.null chunk
-            then -- Socket closed
-                 return ()
-            else -- We got some bytes
-                 consume $ mappend previous chunk
+        unless (SB.null chunk) $ consume $ mappend previous chunk
 
     consume chunk =
         let (line, rest) = SBC.breakSubstring "\r\n" chunk
@@ -73,13 +81,14 @@ reader chan sock = loop mempty
                 then -- We don't have a line yet
                      loop chunk
                 else -- We have at least one line to consume
-                     writeChan chan line >> consume (SB.drop 2 rest)
+                     do writeChan chan (SocketData line)
+                        consume (SB.drop 2 rest)
 
 -- | Chan -> Socket
 --
-writer :: Chan SB.ByteString -> Socket -> IO ()
+writer :: Chan SocketData -> Socket -> IO ()
 writer chan sock = forever $ do
-    message <- sanitize <$> readChan chan
+    message <- sanitize . unSocketData <$> readChan chan
     sendAll sock $ message `mappend` "\r\n"
   where
     -- Remove everything after a newline
