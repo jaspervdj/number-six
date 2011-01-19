@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings, GeneralizedNewtypeDeriving,
-    Rank2Types, ExistentialQuantification #-}
+    ExistentialQuantification #-}
 module NumberSix.Irc
     ( -- * Core types
       IrcConfig (..)
@@ -79,6 +79,7 @@ data IrcConfig = IrcConfig
     , ircHost        :: ByteString
     , ircPort        :: Int
     , ircGodPassword :: ByteString
+    , ircDatabase    :: String
     }
 
 -- | An IRC God

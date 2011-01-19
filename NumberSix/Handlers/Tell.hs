@@ -23,7 +23,7 @@ handler = makeHandlerWith "tell" [storeHook, loadHook] initialize
 initialize :: Irc ByteString ()
 initialize = withSqlRun
     "CREATE TABLE tells (                                   \
-    \    id INTEGER PRIMARY KEY,                            \
+    \    id SERIAL,                                         \
     \    host TEXT, channel TEXT,                           \
     \    sender TEXT, recipient TEXT, time TEXT, text TEXT  \
     \)"

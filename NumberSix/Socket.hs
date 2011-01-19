@@ -60,7 +60,6 @@ reader :: Chan SB.ByteString -> Socket -> IO ()
 reader chan sock = loop mempty
   where
     loop previous = do
-        threadDelay 1000
         chunk <- recv sock 4096
         if SB.null chunk
             then -- Socket closed
@@ -80,7 +79,6 @@ reader chan sock = loop mempty
 --
 writer :: Chan SB.ByteString -> Socket -> IO ()
 writer chan sock = forever $ do
-    threadDelay 1000
     message <- sanitize <$> readChan chan
     sendAll sock $ message `mappend` "\r\n"
   where

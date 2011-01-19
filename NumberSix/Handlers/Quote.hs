@@ -23,7 +23,7 @@ handler =
 initialize :: Irc ByteString ()
 initialize = withSqlRun
     "CREATE TABLE quotes (                   \
-    \    id INTEGER PRIMARY KEY,             \
+    \    id SERIAL,                          \
     \    host TEXT, channel TEXT, text TEXT  \
     \)"
 
