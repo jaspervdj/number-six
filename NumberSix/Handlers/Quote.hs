@@ -20,7 +20,7 @@ handler :: Handler ByteString
 handler =
     makeHandlerWith "quote" [addQuoteHook, quoteHook, lastQuoteHook] initialize
 
-initialize :: Irc s ()
+initialize :: Irc ByteString ()
 initialize = withSqlRun $ unlines
     [ "CREATE TABLE quotes ("
     , "    id INTEGER PRIMARY KEY,"
