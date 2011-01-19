@@ -3,7 +3,7 @@
 --
 {-# LANGUAGE GeneralizedNewtypeDeriving, OverloadedStrings #-}
 module NumberSix.Util.Time
-    ( IrcTime
+    ( IrcTime (..)
     , getTime
     , prettyTime
     ) where
@@ -19,7 +19,7 @@ import Data.Binary (Binary)
 import NumberSix.Irc
 import NumberSix.IrcString
 
-newtype IrcTime = IrcTime String
+newtype IrcTime = IrcTime {unIrcTime :: String}
                 deriving (Show, Read, Binary)
 
 -- | Get the current time

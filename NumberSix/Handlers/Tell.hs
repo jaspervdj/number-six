@@ -4,7 +4,6 @@ module NumberSix.Handlers.Tell
     ) where
 
 import Control.Applicative ((<$>))
-import Data.Maybe (fromMaybe)
 import Control.Monad (forM_)
 import Control.Arrow (first)
 
@@ -16,32 +15,60 @@ import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Time
-import NumberSix.Util.Redis
+import NumberSix.Util.Sql
 
 handler :: Handler ByteString
-handler = makeHandler "tell" [storeHook, loadHook]
+handler = makeHandlerWith "tell" [storeHook, loadHook] initialize
+
+initialize :: Irc ByteString ()
+initialize = withSqlRun $ unlines
+    [ "CREATE TABLE tells ("
+    , "    id INTEGER PRIMARY KEY,"
+    , "    host TEXT, channel TEXT,"
+    , "    sender TEXT, recipient TEXT, time TEXT, text TEXT"
+    , ")"
+    ]
 
 storeHook :: Irc ByteString ()
 storeHook = onBangCommand "!tell" $ do
-    text <- getBangCommandText
+    host <- getHost
+    channel <- getChannel
     sender <- getSender
-    time <- getTime
-    let (recipient, message) = first toLower $ breakWord text
-        tell = (sender, time, message)
-    withRedis $ \redis -> do
-        messages <- fromMaybe [] <$> getItem redis ChannelRealm recipient
-        setItem redis ChannelRealm recipient $ messages ++ [tell]
+    IrcTime time <- getTime
+    text' <- getBangCommandText
+    let (recipient, text) = first toLower $ breakWord text'
+    _ <- withSql $ \c -> run c
+        "INSERT INTO tells (host, channel, sender, recipient, time, text) \
+        \VALUES (?, ?, ?, ?, ?, ?)"
+        [ toSql host, toSql channel, toSql sender
+        , toSql recipient, toSql time, toSql text ]
+
     writeReply $ "I'll pass that on when " <> recipient <> " is here."
 
 loadHook :: Irc ByteString ()
-loadHook = onCommand "PRIVMSG" $ withRedis $ \redis -> do
-    sender <- toLower <$> getSender
-    items <- getItem redis ChannelRealm sender
-    case items of
-        Nothing -> return ()
-        Just l -> do
-            deleteItem redis ChannelRealm sender
-            forM_ l $ \(from, time, message) -> do
-                pretty <- prettyTime time
-                writeReply $ from <> " (" <> pretty <> "): " <> message
+loadHook = onCommand "PRIVMSG" $ do
+    host <- getHost
+    channel <- getChannel
+    recipient <- toLower <$> getSender
+
+    -- Find all messages for the recipient
+    messages <- withSql $ \c -> quickQuery' c
+        "SELECT sender, time, text FROM tells \
+        \WHERE host = ? AND channel = ? AND recipient = ?"
+        [toSql host, toSql channel, toSql recipient]
+
+    case messages of
+        [] -> return ()
+        ls -> do
+            -- Delete the messages
+            _ <- withSql $ \c -> run c
+                "DELETE FROM tells \
+                \WHERE host = ? AND channel = ? AND recipient = ?"
+                [toSql host, toSql channel, toSql recipient]
+
+            -- Print the messages
+            forM_ ls $ \[sender, time, text] -> do
+                pretty <- prettyTime $ IrcTime $ fromSql time
+                writeReply $ fromSql sender <> " (" <> pretty <> "): "
+                                            <> fromSql text
                 sleep 1
