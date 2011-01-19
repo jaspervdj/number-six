@@ -7,19 +7,12 @@ module NumberSix
     ) where
 
 import Prelude hiding (catch)
-import Control.Applicative ((<$>))
 import Control.Concurrent (forkIO)
 import Control.Exception (try, SomeException (..), catch)
 import Control.Monad (forever, forM_)
-import Data.Monoid (mappend)
 import Control.Concurrent.Chan.Strict (readChan, writeChan)
 import Control.Concurrent.MVar (newMVar)
-import Data.Time.Clock (getCurrentTime)
-import Data.Time.Format (formatTime)
-import System.Locale (defaultTimeLocale)
-import System.Environment (getProgName)
 
-import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc
@@ -29,13 +22,15 @@ import NumberSix.Message.Decode
 import NumberSix.Handlers
 import NumberSix.Socket
 import NumberSix.ExponentialBackoff
+import NumberSix.Logger
 
 -- | Run a single IRC connection
 --
-irc :: [SomeHandler]  -- ^ Handlers
+irc :: Logger         -- ^ Logger
+    -> [SomeHandler]  -- ^ Handlers
     -> IrcConfig      -- ^ Configuration
     -> IO ()
-irc handlers' config = withConnection' $ \inChan outChan -> do
+irc logger handlers' config = withConnection' $ \inChan outChan -> do
 
     -- Create a god container
     gods <- newMVar []
@@ -61,12 +56,6 @@ irc handlers' config = withConnection' $ \inChan outChan -> do
   where
     withConnection' =
         withConnection (SBC.unpack $ ircHost config) (ircPort config)
-
-    logger message = do
-        stamp <- SBC.pack . formatTime defaultTimeLocale "%c" <$> getCurrentTime
-        logFileName <- (++ ".log") <$> getProgName
-        SB.appendFile logFileName $
-            stamp `mappend` " " `mappend` message `mappend` "\n"
 
     -- Writer to the out channel
     writer chan message = do
@@ -102,6 +91,8 @@ numberSix = numberSixWith handlers
 -- | Launch a bot with given 'SomeHandler's and block forever
 --
 numberSixWith :: [SomeHandler] -> IrcConfig -> IO ()
-numberSixWith handlers' config = exponentialBackoff 30 $ do
-    e <- try $ irc handlers' config
-    putStrLn $ "Error: " ++ show (e :: Either SomeException ())
+numberSixWith handlers' config = do
+    logger <- newLogger
+    exponentialBackoff 30 $ do
+        e <- try $ irc logger handlers' config
+        putStrLn $ "Error: " ++ show (e :: Either SomeException ())
