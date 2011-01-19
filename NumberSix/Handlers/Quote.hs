@@ -21,12 +21,11 @@ handler =
     makeHandlerWith "quote" [addQuoteHook, quoteHook, lastQuoteHook] initialize
 
 initialize :: Irc ByteString ()
-initialize = withSqlRun $ unlines
-    [ "CREATE TABLE quotes ("
-    , "    id INTEGER PRIMARY KEY,"
-    , "    host TEXT, channel TEXT, text TEXT"
-    , ")"
-    ]
+initialize = withSqlRun
+    "CREATE TABLE quotes (                   \
+    \    id INTEGER PRIMARY KEY,             \
+    \    host TEXT, channel TEXT, text TEXT  \
+    \)"
 
 addQuoteHook :: Irc ByteString ()
 addQuoteHook = onBangCommand "!addquote" $ do

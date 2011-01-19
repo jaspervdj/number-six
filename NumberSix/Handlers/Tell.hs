@@ -21,13 +21,12 @@ handler :: Handler ByteString
 handler = makeHandlerWith "tell" [storeHook, loadHook] initialize
 
 initialize :: Irc ByteString ()
-initialize = withSqlRun $ unlines
-    [ "CREATE TABLE tells ("
-    , "    id INTEGER PRIMARY KEY,"
-    , "    host TEXT, channel TEXT,"
-    , "    sender TEXT, recipient TEXT, time TEXT, text TEXT"
-    , ")"
-    ]
+initialize = withSqlRun
+    "CREATE TABLE tells (                                   \
+    \    id INTEGER PRIMARY KEY,                            \
+    \    host TEXT, channel TEXT,                           \
+    \    sender TEXT, recipient TEXT, time TEXT, text TEXT  \
+    \)"
 
 storeHook :: Irc ByteString ()
 storeHook = onBangCommand "!tell" $ do
@@ -38,7 +37,7 @@ storeHook = onBangCommand "!tell" $ do
     text' <- getBangCommandText
     let (recipient, text) = first toLower $ breakWord text'
     _ <- withSql $ \c -> run c
-        "INSERT INTO tells (host, channel, sender, recipient, time, text) \
+        "INSERT INTO tells (host, channel, sender, recipient, time, text)  \
         \VALUES (?, ?, ?, ?, ?, ?)"
         [ toSql host, toSql channel, toSql sender
         , toSql recipient, toSql time, toSql text ]
@@ -53,7 +52,7 @@ loadHook = onCommand "PRIVMSG" $ do
 
     -- Find all messages for the recipient
     messages <- withSql $ \c -> quickQuery' c
-        "SELECT sender, time, text FROM tells \
+        "SELECT sender, time, text FROM tells  \
         \WHERE host = ? AND channel = ? AND recipient = ?"
         [toSql host, toSql channel, toSql recipient]
 
@@ -62,7 +61,7 @@ loadHook = onCommand "PRIVMSG" $ do
         ls -> do
             -- Delete the messages
             _ <- withSql $ \c -> run c
-                "DELETE FROM tells \
+                "DELETE FROM tells  \
                 \WHERE host = ? AND channel = ? AND recipient = ?"
                 [toSql host, toSql channel, toSql recipient]
 
