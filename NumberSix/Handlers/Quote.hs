@@ -51,17 +51,18 @@ quoteHook = onBangCommand "!quote" $ do
             then showQuote (read $ SBC.unpack query)
             -- A search term was given, search through quotes
             else do
-                qs <- filter ((query `SBC.isInfixOf`) . snd) <$> getAllQuotes
+                qs <- getMatching query
                 r <- liftIO $ randomRIO (1, length qs)
-                showQuote $ fst $ qs !! (r - 1)
+                showQuote $ qs !! (r - 1)
   where
-    getAllQuotes = do
+    getMatching query = do
         host <- getHost
         channel <- getChannel
         ls <- withSql $ \c -> quickQuery' c
-            "SELECT id, text FROM quotes WHERE host = ? AND channel = ?"
-            [toSql host, toSql channel]
-        return $ map (\[i, t] -> (fromSql i, fromSql t)) ls
+            "SELECT id FROM quotes  \
+            \WHERE host = ? AND channel = ? AND text LIKE ?"
+            [toSql host, toSql channel, toSql ("%" <> query <> "%")]
+        return $ map (\[i] -> fromSql i) ls
 
 lastQuoteHook :: Irc ByteString ()
 lastQuoteHook = onBangCommand "!lastquote" $ getLastId >>= showQuote
