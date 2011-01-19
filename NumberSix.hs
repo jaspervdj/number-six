@@ -6,9 +6,10 @@ module NumberSix
     , numberSixWith
     ) where
 
+import Prelude hiding (catch)
 import Control.Applicative ((<$>))
 import Control.Concurrent (forkIO)
-import Control.Exception (try, SomeException (..))
+import Control.Exception (try, SomeException (..), catch)
 import Control.Monad (forever, forM_)
 import Data.Monoid (mappend)
 import Control.Concurrent.Chan (readChan, writeChan)
@@ -54,7 +55,8 @@ irc handlers' config = withConnection' $ \inChan outChan -> do
                 , ircMessage = error "NumberSix: message not known yet"
                 , ircHandler = h
                 }
-        in initializeSomeHandler h state
+        in catch (initializeSomeHandler h state)
+                 (\e -> putStrLn (show (e :: SomeException)))
 
     forever $ handleLine environment inChan
   where

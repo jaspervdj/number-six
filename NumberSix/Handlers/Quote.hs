@@ -4,10 +4,8 @@ module NumberSix.Handlers.Quote
     ) where
 
 import Control.Applicative ((<$>))
-import Control.Monad (forM)
 import Control.Monad.Trans (liftIO)
 import Data.Char (isDigit)
-import Data.Maybe (fromMaybe, catMaybes)
 import System.Random (randomRIO)
 
 import Data.ByteString (ByteString)
@@ -16,19 +14,29 @@ import qualified Data.ByteString.Char8 as SBC
 import NumberSix.Irc
 import NumberSix.Message
 import NumberSix.Bang
-import NumberSix.Util.Redis
+import NumberSix.Util.Sql
 
 handler :: Handler ByteString
-handler = makeHandler "quote" [addQuoteHook, quoteHook, lastQuoteHook]
+handler =
+    makeHandlerWith "quote" [addQuoteHook, quoteHook, lastQuoteHook] initialize
+
+initialize :: Irc s ()
+initialize = withSqlRun $ unlines
+    [ "CREATE TABLE quotes ("
+    , "    id INTEGER PRIMARY KEY,"
+    , "    host TEXT, channel TEXT, text TEXT"
+    , ")"
+    ]
 
 addQuoteHook :: Irc ByteString ()
-addQuoteHook = onBangCommand "!addquote" $ withRedis $ \redis -> do
-    lastId <- getLastId
+addQuoteHook = onBangCommand "!addquote" $ do
     text <- getBangCommandText
-    let nextId = lastId + 1
-    setItem redis ChannelRealm (SBC.pack $ show nextId) text
-    setItem redis ChannelRealm "last-id" nextId
-    showQuote nextId
+    host <- getHost
+    channel <- getChannel
+    _ <- withSql $ \c -> run c
+        "INSERT INTO quotes (host, channel, text) VALUES (?, ?, ?)"
+        [toSql host, toSql channel, toSql text]
+    write "Quote added"
 
 quoteHook :: Irc ByteString ()
 quoteHook = onBangCommand "!quote" $ do
@@ -44,28 +52,32 @@ quoteHook = onBangCommand "!quote" $ do
             then showQuote (read $ SBC.unpack query)
             -- A search term was given, search through quotes
             else do
-                lastId <- getLastId
-                quotes <- withRedis $ \redis -> catMaybes <$>
-                    forM [1 .. lastId] (getQuote redis query)
-                r <- liftIO $ randomRIO (1, length quotes)
-                showQuote $ quotes !! (r - 1)
+                qs <- filter ((query `SBC.isInfixOf`) . snd) <$> getAllQuotes
+                r <- liftIO $ randomRIO (1, length qs)
+                showQuote $ fst $ qs !! (r - 1)
   where
-    getQuote redis query n = do
-        item <- getItem redis ChannelRealm query
-        return $ case item of
-            Nothing -> Nothing
-            Just quote -> if query `SBC.isInfixOf` quote then Just n
-                                                         else Nothing
+    getAllQuotes = do
+        host <- getHost
+        channel <- getChannel
+        ls <- withSql $ \c -> quickQuery' c
+            "SELECT id, text FROM quotes WHERE host = ? AND channel = ?"
+            [toSql host, toSql channel]
+        return $ map (\[i, t] -> (fromSql i, fromSql t)) ls
 
 lastQuoteHook :: Irc ByteString ()
 lastQuoteHook = onBangCommand "!lastquote" $ getLastId >>= showQuote
 
 getLastId :: Irc ByteString Integer
-getLastId = withRedis $ \redis ->
-    fromMaybe 0 <$> getItem redis ChannelRealm "last-id"
+getLastId = do
+    [[r]] <- withSql $ \c -> quickQuery' c
+        "SELECT MAX(id) FROM quotes" []
+    return $ fromSql r
 
 showQuote :: Integer -> Irc ByteString ()
 showQuote n = do
-    let sn = SBC.pack $ show n
-    Just quote <- withRedis $ \redis -> getItem redis ChannelRealm sn
-    write $ "Quote " <> sn <> ": " <> quote
+    host <- getHost
+    channel <- getChannel
+    [[r]] <- withSql $ \c -> quickQuery' c
+        "SELECT text FROM quotes WHERE host = ? AND channel = ? AND id = ?"
+        [toSql host, toSql channel, toSql n]
+    write $ "Quote " <> (SBC.pack $ show n) <> ": " <> fromSql r
