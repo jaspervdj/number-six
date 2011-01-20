@@ -5,7 +5,6 @@ module NumberSix.SandBox
     ( sandBox
     ) where
 
-import Control.Monad (unless)
 import Data.Monoid (mappend)
 import Control.Exception (try, SomeException)
 import Control.Concurrent (forkIO, killThread, threadDelay)
@@ -19,7 +18,7 @@ import NumberSix.Logger
 -- | Action finish signal
 --
 data Signal = Finished
-            | Crashed
+            | Crashed ByteString
             | Timeout
             deriving (Show, Eq)
 
@@ -38,7 +37,7 @@ sandBox logger name timeout action = do
     actionThreadId <- forkIO $ do
         r <- try action
         putMVar mvar $ case (r :: Either SomeException ()) of
-            Left  _ -> Crashed
+            Left  e -> Crashed (SBC.pack $ show e)
             Right _ -> Finished
 
     -- Thread signaling a timeout (if there is a timeout)
@@ -59,6 +58,9 @@ sandBox logger name timeout action = do
             Nothing  -> return ()
 
     -- Log crashes and timeouts
-    unless (result == Finished) $ logger $
-        "Thread " `mappend` name `mappend` ": "
-                  `mappend` (SBC.pack $ show result)
+    case result of
+        Crashed e -> logger $
+            "Thread " `mappend` name `mappend` " crashed: " `mappend` e
+        Timeout   -> logger $
+            "Thread " `mappend` name `mappend` " timed out"
+        _         -> return ()
