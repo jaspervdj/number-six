@@ -16,7 +16,7 @@ google query = httpScrape url $ \tags ->
     let Just (TagOpen _ attrs) =
             find (~== TagOpen "a" [("class", "l")]) tags
         Just t = lookup "href" attrs
-        in t
+    in t
   where
     url = "http://www.google.com/search?q=" <> urlEncode query
 
