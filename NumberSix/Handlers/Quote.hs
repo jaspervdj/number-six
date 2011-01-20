@@ -3,7 +3,6 @@ module NumberSix.Handlers.Quote
     ( handler
     ) where
 
-import Control.Applicative ((<$>))
 import Control.Monad.Trans (liftIO)
 import Data.Char (isDigit)
 import System.Random (randomRIO)

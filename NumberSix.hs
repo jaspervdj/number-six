@@ -8,7 +8,6 @@ module NumberSix
 
 import Prelude hiding (catch)
 import Control.Concurrent (forkIO)
-import Control.Exception (try, SomeException (..), catch)
 import Control.Monad (forever, forM_)
 import Control.Concurrent.Chan.Strict (readChan, writeChan)
 import Control.Concurrent.MVar (newMVar)
@@ -23,6 +22,7 @@ import NumberSix.Handlers
 import NumberSix.Socket
 import NumberSix.ExponentialBackoff
 import NumberSix.Logger
+import NumberSix.SandBox
 
 -- | Run a single IRC connection
 --
@@ -43,14 +43,14 @@ irc logger handlers' config = withConnection' $ \inChan outChan -> do
             }
 
     -- Initialize handlers
-    forM_ handlers' $ \h ->
+    forM_ handlers' $ \h@(SomeHandler h') ->
         let state = IrcState
                 { ircEnvironment = environment
                 , ircMessage = error "NumberSix: message not known yet"
                 , ircHandler = h
                 }
-        in catch (initializeSomeHandler h state)
-                 (\e -> putStrLn (show (e :: SomeException)))
+        in sandBox logger (handlerName h') (Just 10) $
+                initializeSomeHandler h state
 
     forever $ handleLine environment inChan
   where
@@ -72,7 +72,7 @@ irc logger handlers' config = withConnection' $ \inChan outChan -> do
                 logger $ "IN: " <> l
 
                 -- Run every handler on the message
-                forM_ handlers' $ \h -> do
+                forM_ handlers' $ \h@(SomeHandler h') -> do
                     let state = IrcState
                             { ircEnvironment = environment
                             , ircMessage = message'
@@ -80,7 +80,8 @@ irc logger handlers' config = withConnection' $ \inChan outChan -> do
                             }
 
                     -- Run the handler in a separate thread
-                    _ <- forkIO $ runSomeHandler h state
+                    _ <- forkIO $ sandBox logger (handlerName h') (Just 60) $
+                        runSomeHandler h state
                     return ()
 
 -- | Launch a bots and block forever. All default handlers will be activated.
@@ -93,6 +94,5 @@ numberSix = numberSixWith handlers
 numberSixWith :: [SomeHandler] -> IrcConfig -> IO ()
 numberSixWith handlers' config = do
     logger <- newLogger
-    exponentialBackoff 30 $ do
-        e <- try $ irc logger handlers' config
-        putStrLn $ "Error: " ++ show (e :: Either SomeException ())
+    exponentialBackoff 30 $ sandBox logger "numberSixWith" Nothing $
+        irc logger handlers' config
