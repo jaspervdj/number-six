@@ -94,5 +94,5 @@ numberSix = numberSixWith handlers
 numberSixWith :: [SomeHandler] -> IrcConfig -> IO ()
 numberSixWith handlers' config = do
     logger <- newLogger
-    exponentialBackoff 30 $ sandBox logger "numberSixWith" Nothing $
+    exponentialBackoff 30 (5 * 60) $ sandBox logger "numberSixWith" Nothing $
         irc logger handlers' config
