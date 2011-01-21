@@ -80,6 +80,8 @@ data IrcConfig = IrcConfig
     , ircPort        :: Int
     , ircGodPassword :: ByteString
     , ircDatabase    :: String
+    , -- (NickServ service name, auth line)
+      ircNickServ    :: Maybe (ByteString, ByteString)
     }
 
 -- | An IRC God

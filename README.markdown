@@ -124,6 +124,11 @@ Check what track a user last listened to on last.fm. Commands:
 
 - `!lastfm username`: Print the track the given user last listened to.
 
+NickServ
+--------
+
+Authenticates the bot with NickServ. This handler has no commands.
+
 NowPlaying
 ----------
 
