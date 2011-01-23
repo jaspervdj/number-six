@@ -21,8 +21,10 @@ handler =
 
 initialize :: Irc ByteString ()
 initialize = withSqlRun
+    -- A global ID and an ID per channel
     "CREATE TABLE quotes (                   \
     \    id SERIAL,                          \
+    \    local_id INT,                       \
     \    host TEXT, channel TEXT, text TEXT  \
     \)"
 
@@ -31,9 +33,10 @@ addQuoteHook = onBangCommand "!addquote" $ do
     text <- getBangCommandText
     host <- getHost
     channel <- getChannel
+    lastId <- getLastId
     _ <- withSql $ \c -> run c
-        "INSERT INTO quotes (host, channel, text) VALUES (?, ?, ?)"
-        [toSql host, toSql channel, toSql text]
+        "INSERT INTO quotes (local_id, host, channel, text) VALUES (?, ?, ?, ?)"
+        [toSql (lastId + 1), toSql host, toSql channel, toSql text]
     write "Quote added"
 
 quoteHook :: Irc ByteString ()
@@ -68,15 +71,23 @@ lastQuoteHook = onBangCommand "!lastquote" $ getLastId >>= showQuote
 
 getLastId :: Irc ByteString Integer
 getLastId = do
+    host <- getHost
+    channel <- getChannel
     [[r]] <- withSql $ \c -> quickQuery' c
-        "SELECT MAX(id) FROM quotes" []
-    return $ fromSql r
+        "SELECT MAX(local_id) FROM quotes  \
+        \WHERE host = ? AND channel = ?"
+        [toSql host, toSql channel]
+
+    return $ case r of
+        SqlNull -> 0
+        _       -> fromSql r
 
 showQuote :: Integer -> Irc ByteString ()
 showQuote n = do
     host <- getHost
     channel <- getChannel
     [[r]] <- withSql $ \c -> quickQuery' c
-        "SELECT text FROM quotes WHERE host = ? AND channel = ? AND id = ?"
+        "SELECT text FROM quotes  \
+        \WHERE host = ? AND channel = ? AND local_id = ?"
         [toSql host, toSql channel, toSql n]
     write $ "Quote " <> (SBC.pack $ show n) <> ": " <> fromSql r
