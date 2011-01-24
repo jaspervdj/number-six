@@ -227,6 +227,13 @@ Prints the title of a web page. Commands:
 
 - `!title url`: Print the title of the given webpage
 
+Topic
+-----
+
+Set the channel topic. Only gods may give this command:
+
+- `!topic message`: Set the channel topic
+
 TryHaskell
 ----------
 

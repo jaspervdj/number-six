@@ -32,6 +32,7 @@ import qualified NumberSix.Handlers.Slap
 import qualified NumberSix.Handlers.Sup
 import qualified NumberSix.Handlers.Tell
 import qualified NumberSix.Handlers.Title
+import qualified NumberSix.Handlers.Topic
 import qualified NumberSix.Handlers.TryHaskell
 import qualified NumberSix.Handlers.Tumblr
 import qualified NumberSix.Handlers.Twitter
@@ -67,6 +68,7 @@ handlers =
     , SomeHandler NumberSix.Handlers.Sup.handler
     , SomeHandler NumberSix.Handlers.Tell.handler
     , SomeHandler NumberSix.Handlers.Title.handler
+    , SomeHandler NumberSix.Handlers.Topic.handler
     , SomeHandler NumberSix.Handlers.TryHaskell.handler
     , SomeHandler NumberSix.Handlers.Tumblr.handler
     , SomeHandler NumberSix.Handlers.Twitter.handler
