@@ -33,11 +33,11 @@ addQuoteHook = onBangCommand "!addquote" $ do
     text <- getBangCommandText
     host <- getHost
     channel <- getChannel
-    lastId <- getLastId
+    localId <- (fmap (+ 1)) getLastId
     _ <- withSql $ \c -> run c
         "INSERT INTO quotes (local_id, host, channel, text) VALUES (?, ?, ?, ?)"
-        [toSql (lastId + 1), toSql host, toSql channel, toSql text]
-    write "Quote added"
+        [toSql localId, toSql host, toSql channel, toSql text]
+    write $ "Quote " <> SBC.pack (show localId) <> " added"
 
 quoteHook :: Irc ByteString ()
 quoteHook = onBangCommand "!quote" $ do
