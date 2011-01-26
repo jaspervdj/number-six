@@ -37,7 +37,7 @@ A cool IRC game.
   user in a certain amount of time (a countdown will be visible).
 - `!pass`: Passes the bomb to the user who placed the bomb. This command can
   only be issued by the current person owning them bomb.
-- `!pass nick`: Passes the bomb to an arbitrary user.
+- `!pass nick`: Passes the bomb to the specified user
 
 Cubits
 ------
@@ -280,4 +280,4 @@ YouTube
 
 Lookup a video on youtube.com. Commands:
 
-- `!youtube term`: Looks for videos related to the given term on youtube
+- `!youtube term, !y term`: Looks for videos related to the given term on youtube

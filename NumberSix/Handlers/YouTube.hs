@@ -32,4 +32,4 @@ youTube query = do
     url = "http://gdata.youtube.com/feeds/api/videos?q=" <> urlEncode query
 
 handler :: Handler String
-handler = makeBangHandler "urbandictionary" ["!youtube"] youTube
+handler = makeBangHandler "youtube" ["!youtube", "!y"] youTube
