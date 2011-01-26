@@ -17,11 +17,10 @@ import NumberSix.Util.BitLy
 youTube :: String -> Irc String String
 youTube query = do
     -- Find the first entry
-    entry <- httpScrape url $ takeWhile (~/= TagClose "entry")
-                            . dropWhile (~/= TagOpen "entry" [])
+    entry <- httpScrape url $ insideTag "entry"
 
     -- Find the title & URL in the entry
-    let Just title = nextTagText entry "title"
+    let title = innerText $ insideTag "title" entry
         [TagOpen _ attrs] = take 1 $
             dropWhile (~/= TagOpen "link" [("rel", "alternate")]) entry
         -- Also drop the '&feature...' part from the URL

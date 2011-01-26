@@ -6,6 +6,7 @@ module NumberSix.Util.Http
     , httpScrape
     , httpPrefix
     , curlOptions
+    , insideTag
     , nextTag
     , nextTagText
     , urlEncode
@@ -63,6 +64,27 @@ curlOptions = [ CurlFollowLocation True
               , CurlTimeoutMS 10000
               , CurlMaxFileSize 128000
               ]
+
+-- | Get the tag list inside an open and closing tag. Supports nested elements.
+--
+insideTag :: String        -- ^ Tag name
+          -> [Tag String]  -- ^ Tag list
+          -> [Tag String]  -- ^ Resulting tag list
+insideTag tag = inside' 1 . drop 1 . dropWhile (~/= TagOpen tag [])
+  where
+    inside' :: Int -> [Tag String] -> [Tag String]
+    inside' _     [] = []
+    inside' stack (x : xs) = case x of
+        TagOpen t _ -> 
+            if t == tag then x : inside' (stack + 1) xs
+                        else consume
+        TagClose t ->
+            if t /= tag then consume
+                        else if stack == 1 then []
+                                           else x : inside' (stack - 1) xs
+        _ -> consume
+      where
+        consume = x : inside' stack xs
 
 -- | Get the tag following a certain tag
 --

@@ -13,7 +13,7 @@ import NumberSix.Util.Http
 
 urban :: String -> Irc String String
 urban query = httpScrape url $
-    innerText . takeWhile (~/= TagClose "div")
+    innerText . insideTag "div"
               . dropWhile (~/= TagOpen "div" [("class", "definition")])
   where
     url = "http://www.urbandictionary.com/define.php?term=" <> urlEncode query
