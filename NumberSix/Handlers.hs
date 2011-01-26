@@ -38,6 +38,7 @@ import qualified NumberSix.Handlers.Tumblr
 import qualified NumberSix.Handlers.Twitter
 import qualified NumberSix.Handlers.UrbanDictionary
 import qualified NumberSix.Handlers.Voice
+import qualified NumberSix.Handlers.YouTube
 
 handlers :: [SomeHandler]
 handlers =
@@ -74,4 +75,5 @@ handlers =
     , SomeHandler NumberSix.Handlers.Twitter.handler
     , SomeHandler NumberSix.Handlers.UrbanDictionary.handler
     , SomeHandler NumberSix.Handlers.Voice.handler
+    , SomeHandler NumberSix.Handlers.YouTube.handler
     ]

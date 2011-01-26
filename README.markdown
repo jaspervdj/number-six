@@ -274,3 +274,10 @@ be set manually, altough this requires god privileges:
 
 - `!voice nick`: Give a user voice
 - `!devoice nick`, `!stfu nick`: Take voice from a user
+
+YouTube
+-------
+
+Lookup a video on youtube.com. Commands:
+
+- `!youtube term`: Looks for videos related to the given term on youtube
