@@ -6,22 +6,12 @@ module NumberSix
     , numberSixWith
     ) where
 
-import Control.Applicative ((<$>))
-import Control.Concurrent (forkIO, threadDelay)
-import Control.Exception (try, SomeException (..))
+import Prelude hiding (catch)
+import Control.Concurrent (forkIO)
 import Control.Monad (forever, forM_)
-import Data.Monoid (mempty)
-import Control.DeepSeq (deepseq)
-import System.IO
-import Network.BSD ( HostEntry (..), getProtocolNumber, getHostByName
-                   , hostAddress
-                   )
-import Network.Socket (Socket, SockAddr (..), SocketType (..), socket, connect)
-import Network.Socket.ByteString
-import Control.Concurrent.Chan (Chan, readChan, newChan, writeChan)
+import Control.Concurrent.Chan.Strict (readChan, writeChan)
 import Control.Concurrent.MVar (newMVar)
 
-import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc
@@ -29,104 +19,80 @@ import NumberSix.Message
 import NumberSix.Message.Encode
 import NumberSix.Message.Decode
 import NumberSix.Handlers
+import NumberSix.Socket
+import NumberSix.ExponentialBackoff
+import NumberSix.Logger
+import NumberSix.SandBox
 
 -- | Run a single IRC connection
 --
-irc :: IrcConfig      -- ^ Configuration
+irc :: Logger         -- ^ Logger
     -> [SomeHandler]  -- ^ Handlers
+    -> IrcConfig      -- ^ Configuration
     -> IO ()
-irc config handlers' = do
-    -- Connect to the IRC server
-    sock <- connect' (SBC.unpack $ ircHost config) $ ircPort config
-
-    -- Spawn our thread to take care of the writes
-    chan <- newChan
-    _ <- forkIO $ writer chan sock
+irc logger handlers' config = withConnection' $ \inChan outChan -> do
 
     -- Create a god container
     gods <- newMVar []
 
-    let writer' m = do
-            writeChan chan m
-            logger $ "SENT: " <> (SBC.pack $ show m)
-        environment = IrcEnvironment
+    let environment = IrcEnvironment
             { ircConfig = config
-            , ircWriter = writer'
+            , ircWriter = writer outChan
             , ircLogger = logger
             , ircGods   = gods
             }
 
-    loop environment sock mempty
+    -- Initialize handlers
+    forM_ handlers' $ \h@(SomeHandler h') ->
+        let state = IrcState
+                { ircEnvironment = environment
+                , ircMessage = error "NumberSix: message not known yet"
+                , ircHandler = h
+                }
+        in sandBox logger (handlerName h') (Just 10) $
+                initializeSomeHandler h state
+
+    forever $ handleLine environment inChan
   where
-    logger = SB.hPutStrLn stderr
+    withConnection' =
+        withConnection (SBC.unpack $ ircHost config) (ircPort config)
 
-    -- Higher-level connect function
-    connect' hostname port = do
-        protocol <- getProtocolNumber "tcp"
-        entry <- getHostByName hostname
-        sock <- socket (hostFamily entry) Stream protocol
-        connect sock $ SockAddrInet (fromIntegral port) $ hostAddress entry
-        return sock
-
-    -- Loop forever, consuming one line every loop
-    loop environment sock previous = do
-        threadDelay 100000
-        chunk <- fmap (previous <>) $ recv sock 4096
-        consume environment sock chunk
-
-    -- Consume chunks and handle lines
-    consume environment sock chunk = do
-        let (line, rest) = SBC.breakSubstring "\r\n" chunk
-        if SB.null rest
-            -- Need more input
-            then loop environment sock chunk
-            -- Got a line
-            else do handleLine environment line
-                    consume environment sock $ SB.drop 2 rest
+    -- Writer to the out channel
+    writer chan message = do
+        let bs = encode message
+        writeChan chan $ SocketData bs
+        logger $ "OUT: " <> bs
 
     -- Processes one line
-    handleLine environment line = case decode line of
-        Nothing -> logger "Parse error."
-        Just message' -> do
-            logger $ "RECEIVED: " <> (SBC.pack $ show message')
+    handleLine environment inChan = do
+        SocketData l <- readChan inChan
+        case decode l of
+            Nothing -> logger "Parse error."
+            Just message' -> do
+                logger $ "IN: " <> l
 
-                -- Build an IRC state
-            -- Run every handler on the message
-            forM_ handlers' $ \h -> do
-                let state = IrcState
-                        { ircEnvironment = environment
-                        , ircMessage = message'
-                        , ircHandler = h
-                        }
+                -- Run every handler on the message
+                forM_ handlers' $ \h@(SomeHandler h') -> do
+                    let state = IrcState
+                            { ircEnvironment = environment
+                            , ircMessage = message'
+                            , ircHandler = h
+                            }
 
-                -- Run the handler in a separate thread
-                _ <- forkIO $ runSomeHandler h state
-                return ()
+                    -- Run the handler in a separate thread
+                    _ <- forkIO $ sandBox logger (handlerName h') (Just 60) $
+                        runSomeHandler h state
+                    return ()
 
--- | A thread that writes messages from a channel
+-- | Launch a bots and block forever. All default handlers will be activated.
 --
-writer :: Chan Message -> Socket -> IO ()
-writer chan sock = forever $ do
-    message <- encode <$> readChan chan
-    result <- try $ SB.unpack message `deepseq` return message
-    case result of
-        Left (SomeException _) -> return ()
-        Right m -> sendAll sock $ m <> "\r\n"
-
--- | Launch multiple bots and block forever. All default handlers will be
--- activated.
---
-numberSix :: [IrcConfig] -> IO ()
+numberSix :: IrcConfig -> IO ()
 numberSix = numberSixWith handlers
 
--- | Launch multiple bots with given 'SomeHandler's and block forever
+-- | Launch a bot with given 'SomeHandler's and block forever
 --
-numberSixWith :: [SomeHandler] -> [IrcConfig] -> IO ()
-numberSixWith handlers' configs = do
-    -- Spawn a thread for every config
-    forM_ configs $ \config -> do
-        _ <- forkIO $ irc config handlers'
-        return ()
-
-    -- Wait forever
-    interact id
+numberSixWith :: [SomeHandler] -> IrcConfig -> IO ()
+numberSixWith handlers' config = do
+    logger <- newLogger
+    exponentialBackoff 30 (5 * 60) $ sandBox logger "numberSixWith" Nothing $
+        irc logger handlers' config

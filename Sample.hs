@@ -7,13 +7,13 @@ import NumberSix
 import NumberSix.Irc
 
 main :: IO ()
-main = numberSix [config]
-  where
-    config = IrcConfig
-        { ircNick        = "mempty"
-        , ircRealName    = "Number Six Testing Bot"
-        , ircChannels    = ["#testing"]
-        , ircHost        = "wina.ugent.be"
-        , ircPort        = 6666
-        , ircGodPassword = "foobar"
-        }
+main = numberSix IrcConfig
+    { ircNick        = "number-six"
+    , ircRealName    = "Number Six Testing Bot"
+    , ircChannels    = ["#testing"]
+    , ircHost        = "wina.ugent.be"
+    , ircPort        = 6669
+    , ircGodPassword = "foobar"
+    , ircDatabase    = "dbname = number-six"
+    , ircNickServ    = Just ("NickServ@services.wina.ugent.be", "auth hunter2")
+    }

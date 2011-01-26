@@ -4,32 +4,68 @@ module NumberSix.Handlers.Seen
     ) where
 
 import Control.Applicative ((<$>))
+import Control.Arrow (first)
 
 import Data.ByteString (ByteString)
 
 import NumberSix.Irc
+import NumberSix.IrcString
 import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
-import NumberSix.Util.Redis
+import NumberSix.Util.Sql
+import NumberSix.Util.Time
 
 handler :: Handler ByteString
-handler = makeHandler "seen" [storeHook, loadHook]
+handler = makeHandlerWith "seen" [storeHook, loadHook] initialize
+
+initialize :: Irc ByteString ()
+initialize = withSqlRun
+    "CREATE TABLE seen (                    \
+    \    id SERIAL,                         \
+    \    host TEXT, channel TEXT,           \
+    \    sender TEXT, time TEXT, text TEXT  \
+    \)"
 
 storeHook :: Irc ByteString ()
 storeHook = onCommand "PRIVMSG" $ do
-    sender <- getSender
-    time <- prettyTime
+    host <- getHost
+    channel <- getChannel
+    sender <- toLower <$> getSender
+    IrcTime time <- getTime
     text <- getMessageText
-    let lastSeen = (time, text)
-    withRedis $ \redis -> setItem redis sender lastSeen
+    _ <- withSql $ \c -> do
+        r <- quickQuery' c
+            "SELECT id FROM seen  \
+            \WHERE host = ? AND channel = ? AND sender = ?"
+            [toSql host, toSql channel, toSql sender]
+        case r of
+            -- In the database: update
+            [[id']] -> run c
+                "UPDATE seen SET time = ?, text = ? WHERE id = ?"
+                [toSql time, toSql text, id']
+            -- Not yet in the database: insert
+            _ -> run c
+                "INSERT INTO seen (host, channel, sender, time, text)  \
+                \VALUES (?, ?, ?, ?, ?)"
+                [ toSql host, toSql channel, toSql sender
+                , toSql time, toSql text ]
+    return ()
 
 loadHook :: Irc ByteString ()
 loadHook = onBangCommand "!seen" $ do
-    (who, _) <- breakWord <$> getBangCommandText
-    item <- withRedis $ \redis -> getItem redis who
-    case item of
-        Just (time, text) -> writeReply $
-            "I last saw " <> who <> " on " <> time
-                          <> " saying: " <> text
-        _ -> writeReply $ "I ain't never seen " <> who
+    host <- getHost
+    channel <- getChannel
+    (sender, _) <- first toLower . breakWord <$> getBangCommandText
+    r <- withSql $ \c -> quickQuery' c
+        "SELECT time, text FROM seen  \
+        \WHERE host = ? AND channel = ? AND sender = ?"
+        [toSql host, toSql channel, toSql sender]
+    case r of
+        -- In the database: seen
+        [[time, text]] -> do
+            pretty <- prettyTime $ IrcTime $ fromSql time
+            writeReply $ "I last saw " <> sender <> " " <> pretty
+                                       <> " saying: " <> fromSql text
+        -- Not yet in the database: not seen
+        _ -> writeReply $ "I ain't never seen " <> sender

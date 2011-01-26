@@ -4,7 +4,7 @@ module NumberSix.Handlers.Gods
     ( handler
     ) where
 
-import Data.List (nub)
+import Data.List (nub, isInfixOf)
 
 import NumberSix.Irc
 import NumberSix.Message
@@ -20,8 +20,8 @@ godsHook = onBangCommand "!gods" printGods
 addGodHook :: Irc String ()
 addGodHook = onBangCommand "!addgod" $ do
     password <- getBangCommandText
-    sender <- getSender
-    modifyGods (add sender) password
+    prefix <- getPrefix
+    modifyGods (add $ God prefix) password
     printGods
   where
     add x = nub . (x :)
@@ -29,13 +29,15 @@ addGodHook = onBangCommand "!addgod" $ do
 removeGodHook :: Irc String ()
 removeGodHook = onBangCommand "!removegod" $ onGod $ do
     password <- getGodPassword
-    god <- getBangCommandText
-    sender <- getSender
-    let toRemove = if null god then sender else god
-    modifyGods (filter (/= toRemove)) password
+    pattern <- getBangCommandText
+    prefix <- getPrefix
+    let keep = if null pattern then (/= God prefix) else noMatch pattern
+    modifyGods (filter keep) password
     printGods
+  where
+    noMatch pattern god = not $ pattern `isInfixOf` show god
 
 printGods :: Irc String ()
 printGods = do
     gods <- getGods
-    write $ "My gods are " <> prettyList gods <> "."
+    write $ "My gods are " <> prettyList (map show gods) <> "."

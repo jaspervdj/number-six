@@ -2,7 +2,15 @@ Number Six
 ==========
 
 Number six is a custom IRC bot, developped for the `#ghentfpg` IRC channels.
-It's still a work in progress and very alpha.
+
+Compiling & Running
+===================
+
+The best way to get started is to copy `Sample.hs` and start from there.
+Configure it, then compile & run using:
+
+    `ghc --make Sample.hs`
+    `./Sample`
 
 Handlers
 ========
@@ -19,6 +27,17 @@ Binary conversions. Commands:
 - `!unbin binary`: Convert a binary number to decimal notation
 - `!hex decimal`: Convert a decimal number to hex notation
 - `!unhex`: Convert a hex number to decimal notation
+
+Bomb
+----
+
+A cool IRC game.
+
+- `!bomb nick`: Attach a bomb to the specified user. This bomb will kick the
+  user in a certain amount of time (a countdown will be visible).
+- `!pass`: Passes the bomb to the user who placed the bomb. This command can
+  only be issued by the current person owning them bomb.
+- `!pass nick`: Passes the bomb to the specified user
 
 Cubits
 ------
@@ -60,7 +79,7 @@ Check who the gods are on this server, and manage them. Commands:
 - `!addgod password`: This adds the sender as a god. Obviously, you should run
   this in a private query.
 - `!removegod`: Removes you as a god.
-- `!removegod nick`: Removes the given user as god.
+- `!removegod pattern`: Removes all gods which match the given pattern.
 
 Google
 ------
@@ -98,18 +117,17 @@ Identify
 System handler which sets the nickname and the real name of the bot. This
 handler has no commands.
 
-Kick
-----
-
-System handler which rejoins a channel after being kicked. This handler has no
-commands.
-
 LastFm
 ------
 
 Check what track a user last listened to on last.fm. Commands:
 
 - `!lastfm username`: Print the track the given user last listened to.
+
+NickServ
+--------
+
+Authenticates the bot with NickServ. This handler has no commands.
 
 NowPlaying
 ----------
@@ -142,6 +160,12 @@ Reddit
 Print a random item from a subreddit. Commands:
 
 - `!reddit name`: Prints a random item from the given subreddit
+
+Rejoin
+------
+
+System handler which rejoins a channel after being kicked. This handler has no
+commands.
 
 Quote
 -----
@@ -182,6 +206,12 @@ Shows the bot's superiority to a user. Commands:
 
 - `!slap nick`: Slaps the specified user around a bit.
 
+Sup
+---
+
+When the user greets the bot with `sup botname`, the bot will respond with
+`sup username`.
+
 Tell
 ----
 
@@ -196,6 +226,13 @@ Title
 Prints the title of a web page. Commands:
 
 - `!title url`: Print the title of the given webpage
+
+Topic
+-----
+
+Set the channel topic. Only gods may give this command:
+
+- `!topic message`: Set the channel topic
 
 TryHaskell
 ----------
@@ -228,3 +265,19 @@ UrbanDictionary
 Lookup an expression on urbandictionary.com. Commands:
 
 - `!urban term`: Looks up the given term on urban dictionary
+
+Voice
+-----
+
+When people join the channel, the bot will give them voice (`+v`). This can also
+be set manually, altough this requires god privileges:
+
+- `!voice nick`: Give a user voice
+- `!devoice nick`, `!stfu nick`: Take voice from a user
+
+YouTube
+-------
+
+Lookup a video on youtube.com. Commands:
+
+- `!youtube term, !y term`: Looks for videos related to the given term on youtube

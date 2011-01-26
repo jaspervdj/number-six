@@ -1,7 +1,10 @@
 -- | Encode IRC messages back to bytestrings
 --
 {-# LANGUAGE OverloadedStrings #-}
-module NumberSix.Message.Encode where
+module NumberSix.Message.Encode
+    ( encodePrefix
+    , encode
+    ) where
 
 import Data.Maybe (isJust, fromMaybe)
 import Data.Monoid (Monoid, mempty)

@@ -4,7 +4,7 @@ module NumberSix.Handlers.Title
     ( handler
     ) where
 
-import Data.Maybe (fromMaybe)
+import Text.HTML.TagSoup (innerText)
 
 import NumberSix.Irc
 import NumberSix.Message
@@ -13,9 +13,9 @@ import NumberSix.Util.Http
 
 title :: String -> Irc String String
 title query = httpScrape query $ \tags ->
-    fromMaybe "Not now, I'm taking a break." $ do
-        title' <- nextTagText tags "title"
-        return $ "Title: " <> title'
+    let title' = innerText $ insideTag "title" tags
+    in if null title' then "Not now, I'm taking a break."
+                      else "Title: " <> title'
 
 handler :: Handler String
 handler = makeBangHandler "title" ["!title"] title

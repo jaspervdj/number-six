@@ -6,6 +6,7 @@ module NumberSix.Handlers.Op
 
 import NumberSix.Irc
 import NumberSix.Bang
+import NumberSix.Util.Mode
 
 handler :: Handler String
 handler = makeHandler "op" [opHook, deopHook]
@@ -13,11 +14,9 @@ handler = makeHandler "op" [opHook, deopHook]
 opHook :: Irc String ()
 opHook = onBangCommand "!op" $ onGod $ do
     nick <- getBangCommandText
-    channel <- getChannel
-    writeMessage "MODE" [channel, "+o", nick]
+    mode "+o" nick
 
 deopHook :: Irc String ()
 deopHook = onBangCommand "!deop" $ onGod $ do
     nick <- getBangCommandText
-    channel <- getChannel
-    writeMessage "MODE" [channel, "-o", nick]
+    mode "-o" nick

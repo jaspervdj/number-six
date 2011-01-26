@@ -11,10 +11,9 @@ Cabal-version:       >= 1.2
 
 Library
   Ghc-Options:       -Wall
-  Exposed-Modules:   NumberSix
-                     NumberSix.Bang
-                     NumberSix.Handlers
+  Exposed-Modules:   NumberSix.Bang
                      NumberSix.Handlers.Binary
+                     NumberSix.Handlers.Bomb
                      NumberSix.Handlers.Cubits
                      NumberSix.Handlers.Down
                      NumberSix.Handlers.EightBall
@@ -24,34 +23,41 @@ Library
                      NumberSix.Handlers.HackerNews
                      NumberSix.Handlers.Hello
                      NumberSix.Handlers.Help
+                     NumberSix.Handlers
                      NumberSix.Handlers.Identify
-                     NumberSix.Handlers.Kick
                      NumberSix.Handlers.LastFm
                      NumberSix.Handlers.NowPlaying
                      NumberSix.Handlers.Op
                      NumberSix.Handlers.Ping
-                     NumberSix.Handlers.Reddit
                      NumberSix.Handlers.Quote
+                     NumberSix.Handlers.Reddit
+                     NumberSix.Handlers.Rejoin
                      NumberSix.Handlers.Say
                      NumberSix.Handlers.Seen
                      NumberSix.Handlers.Shorten
                      NumberSix.Handlers.Slap
+                     NumberSix.Handlers.Sup
                      NumberSix.Handlers.Tell
                      NumberSix.Handlers.Title
                      NumberSix.Handlers.TryHaskell
+                     NumberSix.Handlers.Tumblr
                      NumberSix.Handlers.Twitter
                      NumberSix.Handlers.UrbanDictionary
+                     NumberSix.Handlers.Voice
+                     NumberSix
                      NumberSix.Irc
                      NumberSix.IrcString
-                     NumberSix.Message
                      NumberSix.Message.Decode
                      NumberSix.Message.Encode
-                     NumberSix.Util
+                     NumberSix.Message
                      NumberSix.Util.BitLy
+                     NumberSix.Util
                      NumberSix.Util.Http
                      NumberSix.Util.Redis
+                     NumberSix.Util.Time
+                     NumberSix.Util.Mode
   Build-depends:     base >= 4 && < 5,
-                     monads-fd >= 0.1,
+                     mtl >= 2 && < 3,
                      random >= 1,
                      containers >= 0.3,
                      bytestring >= 0.9,
@@ -60,12 +66,10 @@ Library
                      redis-simple >= 0.1,
                      binary >= 0.5,
                      tagsoup >= 0.10,
-                     old-locale >= 1,
                      time >= 1,
                      dataenc >= 0.13,
-                     network >= 2.2,
+                     network >= 2.3,
                      json >= 0.4,
                      attoparsec >= 0.8,
-                     network-bytestring >= 0.1,
                      deepseq >= 1.0,
                      curl >= 1.3

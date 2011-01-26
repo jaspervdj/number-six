@@ -10,14 +10,18 @@ module NumberSix.IrcString
     ( IrcString (..)
     , withIrcByteString
     , withIrcString
+    , toLower
+    , (==?)
     ) where
 
 import Data.Monoid (Monoid)
 import Data.Char (chr)
+import qualified Data.Char as Char (toLower)
 
 import Data.ByteString (ByteString)
 import Data.ByteString.Char8 ()
 import qualified Data.ByteString as SB
+import qualified Data.ByteString.Char8 as SBC
 import qualified Codec.Binary.UTF8.String as Utf8
 import GHC.Exts (IsString)
 
@@ -65,3 +69,20 @@ withIrcString :: IrcString s
               -> s
               -> s
 withIrcString f = withIrcByteString $ toByteString . f . fromByteString
+
+toLower :: IrcString s
+        => s -> s
+toLower = withIrcByteString $ SBC.map toLower'
+  where
+    -- See IRC RFC
+    toLower' '['  = '{'
+    toLower' ']'  = '}'
+    toLower' '\\' = '|'
+    toLower' '~'  = '^'
+    toLower' x    = Char.toLower x
+
+-- | Case-insensitive comparison
+--
+(==?) :: IrcString s
+      => s -> s -> Bool
+s1 ==? s2 = toLower s1 == toLower s2

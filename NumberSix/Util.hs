@@ -5,23 +5,20 @@ module NumberSix.Util
     ( sleep
     , forkIrc
     , breakWord
-    , prettyTime
     , prettyList
     , trim
     , meAction
+    , kick
     , removeNewlines
     , randomElement
     ) where
 
-import Control.Applicative ((<$>))
 import Control.Arrow (first, second)
 import Control.Concurrent (threadDelay, forkIO)
+import Control.Monad (when)
 import Control.Monad.Reader (ask)
 import Control.Monad.Trans (liftIO)
 import Data.Char (isSpace)
-import Data.Time.Clock (getCurrentTime)
-import Data.Time.Format (formatTime)
-import System.Locale (defaultTimeLocale)
 import System.Random (randomRIO)
 
 import qualified Data.ByteString.Char8 as SBC
@@ -51,12 +48,6 @@ breakWord = first fromByteString
           . second (fromByteString . SBC.drop 1)
           . SBC.break isSpace . toByteString
 
--- | Get the time in a pretty format
---
-prettyTime :: IrcString s => Irc s s
-prettyTime = fromByteString . SBC.pack . formatTime defaultTimeLocale "%F@%H:%M"
-           <$> liftIO getCurrentTime
-
 -- | Show a list of strings in a pretty format
 --
 prettyList :: IrcString s => [s] -> s
@@ -75,6 +66,17 @@ trim = withIrcByteString $
 --
 meAction :: IrcString s => s -> s
 meAction x = "\SOHACTION " <> x <> "\SOH"
+
+-- | Kick someone
+--
+kick :: IrcString s
+     => s         -- ^ Nick to kick
+     -> s         -- ^ Reason
+     -> Irc s ()
+kick nick reason = do
+    channel <- getChannel
+    myNick <- getNick
+    when (nick /= myNick) $ writeMessage "KICK" [channel, nick, reason]
 
 -- | Replace newlines by spaces
 --

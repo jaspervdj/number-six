@@ -13,7 +13,7 @@ import Data.ByteString (ByteString)
 
 data Prefix = ServerPrefix ByteString
             | NickPrefix ByteString (Maybe ByteString) (Maybe ByteString)
-            deriving (Show)
+            deriving (Show, Eq)
 
 data Message = Message
     { messagePrefix     :: Maybe Prefix

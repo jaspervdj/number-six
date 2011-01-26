@@ -5,17 +5,19 @@ module NumberSix.Util.BitLy
     , textAndUrl
     ) where
 
-import Control.Applicative ((<$>))
-import Data.Maybe (fromMaybe)
+import Text.HTML.TagSoup
 
 import NumberSix.Irc
 import NumberSix.Message
 import NumberSix.Util.Http
 
 shorten :: String -> Irc String String
-shorten query = fromMaybe query <$> httpScrape url getUrl
+shorten query = do
+    result <- httpScrape url getUrl
+    return $ case result of "" -> url
+                            _  -> result
   where
-    getUrl tags = nextTagText tags "url"
+    getUrl = innerText . insideTag "url"
     url =  "http://api.bit.ly/v3/shorten?login=jaspervdj"
         <> "&apiKey=R_578fb5b17a40fa1f94669c6cba844df1"
         <> "&longUrl=" <> urlEncode (httpPrefix query)

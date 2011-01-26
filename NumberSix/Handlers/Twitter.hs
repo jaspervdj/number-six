@@ -4,7 +4,6 @@ module NumberSix.Handlers.Twitter
 
 import Data.Maybe (fromMaybe)
 import Data.Char (isDigit)
-import Control.Monad (mplus)
 
 import Text.HTML.TagSoup
 
@@ -15,10 +14,13 @@ import NumberSix.Util
 import NumberSix.Util.Http
 
 getTweet :: Maybe String -> [Tag String] -> String
-getTweet muser tags = fromMaybe "Not found" $ do
-    text <- nextTagText tags "text"
-    user <- muser `mplus` nextTagText tags "screen_name"
-    return $ "@" <> user <> ": " <> removeNewlines text
+getTweet muser tags =
+    let text = innerText $ insideTag "text" tags
+        user = case innerText (insideTag "screen_name" tags) of
+                    "" -> fromMaybe "" muser
+                    x  -> x
+    in if null text || null user then "Not found"
+                                 else "@" <> user <> ": " <> removeNewlines text
 
 twitter :: String -> Irc String String
 twitter argument = if all isDigit argument
@@ -26,7 +28,7 @@ twitter argument = if all isDigit argument
     else httpScrape user $ getTweet $ Just argument
   where
     user  =  "http://api.twitter.com/1/statuses/user_timeline.xml?screen_name="
-          <> urlEncode argument <> "&include_rts=1"
+          <> urlEncode argument <> "&include_rts=1&count=1"
     tweet =  "http://api.twitter.com/1/statuses/show/"
           <> urlEncode argument <> ".xml"
 

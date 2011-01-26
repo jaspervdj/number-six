@@ -16,12 +16,12 @@ import NumberSix.Util.BitLy
 
 gitHub :: String -> Irc String String
 gitHub query = do
-    Just (text, longUrl) <- httpScrape url $ \tags -> do
-        let tags' = dropWhile (~/= TagOpen "entry" []) tags
-        text <- nextTagText tags' "title"
-        TagOpen _ attrs <- find (~== TagOpen "link" []) tags'
-        url' <- lookup "href" attrs
-        return (text, url')
+    (text, longUrl) <- httpScrape url $ \tags ->
+        let entry = insideTag "entry" tags
+            text = innerText $ insideTag "title" entry
+            Just (TagOpen _ attrs) = find (~== TagOpen "link" []) entry
+            Just url' = lookup "href" attrs
+        in (text, url')
     textAndUrl text longUrl
   where
     url = "http://github.com/" <> urlEncode query <> ".atom"

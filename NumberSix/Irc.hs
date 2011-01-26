@@ -1,8 +1,9 @@
 {-# LANGUAGE OverloadedStrings, GeneralizedNewtypeDeriving,
-    Rank2Types, ExistentialQuantification #-}
+    ExistentialQuantification #-}
 module NumberSix.Irc
     ( -- * Core types
       IrcConfig (..)
+    , God (..)
     , IrcEnvironment (..)
     , IrcState (..)
     , Irc (..)
@@ -20,6 +21,7 @@ module NumberSix.Irc
     , getGodPassword
     , getGods
     , getHandlerName
+    , getPrefix
     , getCommand
     , getParameters
     , getSender
@@ -40,8 +42,10 @@ module NumberSix.Irc
 
       -- * Handlers
     , makeHandler
+    , makeHandlerWith
     , runHandler
     , runSomeHandler
+    , initializeSomeHandler
 
       -- * Conditional execution
     , onCommand
@@ -63,6 +67,7 @@ import qualified Data.ByteString as SB
 import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Message
+import NumberSix.Message.Encode (encodePrefix)
 import NumberSix.IrcString
 
 -- | User-specified IRC configuration
@@ -74,7 +79,18 @@ data IrcConfig = IrcConfig
     , ircHost        :: ByteString
     , ircPort        :: Int
     , ircGodPassword :: ByteString
+    , ircDatabase    :: String
+    , -- (NickServ service name, auth line)
+      ircNickServ    :: Maybe (ByteString, ByteString)
     }
+
+-- | An IRC God
+--
+newtype God = God {unGod :: Prefix}
+            deriving (Eq)
+
+instance Show God where
+    show = SBC.unpack . encodePrefix . unGod
 
 -- | Represents the outer IRC state
 --
@@ -82,7 +98,7 @@ data IrcEnvironment = IrcEnvironment
     { ircConfig   :: IrcConfig
     , ircWriter   :: Message -> IO ()
     , ircLogger   :: ByteString -> IO ()
-    , ircGods     :: MVar [ByteString]
+    , ircGods     :: MVar [God]
     }
 
 -- | Represents the internal IRC state
@@ -103,8 +119,9 @@ newtype Irc s a = Irc {unIrc :: ReaderT IrcState IO a}
 -- | Handler for IRC messages
 --
 data Handler s = Handler
-    { handlerName  :: ByteString
-    , handlerHooks :: [Irc s ()]
+    { handlerName       :: ByteString
+    , handlerHooks      :: [Irc s ()]
+    , handlerInitialize :: Irc s ()
     }
 
 -- | Wrapper type for handlers
@@ -145,11 +162,10 @@ getGodPassword =
 
 -- | Get the gods of the server
 --
-getGods :: IrcString s => Irc s [s]
+getGods :: IrcString s => Irc s [God]
 getGods = do
     mvar <- ircGods . ircEnvironment <$> ask
-    gods <- liftIO $ readMVar mvar
-    return $ map fromByteString gods
+    liftIO $ readMVar mvar
 
 -- | Get the name of the current handler
 --
@@ -157,6 +173,13 @@ getHandlerName :: IrcString s => Irc s s
 getHandlerName = do
     (SomeHandler handler) <- ircHandler <$> ask
     return $ fromByteString $ handlerName handler
+
+-- | Get the IRC prefix
+--
+getPrefix :: Irc s Prefix
+getPrefix = do
+    Just prefix <- messagePrefix . ircMessage <$> ask
+    return prefix
 
 -- | Obtain the actual IRC command: the result from this function will always be
 -- in lowercase.
@@ -239,7 +262,7 @@ write string = do
     nick <- getNick
     -- If the channel equals our own nick, we are talking in a query, and we
     -- want to responsd privately to the sender.
-    destination <- if nick == channel then getSender else return channel
+    destination <- if nick ==? channel then getSender else return channel
     writeChannel destination string
 
 -- | Write a message to the active channel, addressed to a certain user
@@ -274,7 +297,16 @@ makeHandler :: IrcString s
             => s            -- ^ Handler name
             -> [Irc s ()]   -- ^ Hooks
             -> Handler s    -- ^ Resulting handler
-makeHandler name hooks = Handler (toByteString name) hooks
+makeHandler name hooks = makeHandlerWith name hooks (return ())
+
+-- | Create a handler with an initialization procedure
+--
+makeHandlerWith :: IrcString s
+                => s            -- ^ Handler name
+                -> [Irc s ()]   -- ^ Hooks
+                -> Irc s ()     -- ^ Initialization
+                -> Handler s    -- ^ Resulting handler
+makeHandlerWith name = Handler (toByteString name)
 
 -- | Run a handler
 --
@@ -291,15 +323,24 @@ runSomeHandler someHandler state = do
     (SomeHandler handler) <- return someHandler
     runIrc (runHandler handler) state
 
+-- | Initialize some handler
+--
+initializeSomeHandler :: SomeHandler  -- ^ Handler to initialize
+                      -> IrcState     -- ^ Irc state
+                      -> IO ()        -- ^ Result
+initializeSomeHandler someHandler state = do
+    (SomeHandler handler) <- return someHandler
+    runIrc (handlerInitialize handler) state
+
 -- | Execute an 'Irc' action only if the command given is the command received.
 --
 onCommand :: IrcString s
-          => s            -- ^ Command to check for (lowercase!)
+          => s            -- ^ Command to check for
           -> Irc s ()     -- ^ Irc action to execute if match
           -> Irc s ()     -- ^ Result
 onCommand command irc = do
     actualCommand <- getCommand
-    when (actualCommand == command) irc
+    when (actualCommand ==? command) irc
 
 -- | Execute an 'Irc' action only if the sender is a god
 --
@@ -308,20 +349,18 @@ onGod :: IrcString s
       -> Irc s ()     -- ^ Result
 onGod irc = do
     gods <- getGods
-    sender <- getSender
-    if sender `elem` gods
+    prefix <- getPrefix
+    if God prefix `elem` gods
         then irc
         else writeReply "I laugh at your mortality."
 
 -- | Change the list of gods
 --
 modifyGods :: IrcString s
-           => ([s] -> [s])  -- ^ Modification
+           => ([God] -> [God])  -- ^ Modification
            -> s             -- ^ Password
            -> Irc s ()
 modifyGods f password = do
     password' <- getGodPassword
     mvar <- ircGods . ircEnvironment <$> ask
-    when (password == password') $ liftIO $ modifyMVar_ mvar $ return . f'
-  where
-    f' = map toByteString . f . map fromByteString
+    when (password == password') $ liftIO $ modifyMVar_ mvar $ return . f
