@@ -18,6 +18,7 @@ import qualified NumberSix.Handlers.Hello
 import qualified NumberSix.Handlers.Help
 import qualified NumberSix.Handlers.Identify
 import qualified NumberSix.Handlers.LastFm
+import qualified NumberSix.Handlers.Meme
 import qualified NumberSix.Handlers.NickServ
 import qualified NumberSix.Handlers.NowPlaying
 import qualified NumberSix.Handlers.Op
@@ -55,6 +56,7 @@ handlers =
     , SomeHandler NumberSix.Handlers.Help.handler
     , SomeHandler NumberSix.Handlers.Identify.handler
     , SomeHandler NumberSix.Handlers.LastFm.handler
+    , SomeHandler NumberSix.Handlers.Meme.handler
     , SomeHandler NumberSix.Handlers.NickServ.handler
     , SomeHandler NumberSix.Handlers.NowPlaying.handler
     , SomeHandler NumberSix.Handlers.Op.handler

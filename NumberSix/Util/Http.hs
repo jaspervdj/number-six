@@ -63,6 +63,10 @@ curlOptions :: [CurlOption]
 curlOptions = [ CurlFollowLocation True
               , CurlTimeoutMS 10000
               , CurlMaxFileSize 128000
+              , CurlUserAgent
+                    "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) \
+                    \AppleWebKit/534.10 (KHTML, like Gecko) Chrome/8.0.552.237 \
+                    \Safari/534.10"
               ]
 
 -- | Get the tag list inside an open and closing tag. Supports nested elements.

@@ -1,5 +1,6 @@
 module NumberSix.Handlers.Google
     ( handler
+    , google
     ) where
 
 import Data.List (find)
@@ -11,6 +12,8 @@ import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util.Http
 
+-- | Returns the URL of the first found link
+--
 google :: String -> Irc String String
 google query = httpScrape url $ \tags ->
     let Just (TagOpen _ attrs) =
