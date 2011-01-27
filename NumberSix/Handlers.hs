@@ -17,6 +17,7 @@ import qualified NumberSix.Handlers.HackerNews
 import qualified NumberSix.Handlers.Hello
 import qualified NumberSix.Handlers.Help
 import qualified NumberSix.Handlers.Identify
+import qualified NumberSix.Handlers.Join
 import qualified NumberSix.Handlers.LastFm
 import qualified NumberSix.Handlers.Meme
 import qualified NumberSix.Handlers.NickServ
@@ -55,6 +56,7 @@ handlers =
     , SomeHandler NumberSix.Handlers.Hello.handler
     , SomeHandler NumberSix.Handlers.Help.handler
     , SomeHandler NumberSix.Handlers.Identify.handler
+    , SomeHandler NumberSix.Handlers.Join.handler
     , SomeHandler NumberSix.Handlers.LastFm.handler
     , SomeHandler NumberSix.Handlers.Meme.handler
     , SomeHandler NumberSix.Handlers.NickServ.handler

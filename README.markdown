@@ -117,6 +117,14 @@ Identify
 System handler which sets the nickname and the real name of the bot. This
 handler has no commands.
 
+Join
+----
+
+Have the bot join channels. The bot will automatically join the channels
+specified in the the configuration file. Commands:
+
+- `!join channel`: Join the specified channel
+
 LastFm
 ------
 
