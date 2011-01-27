@@ -1,25 +1,17 @@
 -- | Handler that allows looking up memes on knowyourmeme.com
 --
 module NumberSix.Handlers.Meme
-    -- ( handler
-    -- ) where
-    where
-
-import Control.Applicative ((<$>))
-import Data.Maybe (listToMaybe, fromMaybe)
+    ( handler
+    ) where
 
 import Text.HTML.TagSoup
-import Text.Regex.Base
 import Text.Regex.PCRE
-import Text.Regex.PCRE.String
 
-import NumberSix.Handlers.Google
+import NumberSix.Handlers.Google (google)
 import NumberSix.Irc
-import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util.Http
 import NumberSix.Util.BitLy
-import NumberSix.Util
 
 -- | Search for a meme, return the URL of the related page
 --
