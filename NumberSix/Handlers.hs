@@ -26,7 +26,6 @@ import qualified NumberSix.Handlers.Op
 import qualified NumberSix.Handlers.Ping
 import qualified NumberSix.Handlers.Quote
 import qualified NumberSix.Handlers.Reddit
-import qualified NumberSix.Handlers.Rejoin
 import qualified NumberSix.Handlers.Say
 import qualified NumberSix.Handlers.Seen
 import qualified NumberSix.Handlers.Shorten
@@ -65,7 +64,6 @@ handlers =
     , SomeHandler NumberSix.Handlers.Ping.handler
     , SomeHandler NumberSix.Handlers.Quote.handler
     , SomeHandler NumberSix.Handlers.Reddit.handler
-    , SomeHandler NumberSix.Handlers.Rejoin.handler
     , SomeHandler NumberSix.Handlers.Say.handler
     , SomeHandler NumberSix.Handlers.Seen.handler
     , SomeHandler NumberSix.Handlers.Shorten.handler

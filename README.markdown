@@ -121,7 +121,8 @@ Join
 ----
 
 Have the bot join channels. The bot will automatically join the channels
-specified in the the configuration file. Commands:
+specified in the the configuration file. When the bot is kicked out of a
+channel, this handler will try to rejoin the channel. Commands:
 
 - `!join channel`: Join the specified channel
 
@@ -175,12 +176,6 @@ Reddit
 Print a random item from a subreddit. Commands:
 
 - `!reddit name`: Prints a random item from the given subreddit
-
-Rejoin
-------
-
-System handler which rejoins a channel after being kicked. This handler has no
-commands.
 
 Quote
 -----
