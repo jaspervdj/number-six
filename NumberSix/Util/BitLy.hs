@@ -26,4 +26,6 @@ shorten query = do
 textAndUrl :: String -> String -> Irc String String
 textAndUrl text url = do
     shortUrl <- shorten url
-    return $ text <> " >> " <> shortUrl
+    return $ case text of
+        "" -> shortUrl
+        _  -> text <> " >> " <> shortUrl
