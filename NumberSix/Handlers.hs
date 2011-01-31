@@ -10,6 +10,7 @@ import qualified NumberSix.Handlers.Bomb
 import qualified NumberSix.Handlers.Cubits
 import qualified NumberSix.Handlers.Down
 import qualified NumberSix.Handlers.EightBall
+import qualified NumberSix.Handlers.Flickr
 import qualified NumberSix.Handlers.GitHub
 import qualified NumberSix.Handlers.Gods
 import qualified NumberSix.Handlers.Google
@@ -48,6 +49,7 @@ handlers =
     , SomeHandler NumberSix.Handlers.Cubits.handler
     , SomeHandler NumberSix.Handlers.Down.handler
     , SomeHandler NumberSix.Handlers.EightBall.handler
+    , SomeHandler NumberSix.Handlers.Flickr.handler
     , SomeHandler NumberSix.Handlers.GitHub.handler
     , SomeHandler NumberSix.Handlers.Gods.handler
     , SomeHandler NumberSix.Handlers.Google.handler
