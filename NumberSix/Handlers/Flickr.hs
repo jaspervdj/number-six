@@ -9,6 +9,7 @@ import qualified Control.Monad.Trans as CMT
 import Data.Maybe(fromJust)
 import System.Random (randomRIO)
 
+import Flickr.Favorites
 import Flickr.Monad
 import Flickr.People
 import Flickr.Photos
@@ -26,30 +27,50 @@ type URL = String
 
 -- | get the public photos for a given user by the user's URL
 --
-publicPhotos :: URL -> FM [Photo]
-publicPhotos userURL = do
+publicPhotos :: URL -> Maybe Int -> FM [Photo]
+publicPhotos userURL limit = do
     u <- tryFlick $ lookupUser userURL 
     case u of
       Left err -> return []
-      Right user -> getPublicPhotos (userId user) Nothing []
+      Right user -> case limit of
+                      Nothing -> id
+                      Just n -> withPageSize n
+                    $ getPublicPhotos (userId user) Nothing []
+
+-- | Get the last public available favourite for the given user
+--
+publicFaves :: URL -> FM [Photo]
+publicFaves userURL = do
+    u <- tryFlick $ lookupUser userURL
+    case u of
+      Left err -> return []
+      Right user -> withPageSize 1 $ liftM snd $ getPublicList (userId user) [] nullDateDetails
+
 
 -- | Actual handler implementation.
 -- XXX: Needs cleanup and more functionality
 flickr :: String -> Irc String String
-flickr query = do
-    let user : _ = words query
-        url = buildUserURL user
-    photoURLs <- CMT.liftIO $ flickAPI hsflickrAPIKey $ publicPhotos url >>= \ps -> mapM (\p -> liftM photoDetailsURLs $ Flickr.Photos.getInfo (photoId p) Nothing) ps
-    report ("Hey ... we're still living ... looking up for " ++ user)
-    case photoURLs of
-      (us:_) -> let us' = filter (\u -> urlDetailsType u == "photopage") us
-                in case us' of 
-                      (u:_) -> textAndUrl ("Last photo of " ++ user ++ ": ") (urlDetailsURL u)
-                      _ -> do report "OOPS"
-                              textAndUrl ("Cannot obtain URL for the last photo of " ++ user) ""
-      [] -> do report ("Did not find any photos for " ++ user)
-               textAndUrl ("Cannot obtain URL for the last photo of " ++ user) ""
+flickr query = 
+    case words query of
+      command : user : _ -> do
+        let url = buildUserURL user
+        let photos = case command of
+                    "last" -> publicPhotos url (Just 1)
+                    "random" -> do ps <- publicPhotos url Nothing
+                                   r <- liftIO $ randomRIO (1, length ps)
+                                   return (ps !! r : [])
+                    "fave" -> publicFaves url
 
+        photoURLs <- CMT.liftIO $ flickAPI hsflickrAPIKey $ photos >>= \ps-> mapM (\p -> liftM photoDetailsURLs $ Flickr.Photos.getInfo (photoId p) Nothing) ps
+        -- We make sure we only have one.
+        case photoURLs of
+          (us:_) -> let us' = filter (\u -> urlDetailsType u == "photopage") us
+                        in case us' of 
+                             (u:_) -> textAndUrl (command ++ " photo of " ++ user ++ ": ") (urlDetailsURL u)
+                             _ -> return ("Cannot obtain URL for the last photo of " ++ user)
+          [] -> return ("Cannot obtain URL for the last photo of " ++ user) 
+
+      _ -> return ("Usage: !flickr <command> <user> where command is one of: last, random, fave")
   where buildUserURL u = "http://flickr.com/photos/" ++ u
 
 
