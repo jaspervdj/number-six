@@ -63,6 +63,15 @@ Ask a question to the wise 8-ball handler. Commands:
 
 - `!8ball question`: Ask a question
 
+Flickr
+------
+
+Get the last picture of the given flickr member. You need to provide the user's nickname, e.g., 
+itkovian for pictures reached at http://flickr.com/photos/itkovian. Requires the flickr package
+(http://hackage.haskell.org/package/flickr-0.3.3).
+
+- `!flickr nickname`: Get the last publicly avalable picture for the nicknamed user.
+
 GitHub
 ------
 
