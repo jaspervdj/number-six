@@ -70,10 +70,9 @@ flickr query = case words query of
                 Flickr.Photos.getInfo (photoId p) Nothing
 
         -- Obtain the URL details
-        let url = do
-                    us <- listToMaybe photoURLs
-                    us' <- find ((== "photopage") . urlDetailsType) us
-                    return $ urlDetailsURL us'
+        let url = do us <- listToMaybe photoURLs
+                     us' <- find ((== "photopage") . urlDetailsType) us
+                     return $ urlDetailsURL us'
 
         -- Finnish!
         case url of
