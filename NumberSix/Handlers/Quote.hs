@@ -13,6 +13,7 @@ import qualified Data.ByteString.Char8 as SBC
 import NumberSix.Irc
 import NumberSix.Message
 import NumberSix.Bang
+import NumberSix.Util
 import NumberSix.Util.Sql
 
 handler :: Handler ByteString
@@ -54,8 +55,7 @@ quoteHook = onBangCommand "!quote" $ do
             -- A search term was given, search through quotes
             else do
                 qs <- getMatching query
-                r <- liftIO $ randomRIO (1, length qs)
-                showQuote $ qs !! (r - 1)
+                showQuote =<< randomElement qs
   where
     getMatching query = do
         host <- getHost
