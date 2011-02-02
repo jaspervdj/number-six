@@ -56,7 +56,7 @@ flickr query = case words query of
         -- URL search 
         photoURLs <- CMT.liftIO $ flickAPI hsflickrAPIKey $ do
             -- Search photos. Try to limit returned list, if possible
-            let url = "http://flickr.com/photos/" ++ url
+            let url = "http://flickr.com/photos/" ++ user
             photos <- case command of
                           "last" -> publicPhotos url (Just 1)
                           "random" -> do ps <- publicPhotos url Nothing
