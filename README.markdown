@@ -66,11 +66,14 @@ Ask a question to the wise 8-ball handler. Commands:
 Flickr
 ------
 
-Get the last picture of the given flickr member. You need to provide the user's nickname, e.g., 
-itkovian for pictures reached at http://flickr.com/photos/itkovian. Requires the flickr package
+Get the last picture of the given flickr member. You need to
+provide the user's nickname, e.g., itkovian for pictures reached
+at http://flickr.com/photos/itkovian. Requires the flickr package
 (http://hackage.haskell.org/package/flickr-0.3.3).
 
-- `!flickr nickname`: Get the last publicly avalable picture for the nicknamed user.
+- `!flickr fave nickname`: Get the last faved picture for the user
+- `!flickr last nickname`: Get the last available picture from the user
+- `!flickr random nickname`: Get a random picture from the user
 
 GitHub
 ------
