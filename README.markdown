@@ -66,11 +66,14 @@ Ask a question to the wise 8-ball handler. Commands:
 Flickr
 ------
 
-Get the last picture of the given flickr member. You need to provide the user's nickname, e.g., 
-itkovian for pictures reached at http://flickr.com/photos/itkovian. Requires the flickr package
+Get the last picture of the given flickr member. You need to
+provide the user's nickname, e.g., itkovian for pictures reached
+at http://flickr.com/photos/itkovian. Requires the flickr package
 (http://hackage.haskell.org/package/flickr-0.3.3).
 
-- `!flickr nickname`: Get the last publicly avalable picture for the nicknamed user.
+- `!flickr fave nickname`: Get the last faved picture for the user
+- `!flickr last nickname`: Get the last available picture from the user
+- `!flickr random nickname`: Get a random picture from the user
 
 GitHub
 ------
@@ -126,12 +129,28 @@ Identify
 System handler which sets the nickname and the real name of the bot. This
 handler has no commands.
 
+Join
+----
+
+Have the bot join channels. The bot will automatically join the channels
+specified in the the configuration file. When the bot is kicked out of a
+channel, this handler will try to rejoin the channel. Commands:
+
+- `!join channel`: Join the specified channel
+
 LastFm
 ------
 
 Check what track a user last listened to on last.fm. Commands:
 
 - `!lastfm username`: Print the track the given user last listened to.
+
+Meme
+----
+
+Lookup a meme on knowyourmeme.com. Commands:
+
+- `!meme term`: Search for the given term in the meme database
 
 NickServ
 --------
@@ -169,12 +188,6 @@ Reddit
 Print a random item from a subreddit. Commands:
 
 - `!reddit name`: Prints a random item from the given subreddit
-
-Rejoin
-------
-
-System handler which rejoins a channel after being kicked. This handler has no
-commands.
 
 Quote
 -----
