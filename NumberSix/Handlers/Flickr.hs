@@ -8,16 +8,15 @@ import Data.List (find)
 import Control.Applicative ((<$>))
 import Control.Monad
 import qualified Control.Monad.Trans as CMT
-import Data.Maybe (fromMaybe, listToMaybe)
+import Data.Maybe (listToMaybe)
 import System.Random (randomRIO)
 
+import Flickr.API
 import Flickr.Favorites
-import Flickr.Monad
 import Flickr.People
 import Flickr.Photos
-import Flickr.Types
 import Flickr.URLs
-import NumberSix.Util.Redis
+import Util.Keys (hsflickrAPIKey)
 
 import NumberSix.Irc
 import NumberSix.Bang
