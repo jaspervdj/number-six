@@ -17,7 +17,7 @@ import Flickr.People
 import Flickr.Photos
 import Flickr.Types
 import Flickr.URLs
-import Util.Keys
+import NumberSix.Util.Redis
 
 import NumberSix.Irc
 import NumberSix.Bang

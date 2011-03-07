@@ -31,7 +31,6 @@ Library
                      NumberSix.Handlers.Ping
                      NumberSix.Handlers.Quote
                      NumberSix.Handlers.Reddit
-                     NumberSix.Handlers.Rejoin
                      NumberSix.Handlers.Say
                      NumberSix.Handlers.Seen
                      NumberSix.Handlers.Shorten
@@ -72,4 +71,9 @@ Library
                      json >= 0.4,
                      attoparsec >= 0.8,
                      deepseq >= 1.0,
-                     curl >= 1.3
+                     curl >= 1.3,
+                     regex-pcre >= 0.94,
+                     HDBC-postgresql >= 2.2,
+                     HDBC >= 2.2,
+                     strict-concurrency >= 0.2,
+                     old-locale >= 1
