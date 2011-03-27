@@ -297,6 +297,13 @@ be set manually, altough this requires god privileges:
 - `!voice nick`: Give a user voice
 - `!devoice nick`, `!stfu nick`: Take voice from a user
 
+Wikipedia
+---------
+
+Lookup a term on wikipedia. Commands:
+
+- `!w term, !wik term, !wiki term`: Looks up the given term on wikipedia
+
 YouTube
 -------
 

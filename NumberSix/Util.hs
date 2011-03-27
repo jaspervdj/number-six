@@ -76,7 +76,9 @@ kick :: IrcString s
 kick nick reason = do
     channel <- getChannel
     myNick <- getNick
-    when (nick /= myNick) $ writeMessage "KICK" [channel, nick, reason]
+    -- The bot won't kick itself
+    when (not $ nick ==? myNick) $
+        writeMessage "KICK" [channel, nick, reason]
 
 -- | Replace newlines by spaces
 --
