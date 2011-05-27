@@ -36,13 +36,15 @@ storeHook = onBangCommand "!tell" $ do
     IrcTime time <- getTime
     text' <- getBangCommandText
     let (recipient, text) = first toLower $ breakWord text'
-    _ <- withSql $ \c -> run c
-        "INSERT INTO tells (host, channel, sender, recipient, time, text)  \
-        \VALUES (?, ?, ?, ?, ?, ?)"
-        [ toSql host, toSql channel, toSql sender
-        , toSql recipient, toSql time, toSql text ]
-
-    writeReply $ "I'll pass that on when " <> recipient <> " is here."
+    if recipient ==? sender
+        then write "Sigh. The Universe is winning..."
+        else do
+            _ <- withSql $ \c -> run c
+                "INSERT INTO tells (host, channel, sender, recipient, \
+                \time, text) VALUES (?, ?, ?, ?, ?, ?)"
+                [ toSql host, toSql channel, toSql sender
+                , toSql recipient, toSql time, toSql text ]
+            writeReply $ "I'll pass that on when " <> recipient <> " is here."
 
 loadHook :: Irc ByteString ()
 loadHook = onCommand "PRIVMSG" $ do
