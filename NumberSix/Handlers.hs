@@ -23,6 +23,7 @@ import qualified NumberSix.Handlers.Meme
 import qualified NumberSix.Handlers.NickServ
 import qualified NumberSix.Handlers.NowPlaying
 import qualified NumberSix.Handlers.Op
+import qualified NumberSix.Handlers.Pick
 import qualified NumberSix.Handlers.Ping
 import qualified NumberSix.Handlers.Quote
 import qualified NumberSix.Handlers.Reddit
@@ -62,6 +63,7 @@ handlers =
     , SomeHandler NumberSix.Handlers.NickServ.handler
     , SomeHandler NumberSix.Handlers.NowPlaying.handler
     , SomeHandler NumberSix.Handlers.Op.handler
+    , SomeHandler NumberSix.Handlers.Pick.handler
     , SomeHandler NumberSix.Handlers.Ping.handler
     , SomeHandler NumberSix.Handlers.Quote.handler
     , SomeHandler NumberSix.Handlers.Reddit.handler

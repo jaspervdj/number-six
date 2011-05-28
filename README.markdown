@@ -177,6 +177,13 @@ Give channel operator privileges. Commands:
 - `!op nick`: Given channel operator privileges to the specified user
 - `!deop nick`: Take away channel operator privileges from the specified user
 
+Pick
+----
+
+Pick a random item from a list. Commands:
+
+- `!pick item1 item2 item3 ...`, `!who ...`: Print a random item from the list.
+
 Ping
 ----
 
