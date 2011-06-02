@@ -6,20 +6,17 @@ module NumberSix.Handlers.Seen
 import Control.Applicative ((<$>))
 import Control.Arrow (first)
 
-import Data.ByteString (ByteString)
-
 import NumberSix.Irc
-import NumberSix.IrcString
 import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Sql
 import NumberSix.Util.Time
 
-handler :: Handler ByteString
+handler :: Handler
 handler = makeHandlerWith "seen" [storeHook, loadHook] initialize
 
-initialize :: Irc ByteString ()
+initialize :: Irc ()
 initialize = withSqlRun
     "CREATE TABLE seen (                    \
     \    id SERIAL,                         \
@@ -27,7 +24,7 @@ initialize = withSqlRun
     \    sender TEXT, time TEXT, text TEXT  \
     \)"
 
-storeHook :: Irc ByteString ()
+storeHook :: Irc ()
 storeHook = onCommand "PRIVMSG" $ do
     host <- getHost
     channel <- getChannel
@@ -52,7 +49,7 @@ storeHook = onCommand "PRIVMSG" $ do
                 , toSql time, toSql text ]
     return ()
 
-loadHook :: Irc ByteString ()
+loadHook :: Irc ()
 loadHook = onBangCommand "!seen" $ do
     host <- getHost
     channel <- getChannel

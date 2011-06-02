@@ -11,16 +11,15 @@ import Control.Applicative ((<$>))
 import Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc
-import NumberSix.IrcString
 import NumberSix.Bang
 import NumberSix.Message
 import NumberSix.Util
 import NumberSix.Util.Redis
 
-handler :: Handler ByteString
+handler :: Handler
 handler = makeHandler "bomb" [bombHook, passHook]
 
-bombHook :: Irc ByteString ()
+bombHook :: Irc ()
 bombHook = onBangCommand "!bomb" $ do
     -- No bomb action should be running
     exists <- withRedis $ \redis -> existsItem redis ChannelRealm "bomb"
@@ -51,7 +50,7 @@ bombHook = onBangCommand "!bomb" $ do
 
 -- | Pass the bomb!
 --
-passHook :: Irc ByteString ()
+passHook :: Irc ()
 passHook = onBangCommand "!pass" $ withBomb $ \(target, attacker) -> do
     sender <- getSender
     (text, _) <- breakWord <$> getBangCommandText
@@ -63,8 +62,7 @@ passHook = onBangCommand "!pass" $ withBomb $ \(target, attacker) -> do
 
 -- | Utility, execute a certain action with (target, attacker)
 --
-withBomb :: ((ByteString, ByteString) -> Irc ByteString ())
-           -> Irc ByteString ()
+withBomb :: ((ByteString, ByteString) -> Irc ()) -> Irc ()
 withBomb f = do
     tupple <- withRedis $ \redis -> getItem redis ChannelRealm "bomb"
     case tupple of Just t  -> f t

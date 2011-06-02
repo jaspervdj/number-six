@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Google
     ( handler
     , google
@@ -5,6 +6,7 @@ module NumberSix.Handlers.Google
 
 import Data.List (find)
 
+import Data.ByteString (ByteString)
 import Text.HTML.TagSoup
 
 import NumberSix.Irc
@@ -14,14 +16,14 @@ import NumberSix.Util.Http
 
 -- | Returns the URL of the first found link
 --
-google :: String -> Irc String String
+google :: ByteString -> Irc ByteString
 google query = httpScrape url $ \tags ->
     let Just (TagOpen _ attrs) =
-            find (~== TagOpen "a" [("class", "l")]) tags
+            find (~== TagOpen ("a" :: ByteString) [("class", "l")]) tags
         Just t = lookup "href" attrs
     in t
   where
     url = "http://www.google.com/search?q=" <> urlEncode query
 
-handler :: Handler String
+handler :: Handler
 handler = makeBangHandler "google" ["!google", "!g"] google

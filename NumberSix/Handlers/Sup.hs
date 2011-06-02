@@ -6,19 +6,18 @@ module NumberSix.Handlers.Sup
 import Control.Applicative ((<$>))
 import Control.Monad (when)
 
-import Data.ByteString (ByteString)
-import qualified Data.ByteString.Char8 as SBC
+import qualified Data.ByteString as B
 
 import NumberSix.Irc
 import NumberSix.Message
 
-handler :: Handler ByteString
+handler :: Handler
 handler = makeHandler "sup" [supHook]
 
-supHook :: Irc ByteString ()
+supHook :: Irc ()
 supHook = onCommand "PRIVMSG" $ do
     text <- getMessageText
     expected <- ("sup " <>) <$> getNick
-    when (expected `SBC.isPrefixOf` text) $ do
+    when (expected `B.isPrefixOf` text) $ do
         sender <- getSender
         write $ "sup " <> sender

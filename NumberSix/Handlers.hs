@@ -3,11 +3,10 @@ module NumberSix.Handlers
     ( handlers
     ) where
 
-import NumberSix.Irc (SomeHandler (..))
+import NumberSix.Irc (Handler)
 
 import qualified NumberSix.Handlers.Binary
 import qualified NumberSix.Handlers.Bomb
-import qualified NumberSix.Handlers.Cubits
 import qualified NumberSix.Handlers.Down
 import qualified NumberSix.Handlers.EightBall
 import qualified NumberSix.Handlers.GitHub
@@ -43,43 +42,42 @@ import qualified NumberSix.Handlers.Voice
 import qualified NumberSix.Handlers.Wikipedia
 import qualified NumberSix.Handlers.YouTube
 
-handlers :: [SomeHandler]
+handlers :: [Handler]
 handlers =
-    [ SomeHandler NumberSix.Handlers.Binary.handler
-    , SomeHandler NumberSix.Handlers.Bomb.handler
-    , SomeHandler NumberSix.Handlers.Cubits.handler
-    , SomeHandler NumberSix.Handlers.Down.handler
-    , SomeHandler NumberSix.Handlers.EightBall.handler
-    , SomeHandler NumberSix.Handlers.GitHub.handler
-    , SomeHandler NumberSix.Handlers.Gods.handler
-    , SomeHandler NumberSix.Handlers.Google.handler
-    , SomeHandler NumberSix.Handlers.HackerNews.handler
-    , SomeHandler NumberSix.Handlers.Hello.handler
-    , SomeHandler NumberSix.Handlers.Help.handler
-    , SomeHandler NumberSix.Handlers.Identify.handler
-    , SomeHandler NumberSix.Handlers.Join.handler
-    , SomeHandler NumberSix.Handlers.LastFm.handler
-    , SomeHandler NumberSix.Handlers.Meme.handler
-    , SomeHandler NumberSix.Handlers.NickServ.handler
-    , SomeHandler NumberSix.Handlers.NowPlaying.handler
-    , SomeHandler NumberSix.Handlers.Op.handler
-    , SomeHandler NumberSix.Handlers.Pick.handler
-    , SomeHandler NumberSix.Handlers.Ping.handler
-    , SomeHandler NumberSix.Handlers.Quote.handler
-    , SomeHandler NumberSix.Handlers.Reddit.handler
-    , SomeHandler NumberSix.Handlers.Say.handler
-    , SomeHandler NumberSix.Handlers.Seen.handler
-    , SomeHandler NumberSix.Handlers.Shorten.handler
-    , SomeHandler NumberSix.Handlers.Slap.handler
-    , SomeHandler NumberSix.Handlers.Sup.handler
-    , SomeHandler NumberSix.Handlers.Tell.handler
-    , SomeHandler NumberSix.Handlers.Title.handler
-    , SomeHandler NumberSix.Handlers.Topic.handler
-    , SomeHandler NumberSix.Handlers.TryHaskell.handler
-    , SomeHandler NumberSix.Handlers.Tumblr.handler
-    , SomeHandler NumberSix.Handlers.Twitter.handler
-    , SomeHandler NumberSix.Handlers.UrbanDictionary.handler
-    , SomeHandler NumberSix.Handlers.Voice.handler
-    , SomeHandler NumberSix.Handlers.Wikipedia.handler
-    , SomeHandler NumberSix.Handlers.YouTube.handler
+    [ NumberSix.Handlers.Binary.handler
+    , NumberSix.Handlers.Bomb.handler
+    , NumberSix.Handlers.Down.handler
+    , NumberSix.Handlers.EightBall.handler
+    , NumberSix.Handlers.GitHub.handler
+    , NumberSix.Handlers.Gods.handler
+    , NumberSix.Handlers.Google.handler
+    , NumberSix.Handlers.HackerNews.handler
+    , NumberSix.Handlers.Hello.handler
+    , NumberSix.Handlers.Help.handler
+    , NumberSix.Handlers.Identify.handler
+    , NumberSix.Handlers.Join.handler
+    , NumberSix.Handlers.LastFm.handler
+    , NumberSix.Handlers.Meme.handler
+    , NumberSix.Handlers.NickServ.handler
+    , NumberSix.Handlers.NowPlaying.handler
+    , NumberSix.Handlers.Op.handler
+    , NumberSix.Handlers.Pick.handler
+    , NumberSix.Handlers.Ping.handler
+    , NumberSix.Handlers.Quote.handler
+    , NumberSix.Handlers.Reddit.handler
+    , NumberSix.Handlers.Say.handler
+    , NumberSix.Handlers.Seen.handler
+    , NumberSix.Handlers.Shorten.handler
+    , NumberSix.Handlers.Slap.handler
+    , NumberSix.Handlers.Sup.handler
+    , NumberSix.Handlers.Tell.handler
+    , NumberSix.Handlers.Title.handler
+    , NumberSix.Handlers.Topic.handler
+    , NumberSix.Handlers.TryHaskell.handler
+    , NumberSix.Handlers.Tumblr.handler
+    , NumberSix.Handlers.Twitter.handler
+    , NumberSix.Handlers.UrbanDictionary.handler
+    , NumberSix.Handlers.Voice.handler
+    , NumberSix.Handlers.Wikipedia.handler
+    , NumberSix.Handlers.YouTube.handler
     ]

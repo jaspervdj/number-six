@@ -5,15 +5,15 @@ module NumberSix.Util.Mode
     ( mode
     ) where
 
+import Data.ByteString (ByteString)
+
 import NumberSix.Irc
-import NumberSix.IrcString
 
 -- | Change the mode for a user
 --
-mode :: IrcString s
-     => s         -- ^ Mode change string (e.g. @+v@)
-     -> s         -- ^ Target user
-     -> Irc s ()  -- ^ No result
+mode :: ByteString  -- ^ Mode change string (e.g. @+v@)
+     -> ByteString  -- ^ Target user
+     -> Irc ()      -- ^ No result
 mode mode' nick = do
     channel <- getChannel
     writeMessage "MODE" [channel, mode', nick]

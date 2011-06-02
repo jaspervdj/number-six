@@ -8,27 +8,24 @@ module NumberSix.Handlers.Join
 import Control.Monad (forM_, when)
 import Control.Applicative ((<$>))
 
-import Data.ByteString (ByteString)
-
 import NumberSix.Irc
-import NumberSix.IrcString
 import NumberSix.Bang
 import NumberSix.Util
 
-handler :: Handler ByteString
+handler :: Handler
 handler = makeHandler "join" [autoJoinHook, joinHook, rejoinHook]
 
-autoJoinHook :: Irc ByteString ()
+autoJoinHook :: Irc ()
 autoJoinHook = onCommand "376" $ do
     channels <- getChannels
     forM_ channels $ writeMessage "JOIN" . return
 
-joinHook :: Irc ByteString ()
+joinHook :: Irc ()
 joinHook = onBangCommand "!join" $ onGod $ do
     (channel, _) <- breakWord <$> getBangCommandText
     writeMessage "JOIN" [channel]
 
-rejoinHook :: Irc ByteString ()
+rejoinHook :: Irc ()
 rejoinHook = onCommand "KICK" $ do
     (channel : nick' : _) <- getParameters
     myNick <- getNick

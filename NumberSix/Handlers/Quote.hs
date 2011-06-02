@@ -16,11 +16,11 @@ import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Sql
 
-handler :: Handler ByteString
+handler :: Handler
 handler =
     makeHandlerWith "quote" [addQuoteHook, quoteHook, lastQuoteHook] initialize
 
-initialize :: Irc ByteString ()
+initialize :: Irc ()
 initialize = withSqlRun
     -- A global ID and an ID per channel
     "CREATE TABLE quotes (                   \
@@ -29,7 +29,7 @@ initialize = withSqlRun
     \    host TEXT, channel TEXT, text TEXT  \
     \)"
 
-addQuoteHook :: Irc ByteString ()
+addQuoteHook :: Irc ()
 addQuoteHook = onBangCommand "!addquote" $ do
     text <- getBangCommandText
     host <- getHost
@@ -40,7 +40,7 @@ addQuoteHook = onBangCommand "!addquote" $ do
         [toSql localId, toSql host, toSql channel, toSql text]
     write $ "Quote " <> SBC.pack (show localId) <> " added"
 
-quoteHook :: Irc ByteString ()
+quoteHook :: Irc ()
 quoteHook = onBangCommand "!quote" $ do
     query <- getBangCommandText
     if SBC.null query
@@ -66,10 +66,10 @@ quoteHook = onBangCommand "!quote" $ do
             [toSql host, toSql channel, toSql ("%" <> query <> "%")]
         return $ map (\[i] -> fromSql i) ls
 
-lastQuoteHook :: Irc ByteString ()
+lastQuoteHook :: Irc ()
 lastQuoteHook = onBangCommand "!lastquote" $ getLastId >>= showQuote
 
-getLastId :: Irc ByteString Integer
+getLastId :: Irc Integer
 getLastId = do
     host <- getHost
     channel <- getChannel
@@ -82,7 +82,7 @@ getLastId = do
         SqlNull -> 0
         _       -> fromSql r
 
-showQuote :: Integer -> Irc ByteString ()
+showQuote :: Integer -> Irc ()
 showQuote n = do
     host <- getHost
     channel <- getChannel

@@ -4,6 +4,9 @@
 module NumberSix.Util
     ( sleep
     , forkIrc
+    , (<>)
+    , (==?)
+    , toLower
     , breakWord
     , prettyList
     , trim
@@ -13,44 +16,42 @@ module NumberSix.Util
     , randomElement
     ) where
 
-import Control.Arrow (first, second)
+import Control.Arrow (second)
 import Control.Concurrent (threadDelay, forkIO)
-import Control.Monad (when)
 import Control.Monad.Reader (ask)
 import Control.Monad.Trans (liftIO)
+import Control.Monad (when)
 import Data.Char (isSpace)
 import System.Random (randomRIO)
 
-import qualified Data.ByteString.Char8 as SBC
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as B
 
 import NumberSix.Irc
-import NumberSix.IrcString
 import NumberSix.Message
 
 -- | Sleep a while.
 --
-sleep :: Int       -- ^ Number of seconds to sleep
-      -> Irc s ()  -- ^ Result
+sleep :: Int     -- ^ Number of seconds to sleep
+      -> Irc ()  -- ^ Result
 sleep = liftIO . threadDelay . (* 1000000)
 
 -- | 'forkIO' lifted to the Irc monad
 --
-forkIrc :: Irc s ()  -- ^ Action to execute in another thread
-        -> Irc s ()  -- ^ Returns immediately
+forkIrc :: Irc ()  -- ^ Action to execute in another thread
+        -> Irc ()  -- ^ Returns immediately
 forkIrc irc = do
     _<- liftIO . forkIO . runIrc irc =<< ask
     return ()
 
 -- | Take a word from a string, returing the word and the remainder.
 --
-breakWord :: IrcString s => s -> (s, s)
-breakWord = first fromByteString
-          . second (fromByteString . SBC.drop 1)
-          . SBC.break isSpace . toByteString
+breakWord :: ByteString -> (ByteString, ByteString)
+breakWord = second (B.drop 1) . B.break isSpace
 
 -- | Show a list of strings in a pretty format
 --
-prettyList :: IrcString s => [s] -> s
+prettyList :: [ByteString] -> ByteString
 prettyList [] = "none"
 prettyList (x : []) = x
 prettyList (x : y : []) = x <> " and " <> y
@@ -58,21 +59,19 @@ prettyList (x : y : z : r) = x <> ", " <> prettyList (y : z : r)
 
 -- | Drop spaces around a string
 --
-trim :: IrcString s => s -> s
-trim = withIrcByteString $
-    SBC.dropWhile isSpace . SBC.reverse . SBC.dropWhile isSpace . SBC.reverse
+trim :: ByteString -> ByteString
+trim = B.dropWhile isSpace . B.reverse . B.dropWhile isSpace . B.reverse
 
 -- | Make an action a /me command
 --
-meAction :: IrcString s => s -> s
+meAction :: ByteString -> ByteString
 meAction x = "\SOHACTION " <> x <> "\SOH"
 
 -- | Kick someone
 --
-kick :: IrcString s
-     => s         -- ^ Nick to kick
-     -> s         -- ^ Reason
-     -> Irc s ()
+kick :: ByteString  -- ^ Nick to kick
+     -> ByteString  -- ^ Reason
+     -> Irc ()
 kick nick reason = do
     channel <- getChannel
     myNick <- getNick
@@ -82,11 +81,10 @@ kick nick reason = do
 
 -- | Replace newlines by spaces
 --
-removeNewlines :: IrcString s => s -> s
-removeNewlines = withIrcByteString $
-    SBC.map (\x -> if x `elem` "\r\n" then ' ' else x)
+removeNewlines :: ByteString -> ByteString
+removeNewlines = B.map (\x -> if x `elem` "\r\n" then ' ' else x)
 
 -- | Random element from a list
 --
-randomElement :: [a] -> Irc s a
+randomElement :: [a] -> Irc a
 randomElement ls = fmap (ls !!) $ liftIO $ randomRIO (0, length ls - 1)

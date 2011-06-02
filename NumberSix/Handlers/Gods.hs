@@ -1,23 +1,26 @@
 -- | Ask our cylon for it's gods
 --
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Gods
     ( handler
     ) where
 
-import Data.List (nub, isInfixOf)
+import Data.List (nub)
+
+import qualified Data.ByteString.Char8 as B
 
 import NumberSix.Irc
 import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
 
-handler :: Handler String
+handler :: Handler
 handler = makeHandler "gods" [godsHook, addGodHook, removeGodHook]
 
-godsHook :: Irc String ()
+godsHook :: Irc ()
 godsHook = onBangCommand "!gods" printGods
 
-addGodHook :: Irc String ()
+addGodHook :: Irc ()
 addGodHook = onBangCommand "!addgod" $ do
     password <- getBangCommandText
     prefix <- getPrefix
@@ -26,18 +29,18 @@ addGodHook = onBangCommand "!addgod" $ do
   where
     add x = nub . (x :)
 
-removeGodHook :: Irc String ()
+removeGodHook :: Irc ()
 removeGodHook = onBangCommand "!removegod" $ onGod $ do
     password <- getGodPassword
     pattern <- getBangCommandText
     prefix <- getPrefix
-    let keep = if null pattern then (/= God prefix) else noMatch pattern
+    let keep = if B.null pattern then (/= God prefix) else noMatch pattern
     modifyGods (filter keep) password
     printGods
   where
-    noMatch pattern god = not $ pattern `isInfixOf` show god
+    noMatch pattern god = not $ pattern `B.isInfixOf` B.pack (show god)
 
-printGods :: Irc String ()
+printGods :: Irc ()
 printGods = do
     gods <- getGods
-    write $ "My gods are " <> prettyList (map show gods) <> "."
+    write $ "My gods are " <> prettyList (map (B.pack . show) gods) <> "."

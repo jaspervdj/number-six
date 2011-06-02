@@ -13,14 +13,14 @@ import Control.Applicative ((<$>))
 
 import Database.HDBC
 import Database.HDBC.PostgreSQL (connectPostgreSQL)
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as B
 
 import NumberSix.Irc
-import NumberSix.IrcString
 
 -- | Execute a statement
 --
-withSql :: (IrcString s)
-        => (forall c. IConnection c => c -> IO a) -> Irc s a
+withSql :: (forall c. IConnection c => c -> IO a) -> Irc a
 withSql f = do
     database <- ircDatabase . ircConfig . ircEnvironment <$> ask
     liftIO $ do
@@ -32,7 +32,7 @@ withSql f = do
 
 -- | Execute a run statement without arguments
 --
-withSqlRun :: IrcString s => String -> Irc s ()
+withSqlRun :: ByteString -> Irc ()
 withSqlRun statement = withSql $ \c -> do
-    _ <- run c statement []
+    _ <- run c (B.unpack statement) []
     return ()

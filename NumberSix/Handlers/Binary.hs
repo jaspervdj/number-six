@@ -1,5 +1,6 @@
 -- | Binary conversions
 --
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Binary
     ( handler
     ) where
@@ -9,29 +10,31 @@ import Data.Char (intToDigit, digitToInt)
 import Data.List (isPrefixOf)
 import Numeric (showIntAtBase, showHex)
 
+import qualified Data.ByteString.Char8 as B
+
 import NumberSix.Irc
 import NumberSix.Bang
 
-handler :: Handler String
+handler :: Handler
 handler = makeHandler "binary" [binHook, unBinHook, hexHook, unHexHook]
 
-binHook :: Irc String ()
+binHook :: Irc ()
 binHook = onBangCommand "!bin" $ do
-    n <- read <$> getBangCommandText 
-    writeReply $ showIntAtBase 2 intToDigit (n :: Integer) ""
+    n <- read . B.unpack <$> getBangCommandText 
+    writeReply $ B.pack $ showIntAtBase 2 intToDigit (n :: Integer) ""
 
-unBinHook :: Irc String ()
+unBinHook :: Irc ()
 unBinHook = onBangCommand "!unbin" $ do
     s <- getBangCommandText
-    writeReply $ show $ foldl (\x y -> x * 2 + digitToInt y) 0 s
+    writeReply $ B.pack $ show $ B.foldl (\x y -> x * 2 + digitToInt y) 0 s
 
-hexHook :: Irc String ()
+hexHook :: Irc ()
 hexHook = onBangCommand "!hex" $ do
-    n <- read <$> getBangCommandText
-    writeReply $ showHex (n :: Integer) ""
+    n <- read . B.unpack <$> getBangCommandText
+    writeReply $ B.pack $ showHex (n :: Integer) ""
 
-unHexHook :: Irc String ()
+unHexHook :: Irc ()
 unHexHook = onBangCommand "!unhex" $ do
-    s <- getBangCommandText
+    s <- B.unpack <$> getBangCommandText
     let h = if "0x" `isPrefixOf` s then s else "0x" ++ s
-    writeReply $ show (read h :: Integer)
+    writeReply $ B.pack $ show (read h :: Integer)

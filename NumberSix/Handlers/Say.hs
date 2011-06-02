@@ -5,12 +5,10 @@ module NumberSix.Handlers.Say
     ( handler
     ) where
 
-import Data.ByteString (ByteString)
-
 import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util
 
-handler :: Handler ByteString
+handler :: Handler
 handler = makeHandler "say" $ return $ onBangCommand "!say" $ onGod $
     uncurry writeChannel . breakWord =<< getBangCommandText

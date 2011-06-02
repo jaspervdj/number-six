@@ -5,19 +5,18 @@ module NumberSix.Handlers.Identify
 
 import Data.Char (toUpper)
 
-import Data.ByteString (ByteString)
-import qualified Data.ByteString.Char8 as SBC
+import qualified Data.ByteString.Char8 as B
 
 import NumberSix.Irc
 
-handler :: Handler ByteString
+handler :: Handler
 handler = makeHandlerWith "identify" [] initialize
 
-initialize :: Irc ByteString ()
+initialize :: Irc ()
 initialize = do
     nick' <- getNick
     realName' <- getRealName
     writeMessage "NICK" [nick']
-    writeMessage "USER" [ SBC.map toUpper nick'
+    writeMessage "USER" [ B.map toUpper nick'
                         , "*", "*", realName'
                         ]

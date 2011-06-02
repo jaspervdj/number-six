@@ -13,27 +13,27 @@ import Control.Applicative ((<$>))
 import Data.Time (diffUTCTime)
 import Data.Time.Clock (getCurrentTime)
 
-import qualified Data.ByteString.Char8 as SBC
 import Data.Binary (Binary)
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc
-import NumberSix.IrcString
 
 newtype IrcTime = IrcTime {unIrcTime :: String}
                 deriving (Show, Read, Binary)
 
 -- | Get the current time
 --
-getTime :: Irc s IrcTime
+getTime :: Irc IrcTime
 getTime = IrcTime . show <$> liftIO getCurrentTime
 
 -- | Get the time in a pretty format
 --
-prettyTime :: IrcString s => IrcTime -> Irc s s
+prettyTime :: IrcTime -> Irc ByteString
 prettyTime (IrcTime time) = do
     (IrcTime now) <- getTime
     let d = floor $ toRational $ diffUTCTime (read now) (read time)
-    return $ fromByteString $ SBC.pack $ format d
+    return $ SBC.pack $ format d
   where
     format :: Integer -> String
     format d

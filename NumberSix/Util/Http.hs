@@ -16,46 +16,42 @@ import Control.Applicative ((<$>))
 import Control.Monad.Trans (liftIO)
 
 import Data.ByteString (ByteString)
-import qualified Data.ByteString as SB
-import qualified Data.ByteString.Char8 as SBC
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as BC
 import qualified Codec.Binary.Url as Url
 import Text.HTML.TagSoup
-import Text.StringLike (StringLike)
 import Network.Curl (curlGetResponse_, respBody, CurlResponse_)
 import Network.Curl.Opts
 
 import NumberSix.Irc
-import NumberSix.IrcString
 import NumberSix.Message
 
 -- | Perform an HTTP get request and return the response body. The response body
 -- is limited in size, for security reasons.
 --
-httpGet :: (StringLike s, IrcString s)
-        => String   -- ^ URL
-        -> Irc s s  -- ^ Response body
+httpGet :: ByteString      -- ^ URL
+        -> Irc ByteString  -- ^ Response body
 httpGet url = do
-    response <- liftIO $ curlGetResponse_ (httpPrefix url) curlOptions
-    return $ getBody response
+    r <- liftIO $ curlGetResponse_ (BC.unpack $ httpPrefix url) curlOptions
+    return $ getBody r
   where
-    getBody :: IrcString s => CurlResponse_ [(String, String)] ByteString -> s
-    getBody = fromByteString . respBody
+    getBody :: CurlResponse_ [(String, String)] ByteString -> ByteString
+    getBody = respBody
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
 -- function.
 --
-httpScrape :: (StringLike s, IrcString s)
-           => String          -- ^ URL
-           -> ([Tag s] -> a)  -- ^ Scrape function
-           -> Irc s a         -- ^ Result
+httpScrape :: ByteString               -- ^ URL
+           -> ([Tag ByteString] -> a)  -- ^ Scrape function
+           -> Irc a                    -- ^ Result
 httpScrape url f = f . parseTags <$> httpGet url
 
 -- | Add @"http://"@ to the given URL, if needed
 --
-httpPrefix :: IrcString s => s -> s
-httpPrefix = withIrcByteString $ \url ->
-    if "http://" `SBC.isPrefixOf` url || "https://" `SBC.isPrefixOf` url
-        then url else "http://" <> url
+httpPrefix :: ByteString -> ByteString
+httpPrefix url
+    | "http://" `B.isPrefixOf` url || "https://" `B.isPrefixOf` url  = url
+    | otherwise = "http://" <> url
 
 -- | Some sensible default curl optionsfor an IRC bot
 --
@@ -71,12 +67,12 @@ curlOptions = [ CurlFollowLocation True
 
 -- | Get the tag list inside an open and closing tag. Supports nested elements.
 --
-insideTag :: String        -- ^ Tag name
-          -> [Tag String]  -- ^ Tag list
-          -> [Tag String]  -- ^ Resulting tag list
+insideTag :: ByteString        -- ^ Tag name
+          -> [Tag ByteString]  -- ^ Tag list
+          -> [Tag ByteString]  -- ^ Resulting tag list
 insideTag tag = inside' 1 . drop 1 . dropWhile (~/= TagOpen tag [])
   where
-    inside' :: Int -> [Tag String] -> [Tag String]
+    inside' :: Int -> [Tag ByteString] -> [Tag ByteString]
     inside' _     [] = []
     inside' stack (x : xs) = case x of
         TagOpen t _ -> 
@@ -92,14 +88,14 @@ insideTag tag = inside' 1 . drop 1 . dropWhile (~/= TagOpen tag [])
 
 -- | Get the tag following a certain tag
 --
-nextTag :: [Tag String] -> Tag String -> Maybe (Tag String)
+nextTag :: [Tag ByteString] -> Tag ByteString -> Maybe (Tag ByteString)
 nextTag tags tag = case dropWhile (~/= tag) tags of
     (_ : x : _) -> Just x
     _ -> Nothing
 
 -- | Get the text chunk following an opening tag with the given name
 --
-nextTagText :: [Tag String] -> String -> Maybe String
+nextTagText :: [Tag ByteString] -> ByteString -> Maybe ByteString
 nextTagText tags name = do
     tag <- nextTag tags (TagOpen name [])
     case tag of TagText t -> return t
@@ -107,5 +103,5 @@ nextTagText tags name = do
 
 -- | Encode a ByteString to an URL
 --
-urlEncode :: IrcString s => s -> s
-urlEncode = withIrcByteString $ SBC.pack . Url.encode . SB.unpack
+urlEncode :: ByteString -> ByteString
+urlEncode = BC.pack . Url.encode . B.unpack

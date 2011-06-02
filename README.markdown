@@ -39,16 +39,6 @@ A cool IRC game.
   only be issued by the current person owning them bomb.
 - `!pass nick`: Passes the bomb to the specified user
 
-Cubits
-------
-
-Give or take cubits from a user. God is required for giving or taking cubits.
-Commands:
-
-- `!cubits`: Print the number of cubits of the sender
-- `!cubits nick`: Print the number of cubits of the specified user
-- `!cubits nick n`: Give `n` (possibly negative) cubits to the specified user
-
 Down
 ----
 

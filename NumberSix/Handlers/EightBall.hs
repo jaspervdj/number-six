@@ -1,5 +1,6 @@
 -- | Simple 8ball handler
 --
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.EightBall
     ( handler
     ) where
@@ -8,7 +9,7 @@ import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util
 
-handler :: Handler String
+handler :: Handler
 handler = makeHandler "eightball" $ return $ onBangCommand "!8ball" $
     randomElement answers >>= writeReply
   where

@@ -6,20 +6,17 @@ module NumberSix.Handlers.Tell
 import Control.Applicative ((<$>))
 import Control.Monad (forM_)
 
-import Data.ByteString (ByteString)
-
 import NumberSix.Irc
-import NumberSix.IrcString
 import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Time
 import NumberSix.Util.Sql
 
-handler :: Handler ByteString
+handler :: Handler
 handler = makeHandlerWith "tell" [storeHook, loadHook] initialize
 
-initialize :: Irc ByteString ()
+initialize :: Irc ()
 initialize = withSqlRun
     "CREATE TABLE tells (                                   \
     \    id SERIAL,                                         \
@@ -27,7 +24,7 @@ initialize = withSqlRun
     \    sender TEXT, recipient TEXT, time TEXT, text TEXT  \
     \)"
 
-storeHook :: Irc ByteString ()
+storeHook :: Irc ()
 storeHook = onBangCommand "!tell" $ do
     host <- getHost
     channel <- getChannel
@@ -45,7 +42,7 @@ storeHook = onBangCommand "!tell" $ do
                 , toSql (toLower recipient), toSql time, toSql text ]
             writeReply $ "I'll pass that on when " <> recipient <> " is here."
 
-loadHook :: Irc ByteString ()
+loadHook :: Irc ()
 loadHook = onCommand "PRIVMSG" $ do
     host <- getHost
     channel <- getChannel

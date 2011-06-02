@@ -8,9 +8,7 @@ module NumberSix.Handlers.Topic
 import NumberSix.Irc
 import NumberSix.Bang
 
-import Data.ByteString (ByteString)
-
-handler :: Handler ByteString
+handler :: Handler
 handler = makeHandler "topic" $ return $
     onBangCommand "!topic" $ onGod $ do
         channel <- getChannel

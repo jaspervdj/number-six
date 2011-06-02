@@ -7,13 +7,15 @@ module NumberSix.Handlers.LastFm
 
 import Text.HTML.TagSoup
 
+import Data.ByteString (ByteString)
+
 import NumberSix.Irc
 import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util.Http
 import NumberSix.Util.BitLy
 
-lastFm :: String -> Irc String String
+lastFm :: ByteString -> Irc ByteString
 lastFm query = do
     (text, longUrl) <- httpScrape url $ \tags ->
         let artist = innerText $ insideTag "artist" tags
@@ -25,5 +27,5 @@ lastFm query = do
     url =  "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="
         <> urlEncode query <> "&api_key=87b8b81da496639cb5a295d78e5f8f4d"
 
-handler :: Handler String
+handler :: Handler
 handler = makeBangHandler "lastfm" ["!lastfm"] lastFm

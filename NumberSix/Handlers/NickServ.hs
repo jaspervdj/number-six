@@ -8,13 +8,12 @@ module NumberSix.Handlers.NickServ
 import Control.Applicative ((<$>))
 import Control.Monad.Reader (ask)
 
-import Data.ByteString (ByteString)
 import NumberSix.Irc
 
-handler :: Handler ByteString
+handler :: Handler
 handler = makeHandler "nickserv" [authHook]
 
-authHook :: Irc ByteString ()
+authHook :: Irc ()
 authHook = onCommand "376" $ do
     n <- ircNickServ . ircConfig . ircEnvironment <$> ask
     case n of

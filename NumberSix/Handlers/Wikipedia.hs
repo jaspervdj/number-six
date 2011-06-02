@@ -1,11 +1,14 @@
 -- | Wikipedia lookup handler
 --
+{-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Wikipedia
     ( handler
     ) where
 
 import Text.HTML.TagSoup
-import Text.Regex.PCRE
+
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as B
 
 import NumberSix.Irc
 import NumberSix.Message
@@ -13,19 +16,19 @@ import NumberSix.Bang
 import NumberSix.Util.Http
 import NumberSix.Util
 
-wiki :: String -> Irc String String
+wiki :: ByteString -> Irc ByteString
 wiki query = do
     bodyContent <- httpScrape url $
-        dropWhile (~/= TagOpen "div" [("id", "bodyContent")])
+        dropWhile (~/= TagOpen ("div" :: ByteString) [("id", "bodyContent")])
     let shortContent = innerText $ insideTag "p" bodyContent
-    return $ removeNewlines $ if shortContent =~ " may refer to:$"
+    return $ removeNewlines $ if " may refer to:" `B.isSuffixOf` shortContent
         then innerText $ insideTag "li" bodyContent
         else shortContent
   where
     url =  "http://en.wikipedia.org/w/index.php?title=Special%3ASearch&search="
         <> urlEncode query
 
-handler :: Handler String
+handler :: Handler
 handler = makeBangHandler "wikipedia" ["!w", "!wik", "!wiki"] $ \query -> do
     result <- wiki query
     return $ case result of

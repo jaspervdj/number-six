@@ -8,7 +8,6 @@ module NumberSix.Irc
     , IrcState (..)
     , Irc (..)
     , Handler (..)
-    , SomeHandler (..)
 
       -- * Running Irc actions
     , runIrc
@@ -44,8 +43,7 @@ module NumberSix.Irc
     , makeHandler
     , makeHandlerWith
     , runHandler
-    , runSomeHandler
-    , initializeSomeHandler
+    , initializeHandler
 
       -- * Conditional execution
     , onCommand
@@ -68,7 +66,6 @@ import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Message
 import NumberSix.Message.Encode (encodePrefix)
-import NumberSix.IrcString
 
 -- | User-specified IRC configuration
 --
@@ -106,77 +103,70 @@ data IrcEnvironment = IrcEnvironment
 data IrcState = IrcState
     { ircEnvironment :: IrcEnvironment
     , ircMessage     :: Message
-    , ircHandler     :: SomeHandler
+    , ircHandler     :: Handler
     }
 
 -- | Monad stack for the IRC bot
 --
-newtype Irc s a = Irc {unIrc :: ReaderT IrcState IO a}
-                deriving ( Monad, Functor, MonadIO
-                         , MonadReader IrcState
-                         )
+newtype Irc a = Irc {unIrc :: ReaderT IrcState IO a}
+              deriving ( Monad, Functor, MonadIO
+                       , MonadReader IrcState
+                       )
 
 -- | Handler for IRC messages
 --
-data Handler s = Handler
+data Handler = Handler
     { handlerName       :: ByteString
-    , handlerHooks      :: [Irc s ()]
-    , handlerInitialize :: Irc s ()
+    , handlerHooks      :: [Irc ()]
+    , handlerInitialize :: Irc ()
     }
-
--- | Wrapper type for handlers
---
-data SomeHandler = forall s. SomeHandler (Handler s)
 
 -- | Run an 'Irc' action
 --
-runIrc :: Irc s a -> IrcState -> IO a
+runIrc :: Irc a -> IrcState -> IO a
 runIrc irc state = runReaderT (unIrc irc) state
 
 -- | Get our own nick
 --
-getNick :: IrcString s => Irc s s
-getNick = fromByteString . ircNick . ircConfig . ircEnvironment <$> ask
+getNick :: Irc ByteString
+getNick = ircNick . ircConfig . ircEnvironment <$> ask
 
 -- | Get our real name
 --
-getRealName :: IrcString s => Irc s s
-getRealName = fromByteString . ircRealName . ircConfig . ircEnvironment <$> ask
+getRealName :: Irc ByteString
+getRealName = ircRealName . ircConfig . ircEnvironment <$> ask
 
 -- | Get the host we are connected to
 --
-getHost :: IrcString s => Irc s s
-getHost = fromByteString . ircHost . ircConfig . ircEnvironment <$> ask
+getHost :: Irc ByteString
+getHost = ircHost . ircConfig . ircEnvironment <$> ask
 
 -- | Get the channels we are supposed to join
 --
-getChannels :: IrcString s => Irc s [s]
-getChannels =
-    map fromByteString . ircChannels . ircConfig . ircEnvironment <$> ask
+getChannels :: Irc [ByteString]
+getChannels = ircChannels . ircConfig . ircEnvironment <$> ask
 
 -- | Get the god password
 --
-getGodPassword :: IrcString s => Irc s s
+getGodPassword :: Irc ByteString
 getGodPassword =
-    fromByteString . ircGodPassword . ircConfig . ircEnvironment <$> ask
+    ircGodPassword . ircConfig . ircEnvironment <$> ask
 
 -- | Get the gods of the server
 --
-getGods :: IrcString s => Irc s [God]
+getGods :: Irc [God]
 getGods = do
     mvar <- ircGods . ircEnvironment <$> ask
     liftIO $ readMVar mvar
 
 -- | Get the name of the current handler
 --
-getHandlerName :: IrcString s => Irc s s
-getHandlerName = do
-    (SomeHandler handler) <- ircHandler <$> ask
-    return $ fromByteString $ handlerName handler
+getHandlerName :: Irc ByteString
+getHandlerName = handlerName . ircHandler <$> ask
 
 -- | Get the IRC prefix
 --
-getPrefix :: Irc s Prefix
+getPrefix :: Irc Prefix
 getPrefix = do
     Just prefix <- messagePrefix . ircMessage <$> ask
     return prefix
@@ -184,35 +174,34 @@ getPrefix = do
 -- | Obtain the actual IRC command: the result from this function will always be
 -- in lowercase.
 --
-getCommand :: IrcString s => Irc s s
-getCommand =
-    fromByteString . SBC.map toUpper . messageCommand . ircMessage <$> ask
+getCommand :: Irc ByteString
+getCommand = SBC.map toUpper . messageCommand . ircMessage <$> ask
 
 -- | Obtain the IRC parameters given
 --
-getParameters :: IrcString s => Irc s [s]
-getParameters = map fromByteString . messageParameters . ircMessage <$> ask
+getParameters :: Irc [ByteString]
+getParameters = messageParameters . ircMessage <$> ask
 
 -- | Obtain the sender of the command to which this handler is reacting
 --
-getSender :: IrcString s => Irc s s
+getSender :: Irc ByteString
 getSender = do
     prefix <- messagePrefix . ircMessage <$> ask
-    return $ fromByteString $ case prefix of
+    return $ case prefix of
         Nothing -> error "No sender"
         Just (ServerPrefix n) -> n
         Just (NickPrefix n _ _) -> n
 
 -- | Get the active channel
 --
-getChannel :: IrcString s => Irc s s
+getChannel :: Irc ByteString
 getChannel = do
     (channel : _) <- getParameters
     return channel
 
 -- | Obtain the message text of the command to which this handler is reacting
 --
-getMessageText :: IrcString s => Irc s s
+getMessageText :: Irc ByteString
 getMessageText = do
     params <- getParameters
     return $ case params of
@@ -221,42 +210,36 @@ getMessageText = do
 
 -- | Report some message -- it will be logged
 --
-report :: IrcString s
-       => s            -- ^ Message to log
-       -> Irc s ()     -- ^ Result
+report :: ByteString  -- ^ Message to log
+       -> Irc ()      -- ^ Result
 report message = do
     logger <- ircLogger . ircEnvironment <$> ask
-    liftIO $ logger $ toByteString $ "REPORTED: " <> message
+    liftIO $ logger $ "REPORTED: " <> message
 
 -- | Write a raw message to the IRC socket
 --
-writeMessage :: IrcString s
-             => s            -- ^ IRC command
-             -> [s]          -- ^ Parameters
-             -> Irc s ()     -- ^ Result
+writeMessage :: ByteString    -- ^ IRC command
+             -> [ByteString]  -- ^ Parameters
+             -> Irc ()        -- ^ Result
 writeMessage command parameters = do
     writer <- ircWriter . ircEnvironment <$> ask
-    let m = makeMessage (toByteString command) $ map toByteString parameters
-    liftIO $ writer m
+    liftIO $ writer $ makeMessage command parameters
 
 -- | Write a message in a specific channel
 --
-writeChannel :: IrcString s
-             => s            -- ^ Channel to write in
-             -> s            -- ^ Message text
-             -> Irc s ()     -- ^ Result
+writeChannel :: ByteString  -- ^ Channel to write in
+             -> ByteString  -- ^ Message text
+             -> Irc ()      -- ^ Result
 writeChannel destination string =
     writeMessage "PRIVMSG" [destination, string']
   where
-    bs = toByteString string
-    string' | SB.length bs <= 400 = string
-            | otherwise = fromByteString (SB.take 400 bs) <> "..."
+    string' | SB.length string <= 400 = string
+            | otherwise = SB.take 400 string <> "..."
 
 -- | Write a message to the active channel
 --
-write :: IrcString s
-      => s            -- ^ Message text
-      -> Irc s ()     -- ^ Result
+write :: ByteString  -- ^ Message text
+      -> Irc ()      -- ^ Result
 write string = do
     channel <- getChannel
     nick <- getNick
@@ -275,78 +258,62 @@ write string = do
 --
 -- > jaspervdj: Hello there
 --
-writeTo :: IrcString s
-        => s            -- ^ Username to address
-        -> s            -- ^ Message text
-        -> Irc s ()     -- ^ Result
+writeTo :: ByteString  -- ^ Username to address
+        -> ByteString  -- ^ Message text
+        -> Irc ()      -- ^ Result
 writeTo userName message = write $ userName <> ": " <> message
 
 -- | Write a message to the active channel, addressed to the user who fired
 -- the current handler. See 'writeChannelTo' as well.
 --
-writeReply :: IrcString s
-           => s            -- ^ Message text
-           -> Irc s ()     -- ^ Result
+writeReply :: ByteString  -- ^ Message text
+           -> Irc ()      -- ^ Result
 writeReply message = do
     sender <- getSender
     writeTo sender message
 
 -- | Create a handler
 --
-makeHandler :: IrcString s
-            => s            -- ^ Handler name
-            -> [Irc s ()]   -- ^ Hooks
-            -> Handler s    -- ^ Resulting handler
+makeHandler :: ByteString  -- ^ Handler name
+            -> [Irc ()]    -- ^ Hooks
+            -> Handler     -- ^ Resulting handler
 makeHandler name hooks = makeHandlerWith name hooks (return ())
 
 -- | Create a handler with an initialization procedure
 --
-makeHandlerWith :: IrcString s
-                => s            -- ^ Handler name
-                -> [Irc s ()]   -- ^ Hooks
-                -> Irc s ()     -- ^ Initialization
-                -> Handler s    -- ^ Resulting handler
-makeHandlerWith name = Handler (toByteString name)
+makeHandlerWith :: ByteString  -- ^ Handler name
+                -> [Irc ()]    -- ^ Hooks
+                -> Irc ()      -- ^ Initialization
+                -> Handler     -- ^ Resulting handler
+makeHandlerWith = Handler
 
 -- | Run a handler
 --
-runHandler :: Handler s  -- ^ Handler to run
-           -> Irc s ()   -- ^ Result
-runHandler = sequence_ . handlerHooks
+runHandler :: Handler   -- ^ Handler to run
+           -> IrcState  -- Irc state
+           -> IO ()     -- ^ Result
+runHandler handler state = runIrc (sequence_ $ handlerHooks handler) state
 
--- | Run some handler
+-- | Initialize a handler
 --
-runSomeHandler :: SomeHandler  -- ^ Handler to run
-               -> IrcState     -- ^ Irc state
-               -> IO ()        -- ^ Result
-runSomeHandler someHandler state = do
-    (SomeHandler handler) <- return someHandler
-    runIrc (runHandler handler) state
-
--- | Initialize some handler
---
-initializeSomeHandler :: SomeHandler  -- ^ Handler to initialize
-                      -> IrcState     -- ^ Irc state
-                      -> IO ()        -- ^ Result
-initializeSomeHandler someHandler state = do
-    (SomeHandler handler) <- return someHandler
-    runIrc (handlerInitialize handler) state
+initializeHandler :: Handler   -- ^ Handler to initialize
+                  -> IrcState  -- ^ Irc state
+                  -> IO ()     -- ^ Result
+initializeHandler handler state = runIrc (handlerInitialize handler) state
 
 -- | Execute an 'Irc' action only if the command given is the command received.
 --
-onCommand :: IrcString s
-          => s            -- ^ Command to check for
-          -> Irc s ()     -- ^ Irc action to execute if match
-          -> Irc s ()     -- ^ Result
+onCommand :: ByteString  -- ^ Command to check for
+          -> Irc ()      -- ^ Irc action to execute if match
+          -> Irc ()      -- ^ Result
 onCommand command irc = do
     actualCommand <- getCommand
     when (actualCommand ==? command) irc
 
 -- | Execute an 'Irc' action only if the sender is a god
 --
-onGod :: IrcString s
-      => Irc s ()     -- ^ Irc action to execute if the sender is a god
-      -> Irc s ()     -- ^ Result
+onGod :: Irc ()  -- ^ Irc action to execute if the sender is a god
+      -> Irc ()  -- ^ Result
 onGod irc = do
     gods <- getGods
     prefix <- getPrefix
@@ -356,10 +323,9 @@ onGod irc = do
 
 -- | Change the list of gods
 --
-modifyGods :: IrcString s
-           => ([God] -> [God])  -- ^ Modification
-           -> s             -- ^ Password
-           -> Irc s ()
+modifyGods :: ([God] -> [God])  -- ^ Modification
+           -> ByteString        -- ^ Password
+           -> Irc ()
 modifyGods f password = do
     password' <- getGodPassword
     mvar <- ircGods . ircEnvironment <$> ask
