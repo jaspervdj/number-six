@@ -5,7 +5,6 @@ module NumberSix.Handlers.Tell
 
 import Control.Applicative ((<$>))
 import Control.Monad (forM_)
-import Control.Arrow (first)
 
 import Data.ByteString (ByteString)
 
@@ -35,7 +34,7 @@ storeHook = onBangCommand "!tell" $ do
     sender <- getSender
     IrcTime time <- getTime
     text' <- getBangCommandText
-    let (recipient, text) = first toLower $ breakWord text'
+    let (recipient, text) = breakWord text'
     if recipient ==? sender
         then write "Sigh. The Universe is winning..."
         else do
@@ -43,7 +42,7 @@ storeHook = onBangCommand "!tell" $ do
                 "INSERT INTO tells (host, channel, sender, recipient, \
                 \time, text) VALUES (?, ?, ?, ?, ?, ?)"
                 [ toSql host, toSql channel, toSql sender
-                , toSql recipient, toSql time, toSql text ]
+                , toSql (toLower recipient), toSql time, toSql text ]
             writeReply $ "I'll pass that on when " <> recipient <> " is here."
 
 loadHook :: Irc ByteString ()
