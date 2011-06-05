@@ -5,13 +5,21 @@ module NumberSix.Handlers.EightBall
     ( handler
     ) where
 
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as B
+
 import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util
 
-handler :: Handler
-handler = makeHandler "eightball" $ return $ onBangCommand "!8ball" $
-    randomElement answers >>= writeReply
+hashMod :: Int -> ByteString -> Int
+hashMod max' bs = if hash < 0 then hash + max' else hash
+  where
+    hash = B.foldl' step 5381 bs `mod` max'
+    step x c = x * 33 + fromIntegral c
+
+eightball :: ByteString -> ByteString
+eightball = (answers !!) . hashMod (length answers)
   where
     answers = [ "As I see it, yes"
               , "It is certain"
@@ -34,3 +42,6 @@ handler = makeHandler "eightball" $ return $ onBangCommand "!8ball" $
               , "Outlook not so good"
               , "Very doubtful"
               ]
+
+handler :: Handler
+handler = makeBangHandler "eightball" ["!8ball"] $ return . eightball
