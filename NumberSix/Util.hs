@@ -14,6 +14,7 @@ module NumberSix.Util
     , kick
     , removeNewlines
     , randomElement
+    , parseJsonEither
     ) where
 
 import Control.Arrow (second)
@@ -24,6 +25,9 @@ import Control.Monad (when)
 import Data.Char (isSpace)
 import System.Random (randomRIO)
 
+import Data.Aeson (FromJSON, json, parseJSON)
+import Data.Aeson.Types (parseEither)
+import Data.Attoparsec (parseOnly)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as B
 
@@ -88,3 +92,8 @@ removeNewlines = B.map (\x -> if x `elem` "\r\n" then ' ' else x)
 --
 randomElement :: [a] -> Irc a
 randomElement ls = fmap (ls !!) $ liftIO $ randomRIO (0, length ls - 1)
+
+-- | Parse JSON from a bytestring
+--
+parseJsonEither :: FromJSON a => ByteString -> Either String a
+parseJsonEither bs = parseOnly json bs >>= parseEither parseJSON
