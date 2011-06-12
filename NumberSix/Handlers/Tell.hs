@@ -61,7 +61,6 @@ loadHook = onCommand "PRIVMSG" $ do
             -- Print the messages
             forM_ ls $ \[sender, time, text] -> do
                 pretty <- prettyTime $ IrcTime $ fromSql time
-                -- Use writeChannel to reply in a PM
-                writeChannel recipient $
-                    fromSql sender <> " (" <> pretty <> "): " <> fromSql text
+                writeReply $ fromSql sender <> " (" <> pretty <> "): "
+                                            <> fromSql text
                 sleep 1
