@@ -18,14 +18,16 @@ handler = makeHandlerWith "tell" [storeHook, loadHook] initialize
 
 initialize :: Irc ()
 initialize = withSqlRun
-    "CREATE TABLE tells (                                              \
-    \    id SERIAL,                                                    \
-    \    host TEXT, sender TEXT, recipient TEXT, time TEXT, text TEXT  \
+    "CREATE TABLE tells (                                   \
+    \    id SERIAL,                                         \
+    \    host TEXT, channel TEXT,                           \
+    \    sender TEXT, recipient TEXT, time TEXT, text TEXT  \
     \)"
 
 storeHook :: Irc ()
 storeHook = onBangCommand "!tell" $ do
     host <- getHost
+    channel <- getChannel
     sender <- getSender
     IrcTime time <- getTime
     text' <- getBangCommandText
@@ -34,29 +36,33 @@ storeHook = onBangCommand "!tell" $ do
         then write "Sigh. The Universe is winning..."
         else do
             _ <- withSql $ \c -> run c
-                "INSERT INTO tells (host, sender, recipient, time, text) \
-                \VALUES (?, ?, ?, ?, ?)"
-                [ toSql host, toSql sender
+                "INSERT INTO tells (host, channel, sender, recipient, \
+                \time, text) VALUES (?, ?, ?, ?, ?, ?)"
+                [ toSql host, toSql channel, toSql sender
                 , toSql (toLower recipient), toSql time, toSql text ]
-            writeReply $ "I'll pass that on when I see " <> recipient <> "."
+            writeReply $
+                "I'll pass that on when I see " <> recipient <> " here."
 
 loadHook :: Irc ()
 loadHook = onCommand "PRIVMSG" $ do
     host <- getHost
+    channel <- getChannel
     recipient <- toLower <$> getSender
 
     -- Find all messages for the recipient
     messages <- withSql $ \c -> quickQuery' c
-        "SELECT sender, time, text FROM tells WHERE host = ? AND recipient = ?"
-        [toSql host, toSql recipient]
+        "SELECT sender, time, text FROM tells \
+        \WHERE host = ? AND channel = ? AND recipient = ?"
+        [toSql host, toSql channel, toSql recipient]
 
     case messages of
         [] -> return ()
         ls -> do
             -- Delete the messages
             _ <- withSql $ \c -> run c
-                "DELETE FROM tells WHERE host = ? AND recipient = ?"
-                [toSql host, toSql recipient]
+                "DELETE FROM tells \
+                \WHERE host = ? AND channel = ? AND recipient = ?"
+                [toSql host, toSql channel, toSql recipient]
 
             -- Print the messages
             forM_ ls $ \[sender, time, text] -> do
