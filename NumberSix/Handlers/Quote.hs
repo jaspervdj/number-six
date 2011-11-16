@@ -62,7 +62,7 @@ quoteHook = onBangCommand "!quote" $ do
         channel <- getChannel
         ls <- withSql $ \c -> quickQuery' c
             "SELECT local_id FROM quotes  \
-            \WHERE host = ? AND channel = ? AND text LIKE ?"
+            \WHERE host = ? AND channel = ? AND text ILIKE ?"
             [toSql host, toSql channel, toSql ("%" <> query <> "%")]
         return $ map (\[i] -> fromSql i) ls
 
