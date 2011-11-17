@@ -186,6 +186,14 @@ Print a random item from a subreddit. Commands:
 
 - `!reddit name`: Prints a random item from the given subreddit
 
+Resto
+-----
+
+Print the menu of today in the Ghent University resto's, see also
+<https://github.com/blackskad/Resto-menu>
+
+- `!resto`: Print today's menu
+
 Quote
 -----
 

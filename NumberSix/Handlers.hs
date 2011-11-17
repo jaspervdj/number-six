@@ -26,6 +26,7 @@ import qualified NumberSix.Handlers.Pick
 import qualified NumberSix.Handlers.Ping
 import qualified NumberSix.Handlers.Quote
 import qualified NumberSix.Handlers.Reddit
+import qualified NumberSix.Handlers.Resto
 import qualified NumberSix.Handlers.Say
 import qualified NumberSix.Handlers.Seen
 import qualified NumberSix.Handlers.Shorten
@@ -65,6 +66,7 @@ handlers =
     , NumberSix.Handlers.Ping.handler
     , NumberSix.Handlers.Quote.handler
     , NumberSix.Handlers.Reddit.handler
+    , NumberSix.Handlers.Resto.handler
     , NumberSix.Handlers.Say.handler
     , NumberSix.Handlers.Seen.handler
     , NumberSix.Handlers.Shorten.handler
