@@ -23,9 +23,9 @@ hackerNews query = do
                 = dropWhile (~/= TagOpen (B.pack "td") [("class", "title")])
                 $ dropWhile (~/= TagText (query <> ".")) tags
             Just href = lookup "href" attrs
-            link = if "http://" `B.isPrefixOf` href
-                        then href else
-                        "http://news.ycombinator.com/" <> href
+            link = if "item" `B.isPrefixOf` href
+                        then "http://news.ycombinator.com/" <> href
+                        else href
         in (text, link)
     textAndUrl title url
 

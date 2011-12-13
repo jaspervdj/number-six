@@ -10,10 +10,9 @@ import Control.Applicative ((<$>), (<|>))
 
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as SBC
-import Data.Attoparsec ( Parser, Result (..), parse, option, manyTill
-                       , endOfInput
-                       )
+import Data.Attoparsec (Parser, parse, option, manyTill , endOfInput)
 import Data.Attoparsec.Char8 (char8, takeTill, skipWhile)
+import qualified Data.Attoparsec as A
 
 import NumberSix.Message
 
@@ -64,8 +63,8 @@ messageParser = do
 decode :: ByteString -> Maybe Message
 decode = resultToMaybe . parse messageParser
   where
-    resultToMaybe (Done _ x) = Just x
-    resultToMaybe (Fail _ _ _) = Nothing
-    resultToMaybe (Partial f) = case f mempty of
-        Done _ x -> Just x
-        _ -> Nothing
+    resultToMaybe (A.Done _ x)   = Just x
+    resultToMaybe (A.Fail _ _ _) = Nothing
+    resultToMaybe (A.Partial f)  = case f mempty of
+        A.Done _ x -> Just x
+        _          -> Nothing
