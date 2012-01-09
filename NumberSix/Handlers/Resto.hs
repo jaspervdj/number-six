@@ -17,6 +17,7 @@ import qualified Data.ByteString.Char8 as BC
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Vector as V
+import qualified Data.HashMap.Lazy as HM
 
 import NumberSix.Irc
 import NumberSix.Bang
@@ -28,10 +29,10 @@ data WeekMenu = WeekMenu (M.Map String [String]) deriving (Show)
 instance FromJSON WeekMenu where
     parseJSON (Object o) = return $ WeekMenu $ M.fromListWith (++)
         [ (T.unpack day, [T.unpack name])
-        | (day, Object menu) <- M.toList o
-        , Array meats        <- maybeToList $ M.lookup "meat" menu
+        | (day, Object menu) <- HM.toList o
+        , Array meats        <- maybeToList $ HM.lookup "meat" menu
         , Object meat        <- V.toList meats
-        , String name        <- maybeToList $ M.lookup "name" meat
+        , String name        <- maybeToList $ HM.lookup "name" meat
         ]
     parseJSON _          = mzero
 

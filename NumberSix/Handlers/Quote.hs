@@ -7,7 +7,6 @@ import Control.Monad.Trans (liftIO)
 import Data.Char (isDigit)
 import System.Random (randomRIO)
 
-import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as SBC
 
 import NumberSix.Irc

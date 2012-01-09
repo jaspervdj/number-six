@@ -5,8 +5,8 @@ module NumberSix.Handlers.Reddit
 
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad (mzero)
-import qualified Data.Map as M
 import Data.Aeson (FromJSON (..), Object, Value (..), (.:))
+import qualified Data.HashMap.Lazy as HM
 
 import Data.ByteString (ByteString)
 
@@ -31,7 +31,7 @@ instance FromJSON Link where
 
 -- | Fetch the data attribute from an object. Reddit's ugly json...
 unData :: Object -> Object
-unData o = case M.lookup "data" o of Just (Object o') -> o'; _ -> M.empty
+unData o = case HM.lookup "data" o of Just (Object o') -> o'; _ -> HM.empty
 
 reddit :: ByteString -> Irc ByteString
 reddit query = httpGet url >>= \bs -> case parseJsonEither bs of
