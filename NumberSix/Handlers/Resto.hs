@@ -42,7 +42,7 @@ resto _ = do
     let week = formatTime defaultTimeLocale "%U"       currentTime
         day  = formatTime defaultTimeLocale "%Y-%m-%d" currentTime
         url  = "http://kelder.zeus.ugent.be/~blackskad/resto/api/0.1/week/" ++
-            week ++ ".json"
+            dropWhile (== '0') week ++ ".json"
    
     httpGet (BC.pack url) >>= \bs -> return $ case parseJsonEither bs of
         Left _             -> "Please throw some rotten tomatoes at blackskad."
