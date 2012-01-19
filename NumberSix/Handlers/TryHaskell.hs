@@ -5,7 +5,7 @@ module NumberSix.Handlers.TryHaskell
     ( handler
     ) where
 
-import Control.Applicative ((<$>), (<*>))
+import Control.Applicative ((<$>), (<*>), (<|>))
 import Control.Monad (mzero)
 
 import Data.ByteString (ByteString)
@@ -19,18 +19,21 @@ import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Http
 
--- | Result: type, value
---
-data Result = Result ByteString ByteString
+data Result
+    = Result ByteString ByteString  -- Type, value
+    | Error ByteString              -- Error message
 
 instance FromJSON Result where
-    parseJSON (Object o) = Result <$> o .: "type" <*> o .: "result"
+    parseJSON (Object o) =
+        (Result <$> o .: "type" <*> o .: "result") <|>
+        (Error . removeNewlines <$> o .: "error")
     parseJSON _          = mzero
 
 eval :: ByteString -> Irc ByteString
 eval query = httpGet url >>= \bs -> return $ case parseJsonEither bs of
-    Left _ -> "I'm a cybernetic lifeform node. Spare me your rubbish."
+    Left _             -> "Request failed!"
     Right (Result t r) -> if ":t" `B.isPrefixOf` query then t else r
+    Right (Error e)    -> "Error: " <> e
   where
     url = "http://tryhaskell.org/haskell.json?method=eval&expr=" <>
         urlEncode query
