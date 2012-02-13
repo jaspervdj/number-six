@@ -1,16 +1,17 @@
-Name:                number-six
-Version:             0.1
-Synopsis:            A sexy IRC bot library
-License-file:        LICENSE
-Author:              Jasper Van der Jeugt
-Maintainer:          jaspervdj@gmail.com
-Stability:           Experimental
-Category:            Network
-Build-type:          Simple
-Cabal-version:       >= 1.2
+Name:          number-six
+Version:       0.1
+Synopsis:      A sexy IRC bot library
+License-file:  LICENSE
+Author:        Jasper Van der Jeugt <m@jaspervdj.be>
+Maintainer:    Jasper Van der Jeugt <m@jaspervdj.be>
+Stability:     Experimental
+Category:      Network
+Build-type:    Simple
+Cabal-version: >= 1.2
 
 Library
   Ghc-Options:       -Wall
+  Hs-source-dirs:    src
 
   Exposed-Modules:
     NumberSix,

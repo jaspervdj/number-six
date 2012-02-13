@@ -6,7 +6,13 @@ Number six is a custom IRC bot, developped for the `#ghentfpg` IRC channels.
 Compiling & Running
 ===================
 
-The best way to get started is to copy `Sample.hs` and start from there.
+Begin by installing the library:
+
+    cabal configure
+    cabal build
+    cabal install
+
+Them, you can get started by copying `Sample.hs` and starting from there.
 Configure it, then compile & run using:
 
     `ghc --make Sample.hs`
