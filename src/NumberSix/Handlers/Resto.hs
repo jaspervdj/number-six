@@ -7,7 +7,7 @@ import Control.Monad (mzero)
 import Control.Monad.Trans (liftIO)
 import Data.List (intercalate)
 import Data.Maybe (maybeToList)
-import Data.Time (formatTime, getCurrentTime)
+import Data.Time (UTCTime (..), addDays, formatTime, getCurrentTime)
 import System.Locale (defaultTimeLocale)
 import qualified Data.Map as M
 
@@ -37,10 +37,11 @@ instance FromJSON WeekMenu where
     parseJSON _          = mzero
 
 resto :: ByteString -> Irc ByteString
-resto _ = do
+resto arg = do
     currentTime <- liftIO $ getCurrentTime
-    let week = formatTime defaultTimeLocale "%U"       currentTime
-        day  = formatTime defaultTimeLocale "%Y-%m-%d" currentTime
+    let time = currentTime {utctDay = days arg `addDays` utctDay currentTime}
+        week = formatTime defaultTimeLocale "%U"       time
+        day  = formatTime defaultTimeLocale "%Y-%m-%d" time
         url  = "http://kelder.zeus.ugent.be/~blackskad/resto/api/0.1/week/" ++
             dropWhile (== '0') week ++ ".json"
    
@@ -49,6 +50,12 @@ resto _ = do
         Right (WeekMenu m) -> case M.lookup day m of
             Nothing -> "Resto's not open today..."
             Just ms -> T.encodeUtf8 $ T.pack $ intercalate ", " ms
+  where
+    days "tomorrow"           = 1
+    days "morgen"             = 1
+    days "day after tomorrow" = 2
+    days "overmorgen"         = 2
+    days _                    = 0
 
 handler :: Handler
 handler = makeBangHandler "resto" ["!resto"] resto
