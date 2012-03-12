@@ -199,6 +199,8 @@ Print the menu of today in the Ghent University resto's, see also
 <https://github.com/blackskad/Resto-menu>
 
 - `!resto`: Print today's menu
+- `!resto day`: `day` can be: `morgen`, `tomorrow`, `overmorgen`,
+  `day after tomorrow`
 
 Quote
 -----
