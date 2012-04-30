@@ -7,5 +7,5 @@ import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util.BitLy
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "shorten" ["!shorten"] shorten

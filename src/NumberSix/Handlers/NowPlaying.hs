@@ -43,7 +43,7 @@ rgrfm = do
     options = [Curl.CurlPost True, Curl.CurlPostFields ["ajax=jajax"]] ++
         curlOptions
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "nowplaying" ["!nowplaying"] $ \str ->
     case str of
         "stubru" -> stubru

@@ -11,5 +11,5 @@ import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "pick" ["!pick", "!who"] $ randomElement . B.words

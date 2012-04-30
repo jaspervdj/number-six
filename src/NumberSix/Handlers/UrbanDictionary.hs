@@ -20,7 +20,7 @@ urban query = httpScrape url $ innerText . insideTag "div" .
   where
     url = "http://www.urbandictionary.com/define.php?term=" <> urlEncode query
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "urbandictionary" ["!urban"] $ \query -> do
     result <- urban query
     return $ case result of

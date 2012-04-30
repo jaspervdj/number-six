@@ -42,7 +42,7 @@ getBangCommandText = flip fmap getMessageText $
 makeBangHandler :: ByteString                      -- ^ Handler name
                 -> [ByteString]                    -- ^ Bang commands
                 -> (ByteString -> Irc ByteString)  -- ^ Function
-                -> Handler                         -- ^ Resulting handler
+                -> UninitiazedHandler              -- ^ Resulting handler
 makeBangHandler name commands f = makeHandler name $ return $
     onBangCommands commands $ getBangCommandText >>= f >>= write
 

@@ -13,8 +13,8 @@ import NumberSix.Util
 import NumberSix.Util.Time
 import NumberSix.Util.Sql
 
-handler :: Handler
-handler = makeHandlerWith "tell" [storeHook, loadHook] initialize
+handler :: UninitiazedHandler
+handler = makeHandlerWith "tell" (map const [storeHook, loadHook]) initialize
 
 initialize :: Irc ()
 initialize = withSqlRun

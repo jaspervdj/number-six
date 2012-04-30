@@ -28,7 +28,7 @@ wiki query = do
     url =  "http://en.wikipedia.org/w/index.php?title=Special%3ASearch&search="
         <> urlEncode query
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "wikipedia" ["!w", "!wik", "!wiki"] $ \query -> do
     result <- wiki query
     return $ case result of

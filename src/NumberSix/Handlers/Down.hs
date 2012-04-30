@@ -35,5 +35,5 @@ down query = do
                 CurlResponse_ [(String, String)] ByteString
     fixType' = id
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "down" ["!down"] down

@@ -58,5 +58,5 @@ resto arg = do
     days "overmorgen"         = (2, "the day after tomorrow")
     days _                    = (0, "today")
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "resto" ["!resto"] resto

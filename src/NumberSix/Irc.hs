@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings, GeneralizedNewtypeDeriving,
-    ExistentialQuantification #-}
+        ExistentialQuantification #-}
 module NumberSix.Irc
     ( -- * Core types
       IrcConfig (..)
@@ -7,6 +7,7 @@ module NumberSix.Irc
     , IrcEnvironment (..)
     , IrcState (..)
     , Irc (..)
+    , UninitiazedHandler (..)
     , Handler (..)
 
       -- * Running Irc actions
@@ -113,12 +114,14 @@ newtype Irc a = Irc {unIrc :: ReaderT IrcState IO a}
                        , MonadReader IrcState
                        )
 
+data UninitiazedHandler = forall a.
+        UninitiazedHandler ByteString [a -> Irc ()] (Irc a)
+
 -- | Handler for IRC messages
 --
 data Handler = Handler
-    { handlerName       :: ByteString
-    , handlerHooks      :: [Irc ()]
-    , handlerInitialize :: Irc ()
+    { handlerName  :: ByteString
+    , handlerHooks :: [Irc ()]
     }
 
 -- | Run an 'Irc' action
@@ -274,18 +277,18 @@ writeReply message = do
 
 -- | Create a handler
 --
-makeHandler :: ByteString  -- ^ Handler name
-            -> [Irc ()]    -- ^ Hooks
-            -> Handler     -- ^ Resulting handler
-makeHandler name hooks = makeHandlerWith name hooks (return ())
+makeHandler :: ByteString          -- ^ Handler name
+            -> [Irc ()]            -- ^ Hooks
+            -> UninitiazedHandler  -- ^ Resulting handler
+makeHandler name hooks = makeHandlerWith name (map const hooks) (return ())
 
 -- | Create a handler with an initialization procedure
 --
-makeHandlerWith :: ByteString  -- ^ Handler name
-                -> [Irc ()]    -- ^ Hooks
-                -> Irc ()      -- ^ Initialization
-                -> Handler     -- ^ Resulting handler
-makeHandlerWith = Handler
+makeHandlerWith :: ByteString          -- ^ Handler name
+                -> [a -> Irc ()]       -- ^ Hooks
+                -> Irc a               -- ^ Initialization
+                -> UninitiazedHandler  -- ^ Resulting handler
+makeHandlerWith = UninitiazedHandler
 
 -- | Run a handler
 --
@@ -296,10 +299,12 @@ runHandler handler state = runIrc (sequence_ $ handlerHooks handler) state
 
 -- | Initialize a handler
 --
-initializeHandler :: Handler   -- ^ Handler to initialize
-                  -> IrcState  -- ^ Irc state
-                  -> IO ()     -- ^ Result
-initializeHandler handler state = runIrc (handlerInitialize handler) state
+initializeHandler :: UninitiazedHandler  -- ^ Handler to initialize
+                  -> IrcState            -- ^ Irc state
+                  -> IO Handler          -- ^ Result
+initializeHandler (UninitiazedHandler name hooks ini) state = do
+    x <- runIrc ini state
+    return $ Handler name $ map ($ x) hooks
 
 -- | Execute an 'Irc' action only if the command given is the command received.
 --

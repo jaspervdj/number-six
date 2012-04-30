@@ -3,8 +3,7 @@ module NumberSix.Handlers
     ( handlers
     ) where
 
-import NumberSix.Irc (Handler)
-
+import NumberSix.Irc (UninitiazedHandler)
 import qualified NumberSix.Handlers.Binary
 import qualified NumberSix.Handlers.Bomb
 import qualified NumberSix.Handlers.Down
@@ -43,7 +42,7 @@ import qualified NumberSix.Handlers.Voice
 import qualified NumberSix.Handlers.Wikipedia
 import qualified NumberSix.Handlers.YouTube
 
-handlers :: [Handler]
+handlers :: [UninitiazedHandler]
 handlers =
     [ NumberSix.Handlers.Binary.handler
     , NumberSix.Handlers.Bomb.handler

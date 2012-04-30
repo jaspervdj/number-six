@@ -10,7 +10,7 @@ import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "slap" ["!slap"] $ \nick -> do
     myNick <- getNick
     sender <- getSender

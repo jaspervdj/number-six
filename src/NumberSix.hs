@@ -6,11 +6,12 @@ module NumberSix
     , numberSixWith
     ) where
 
-import Prelude hiding (catch)
 import Control.Concurrent (forkIO)
-import Control.Monad (forever, forM_)
 import Control.Concurrent.Chan.Strict (readChan, writeChan)
 import Control.Concurrent.MVar (newMVar)
+import Control.Monad (forever, forM, forM_)
+import Data.Maybe (catMaybes)
+import Prelude hiding (catch)
 
 import qualified Data.ByteString.Char8 as SBC
 
@@ -26,11 +27,11 @@ import NumberSix.SandBox
 
 -- | Run a single IRC connection
 --
-irc :: Logger     -- ^ Logger
-    -> [Handler]  -- ^ Handlers
-    -> IrcConfig  -- ^ Configuration
+irc :: Logger                -- ^ Logger
+    -> [UninitiazedHandler]  -- ^ Handlers
+    -> IrcConfig             -- ^ Configuration
     -> IO ()
-irc logger handlers' config = withConnection' $ \inChan outChan -> do
+irc logger uninitialized config = withConnection' $ \inChan outChan -> do
 
     -- Create a god container
     gods <- newMVar []
@@ -43,15 +44,16 @@ irc logger handlers' config = withConnection' $ \inChan outChan -> do
             }
 
     -- Initialize handlers
-    forM_ handlers' $ \h ->
-        let state = IrcState
-                { ircEnvironment = environment
-                , ircMessage = error "NumberSix: message not known yet"
-                , ircHandler = h
-                }
-        in sandBox logger (handlerName h) (Just 10) $ initializeHandler h state
+    handlers' <- fmap catMaybes $ forM uninitialized $
+        \h@(UninitiazedHandler name _ _) ->
+            let state = IrcState
+                    { ircEnvironment = environment
+                    , ircMessage     = error "NumberSix: message not known yet"
+                    , ircHandler     = error "Uninitialized handler"
+                    }
+            in sandBox logger name (Just 10) $ initializeHandler h state
 
-    forever $ handleLine environment inChan
+    forever $ handleLine environment handlers' inChan
   where
     withConnection' =
         withConnection (SBC.unpack $ ircHost config) (ircPort config)
@@ -63,7 +65,7 @@ irc logger handlers' config = withConnection' $ \inChan outChan -> do
         logger $ "OUT: " <> bs
 
     -- Processes one line
-    handleLine environment inChan = do
+    handleLine environment handlers' inChan = do
         SocketData l <- readChan inChan
         case decode l of
             Nothing -> logger "Parse error."
@@ -79,7 +81,7 @@ irc logger handlers' config = withConnection' $ \inChan outChan -> do
                             }
 
                     -- Run the handler in a separate thread
-                    _ <- forkIO $ sandBox logger (handlerName h) (Just 60) $
+                    _ <- forkIO $ sandBox_ logger (handlerName h) (Just 60) $
                         runHandler h state
                     return ()
 
@@ -90,8 +92,8 @@ numberSix = numberSixWith handlers
 
 -- | Launch a bot with given 'SomeHandler's and block forever
 --
-numberSixWith :: [Handler] -> IrcConfig -> IO ()
+numberSixWith :: [UninitiazedHandler] -> IrcConfig -> IO ()
 numberSixWith handlers' config = do
     logger <- newLogger
-    exponentialBackoff 30 (5 * 60) $ sandBox logger "numberSixWith" Nothing $
+    exponentialBackoff 30 (5 * 60) $ sandBox_ logger "numberSixWith" Nothing $
         irc logger handlers' config

@@ -50,5 +50,5 @@ twitter argument
     tweet t =  "http://api.twitter.com/1/statuses/show/"
             <> urlEncode t <> ".json"
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "twitter" ["!twitter"] twitter

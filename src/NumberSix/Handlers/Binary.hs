@@ -15,7 +15,7 @@ import qualified Data.ByteString.Char8 as B
 import NumberSix.Irc
 import NumberSix.Bang
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeHandler "binary" [binHook, unBinHook, hexHook, unHexHook]
 
 binHook :: Irc ()

@@ -15,9 +15,9 @@ import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Sql
 
-handler :: Handler
-handler =
-    makeHandlerWith "quote" [addQuoteHook, quoteHook, lastQuoteHook] initialize
+handler :: UninitiazedHandler
+handler = makeHandlerWith "quote"
+    (map const [addQuoteHook, quoteHook, lastQuoteHook]) initialize
 
 initialize :: Irc ()
 initialize = withSqlRun

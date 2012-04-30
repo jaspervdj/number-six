@@ -10,7 +10,7 @@ import Control.Monad.Reader (ask)
 
 import NumberSix.Irc
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeHandler "nickserv" [authHook]
 
 authHook :: Irc ()

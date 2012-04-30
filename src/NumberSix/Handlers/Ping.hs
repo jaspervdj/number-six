@@ -5,7 +5,7 @@ module NumberSix.Handlers.Ping
 
 import NumberSix.Irc
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeHandler "ping" $ return $ onCommand "PING" $ do
     params <- getParameters
     writeMessage "PONG" params

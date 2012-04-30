@@ -29,5 +29,5 @@ hackerNews query = do
         in (text, link)
     textAndUrl title url
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "hackernews" ["!hn"] hackerNews

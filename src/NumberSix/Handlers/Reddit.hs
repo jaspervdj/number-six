@@ -41,5 +41,5 @@ reddit query = httpGet url >>= \bs -> case parseJsonEither bs of
     url = "http://reddit.com/r/" <> query <> ".json"
     textAndUrl' (Link t u) = textAndUrl t u
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "reddit" ["!reddit"] reddit

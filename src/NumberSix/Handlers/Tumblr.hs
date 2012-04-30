@@ -62,5 +62,5 @@ tumblr query =
         "last" -> randomTumble (head user) 1
         _ -> randomTumble query 50
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "tumblr" ["!tumblr"] tumblr

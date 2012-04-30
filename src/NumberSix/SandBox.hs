@@ -1,14 +1,16 @@
 -- | Provides a sandbox in which plugins can run
 --
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
 module NumberSix.SandBox
     ( sandBox
+    , sandBox_
     ) where
 
-import Data.Monoid (mappend)
-import Control.Exception (try, SomeException)
 import Control.Concurrent (forkIO, killThread, threadDelay)
 import Control.Concurrent.MVar (newEmptyMVar, putMVar, readMVar)
+import Control.Exception (try, SomeException)
+import Control.Monad (void)
+import Data.Monoid (mappend)
 
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as SBC
@@ -17,18 +19,20 @@ import NumberSix.Logger
 
 -- | Action finish signal
 --
-data Signal = Finished
-            | Crashed ByteString
-            | Timeout
-            deriving (Show, Eq)
+data Signal a
+    = Finished a
+    | Crashed ByteString
+    | Timeout
+    deriving (Show, Eq)
 
 -- | Execute an IO action in a "sandbox" environment
 --
-sandBox :: Logger      -- ^ Logger
-        -> ByteString  -- ^ Name
-        -> Maybe Int   -- ^ Timeout (in seconds)
-        -> (IO ())     -- ^ Sandbox action
-        -> IO ()       -- ^ Blocks until timeout (or action finished)
+sandBox :: forall a.
+           Logger        -- ^ Logger
+        -> ByteString    -- ^ Name
+        -> Maybe Int     -- ^ Timeout (in seconds)
+        -> IO a          -- ^ Sandbox action
+        -> IO (Maybe a)  -- ^ Blocks until timeout (or action finished)
 sandBox logger name timeout action = do
     -- Communication variable
     mvar <- newEmptyMVar
@@ -36,9 +40,9 @@ sandBox logger name timeout action = do
     -- Thread running the action
     actionThreadId <- forkIO $ do
         r <- try action
-        putMVar mvar $ case (r :: Either SomeException ()) of
+        putMVar mvar $ case (r :: Either SomeException a) of
             Left  e -> Crashed (SBC.pack $ show e)
-            Right _ -> Finished
+            Right x -> Finished x
 
     -- Thread signaling a timeout (if there is a timeout)
     timeoutThreadId <- case timeout of
@@ -64,3 +68,13 @@ sandBox logger name timeout action = do
         Timeout   -> logger $
             "Thread " `mappend` name `mappend` " timed out"
         _         -> return ()
+
+    -- Return result
+    case result of
+        Finished x -> return (Just x)
+        _          -> return Nothing
+
+-- | Variation of "sandBox" for when you don't care about the result.
+--
+sandBox_ :: Logger -> ByteString -> Maybe Int -> IO a -> IO ()
+sandBox_ logger name timeout = void . sandBox logger name timeout

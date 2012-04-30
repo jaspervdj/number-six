@@ -6,5 +6,5 @@ module NumberSix.Handlers.Hello
 import NumberSix.Irc
 import NumberSix.Bang
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "hello" ["!hello"] $ const $ return "O hai!"

@@ -38,7 +38,7 @@ meme url = do
     let summary' = innerText $ parseTags $ innerText summary  
     textAndUrl (B.take 250 summary') url
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeBangHandler "meme" ["!meme"] $ \query -> do
     url <- searchMeme query
     case url of

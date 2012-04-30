@@ -16,7 +16,7 @@ import NumberSix.Message
 import NumberSix.Util
 import NumberSix.Util.Redis
 
-handler :: Handler
+handler :: UninitiazedHandler
 handler = makeHandler "bomb" [bombHook, passHook]
 
 bombHook :: Irc ()
