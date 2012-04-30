@@ -39,23 +39,24 @@ instance FromJSON WeekMenu where
 resto :: ByteString -> Irc ByteString
 resto arg = do
     currentTime <- liftIO $ getCurrentTime
-    let time = currentTime {utctDay = days arg `addDays` utctDay currentTime}
-        week = formatTime defaultTimeLocale "%U"       time
-        day  = formatTime defaultTimeLocale "%Y-%m-%d" time
-        url  = "http://kelder.zeus.ugent.be/~blackskad/resto/api/0.1/week/" ++
+    let (d, e) = days arg
+        time   = currentTime {utctDay = d `addDays` utctDay currentTime}
+        week   = formatTime defaultTimeLocale "%U"       time
+        day    = formatTime defaultTimeLocale "%Y-%m-%d" time
+        url    = "http://kelder.zeus.ugent.be/~blackskad/resto/api/0.1/week/" ++
             dropWhile (== '0') week ++ ".json"
    
     httpGet (BC.pack url) >>= \bs -> return $ case parseJsonEither bs of
         Left _             -> "Please throw some rotten tomatoes at blackskad."
         Right (WeekMenu m) -> case M.lookup day m of
-            Nothing -> "Resto's not open today..."
+            Nothing -> "Resto's not open " <> e <> "..."
             Just ms -> T.encodeUtf8 $ T.pack $ intercalate ", " ms
   where
-    days "tomorrow"           = 1
-    days "morgen"             = 1
-    days "day after tomorrow" = 2
-    days "overmorgen"         = 2
-    days _                    = 0
+    days "tomorrow"           = (1, "tomorrow")
+    days "morgen"             = (1, "tomorrow")
+    days "day after tomorrow" = (2, "the day after tomorrow")
+    days "overmorgen"         = (2, "the day after tomorrow")
+    days _                    = (0, "today")
 
 handler :: Handler
 handler = makeBangHandler "resto" ["!resto"] resto
