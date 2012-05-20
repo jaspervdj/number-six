@@ -1,57 +1,56 @@
 -- | Main module, containing the 'numberSix' function needed to launch your bot.
---
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix
     ( numberSix
     , numberSixWith
     ) where
 
-import Control.Concurrent (forkIO)
-import Control.Concurrent.Chan.Strict (readChan, writeChan)
-import Control.Concurrent.MVar (newMVar)
-import Control.Monad (forever, forM, forM_)
-import Data.Maybe (catMaybes)
-import Prelude hiding (catch)
 
-import qualified Data.ByteString.Char8 as SBC
+--------------------------------------------------------------------------------
+import           Control.Concurrent             (forkIO)
+import           Control.Concurrent.Chan.Strict (readChan, writeChan)
+import           Control.Concurrent.MVar        (newMVar)
+import           Control.Monad                  (forever, forM, forM_)
+import           Data.Maybe                     (catMaybes)
+import           Prelude                        hiding (catch)
+import qualified Data.ByteString.Char8          as SBC
 
-import NumberSix.Irc
-import NumberSix.Message
-import NumberSix.Message.Encode
-import NumberSix.Message.Decode
-import NumberSix.Handlers
-import NumberSix.Socket
-import NumberSix.ExponentialBackoff
-import NumberSix.Logger
-import NumberSix.SandBox
 
+--------------------------------------------------------------------------------
+import           NumberSix.ExponentialBackoff
+import           NumberSix.Handlers
+import           NumberSix.Irc
+import           NumberSix.Logger
+import           NumberSix.Message
+import           NumberSix.Message.Decode
+import           NumberSix.Message.Encode
+import           NumberSix.SandBox
+import           NumberSix.Socket
+
+
+--------------------------------------------------------------------------------
 -- | Run a single IRC connection
---
 irc :: Logger                -- ^ Logger
     -> [UninitiazedHandler]  -- ^ Handlers
     -> IrcConfig             -- ^ Configuration
     -> IO ()
 irc logger uninitialized config = withConnection' $ \inChan outChan -> do
-
-    -- Create a god container
+    -- Create the environment
     gods <- newMVar []
-
-    let environment = IrcEnvironment
-            { ircConfig = config
-            , ircWriter = writer outChan
-            , ircLogger = logger
-            , ircGods   = gods
-            }
+    let environment = IrcEnvironment config (writer outChan) logger gods
 
     -- Initialize handlers
     handlers' <- fmap catMaybes $ forM uninitialized $
-        \h@(UninitiazedHandler name _ _) ->
-            let state = IrcState
-                    { ircEnvironment = environment
-                    , ircMessage     = error "NumberSix: message not known yet"
-                    , ircHandler     = error "Uninitialized handler"
-                    }
-            in sandBox logger name (Just 10) $ initializeHandler h state
+        \h@(UninitiazedHandler name _ _) -> do
+            let state = IrcState environment
+                    (error "NumberSix: message not known yet")
+                    (error "Uninitialized handler")
+            r <- sandBox logger name (Just 10) $ initializeHandler h state
+            case r of
+                Nothing -> logger $ "Could not initialize handler " <> name
+                Just _  -> logger $ "Initialized handler " <> name
+
+            return r
 
     forever $ handleLine environment handlers' inChan
   where
@@ -85,13 +84,15 @@ irc logger uninitialized config = withConnection' $ \inChan outChan -> do
                         runHandler h state
                     return ()
 
+
+--------------------------------------------------------------------------------
 -- | Launch a bots and block forever. All default handlers will be activated.
---
 numberSix :: IrcConfig -> IO ()
 numberSix = numberSixWith handlers
 
+
+--------------------------------------------------------------------------------
 -- | Launch a bot with given 'SomeHandler's and block forever
---
 numberSixWith :: [UninitiazedHandler] -> IrcConfig -> IO ()
 numberSixWith handlers' config = do
     logger <- newLogger
