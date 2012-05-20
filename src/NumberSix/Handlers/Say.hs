@@ -9,6 +9,6 @@ import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeHandler "say" $ return $ onBangCommand "!say" $ onGod $
     uncurry writeChannel . breakWord =<< getBangCommandText

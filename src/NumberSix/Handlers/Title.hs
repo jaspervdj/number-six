@@ -20,5 +20,5 @@ title query = httpScrape query $ \tags ->
     in if B.null title' then "Not now, I'm taking a break."
                         else "Title: " <> title'
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeBangHandler "title" ["!title"] title

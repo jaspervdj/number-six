@@ -34,5 +34,5 @@ youTube query = do
   where
     url = "http://gdata.youtube.com/feeds/api/videos?q=" <> urlEncode query
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeBangHandler "youtube" ["!youtube", "!y"] youTube

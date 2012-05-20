@@ -14,7 +14,7 @@ import NumberSix.Message
 import NumberSix.Bang
 import NumberSix.Util
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeHandler "gods" [godsHook, addGodHook, removeGodHook]
 
 godsHook :: Irc ()

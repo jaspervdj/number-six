@@ -8,7 +8,7 @@ module NumberSix.Handlers.Topic
 import NumberSix.Irc
 import NumberSix.Bang
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeHandler "topic" $ return $
     onBangCommand "!topic" $ onGod $ do
         channel <- getChannel

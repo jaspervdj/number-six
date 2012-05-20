@@ -27,5 +27,5 @@ lastFm query = do
     url =  "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="
         <> urlEncode query <> "&api_key=87b8b81da496639cb5a295d78e5f8f4d"
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeBangHandler "lastfm" ["!lastfm"] lastFm

@@ -28,5 +28,5 @@ gitHub query = do
   where
     url = "http://github.com/" <> urlEncode query <> ".atom"
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeBangHandler "github" ["!github"] gitHub

@@ -9,7 +9,7 @@ import NumberSix.Bang
 import NumberSix.Irc
 import NumberSix.Util.Mode
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeHandler "voice" [autoVoiceHook, voiceHook, devoiceHook]
 
 autoVoiceHook :: Irc ()

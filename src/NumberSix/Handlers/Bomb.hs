@@ -34,7 +34,7 @@ type BombState = Map ByteString Bomb
 
 
 --------------------------------------------------------------------------------
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeHandlerWith "bomb" [bombHook, passHook] $ liftIO $ newMVar M.empty
 
 

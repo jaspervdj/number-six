@@ -7,7 +7,7 @@ module NumberSix.Irc
     , IrcEnvironment (..)
     , IrcState (..)
     , Irc (..)
-    , UninitiazedHandler (..)
+    , UninitializedHandler (..)
     , Handler (..)
 
       -- * Running Irc actions
@@ -114,8 +114,8 @@ newtype Irc a = Irc {unIrc :: ReaderT IrcState IO a}
                        , MonadReader IrcState
                        )
 
-data UninitiazedHandler = forall a.
-        UninitiazedHandler ByteString [a -> Irc ()] (Irc a)
+data UninitializedHandler = forall a.
+        UninitializedHandler ByteString [a -> Irc ()] (Irc a)
 
 -- | Handler for IRC messages
 --
@@ -277,18 +277,18 @@ writeReply message = do
 
 -- | Create a handler
 --
-makeHandler :: ByteString          -- ^ Handler name
-            -> [Irc ()]            -- ^ Hooks
-            -> UninitiazedHandler  -- ^ Resulting handler
+makeHandler :: ByteString            -- ^ Handler name
+            -> [Irc ()]              -- ^ Hooks
+            -> UninitializedHandler  -- ^ Resulting handler
 makeHandler name hooks = makeHandlerWith name (map const hooks) (return ())
 
 -- | Create a handler with an initialization procedure
 --
-makeHandlerWith :: ByteString          -- ^ Handler name
-                -> [a -> Irc ()]       -- ^ Hooks
-                -> Irc a               -- ^ Initialization
-                -> UninitiazedHandler  -- ^ Resulting handler
-makeHandlerWith = UninitiazedHandler
+makeHandlerWith :: ByteString            -- ^ Handler name
+                -> [a -> Irc ()]         -- ^ Hooks
+                -> Irc a                 -- ^ Initialization
+                -> UninitializedHandler  -- ^ Resulting handler
+makeHandlerWith = UninitializedHandler
 
 -- | Run a handler
 --
@@ -299,10 +299,10 @@ runHandler handler state = runIrc (sequence_ $ handlerHooks handler) state
 
 -- | Initialize a handler
 --
-initializeHandler :: UninitiazedHandler  -- ^ Handler to initialize
-                  -> IrcState            -- ^ Irc state
-                  -> IO Handler          -- ^ Result
-initializeHandler (UninitiazedHandler name hooks ini) state = do
+initializeHandler :: UninitializedHandler  -- ^ Handler to initialize
+                  -> IrcState              -- ^ Irc state
+                  -> IO Handler            -- ^ Result
+initializeHandler (UninitializedHandler name hooks ini) state = do
     x <- runIrc ini state
     return $ Handler name $ map ($ x) hooks
 

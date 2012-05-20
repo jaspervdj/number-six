@@ -12,7 +12,7 @@ import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeHandler "join" [autoJoinHook, joinHook, rejoinHook]
 
 autoJoinHook :: Irc ()

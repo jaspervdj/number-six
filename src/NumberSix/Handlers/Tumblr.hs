@@ -84,5 +84,5 @@ tumblr query =
 
 
 --------------------------------------------------------------------------------
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeBangHandler "tumblr" ["!tumblr"] tumblr

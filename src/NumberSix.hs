@@ -30,9 +30,9 @@ import           NumberSix.Socket
 
 --------------------------------------------------------------------------------
 -- | Run a single IRC connection
-irc :: Logger                -- ^ Logger
-    -> [UninitiazedHandler]  -- ^ Handlers
-    -> IrcConfig             -- ^ Configuration
+irc :: Logger                  -- ^ Logger
+    -> [UninitializedHandler]  -- ^ Handlers
+    -> IrcConfig               -- ^ Configuration
     -> IO ()
 irc logger uninitialized config = withConnection' $ \inChan outChan -> do
     -- Create the environment
@@ -41,7 +41,7 @@ irc logger uninitialized config = withConnection' $ \inChan outChan -> do
 
     -- Initialize handlers
     handlers' <- fmap catMaybes $ forM uninitialized $
-        \h@(UninitiazedHandler name _ _) -> do
+        \h@(UninitializedHandler name _ _) -> do
             let state = IrcState environment
                     (error "NumberSix: message not known yet")
                     (error "Uninitialized handler")
@@ -93,7 +93,7 @@ numberSix = numberSixWith handlers
 
 --------------------------------------------------------------------------------
 -- | Launch a bot with given 'SomeHandler's and block forever
-numberSixWith :: [UninitiazedHandler] -> IrcConfig -> IO ()
+numberSixWith :: [UninitializedHandler] -> IrcConfig -> IO ()
 numberSixWith handlers' config = do
     logger <- newLogger
     exponentialBackoff 30 (5 * 60) $ sandBox_ logger "numberSixWith" Nothing $

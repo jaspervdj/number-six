@@ -25,5 +25,5 @@ google query = httpScrape url $ \tags ->
   where
     url = "http://www.google.com/search?q=" <> urlEncode query
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeBangHandler "google" ["!google", "!g"] google

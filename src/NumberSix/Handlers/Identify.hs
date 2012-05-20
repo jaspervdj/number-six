@@ -9,7 +9,7 @@ import qualified Data.ByteString.Char8 as B
 
 import NumberSix.Irc
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeHandlerWith "identify" [] initialize
 
 initialize :: Irc ()

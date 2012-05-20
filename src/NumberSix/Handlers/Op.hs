@@ -9,7 +9,7 @@ import NumberSix.Irc
 import NumberSix.Bang
 import NumberSix.Util.Mode
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeHandler "op" [opHook, deopHook]
 
 opHook :: Irc ()

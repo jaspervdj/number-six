@@ -52,5 +52,5 @@ eightball = (answers !!) . hashMod (length answers)
 
 
 --------------------------------------------------------------------------------
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeBangHandler "eightball" ["!8ball"] $ return . eightball

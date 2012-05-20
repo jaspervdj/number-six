@@ -11,7 +11,7 @@ import qualified Data.ByteString as B
 import NumberSix.Irc
 import NumberSix.Message
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeHandler "sup" [supHook]
 
 supHook :: Irc ()

@@ -38,5 +38,5 @@ eval query = httpGet url >>= \bs -> return $ case parseJsonEither bs of
     url = "http://tryhaskell.org/haskell.json?method=eval&expr=" <>
         urlEncode query
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeBangHandler "tryhaskell" [">", "!haskell"] eval

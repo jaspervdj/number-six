@@ -82,5 +82,5 @@ flickr query = case words query of
     _ -> return "Usage: !flickr <command> <user> where command is one of: \
                 \last, random, fave"
 
-handler :: UninitiazedHandler String
+handler :: UninitializedHandler String
 handler = makeBangHandler "flickr" ["!flickr"] flickr

@@ -15,7 +15,7 @@ import NumberSix.Bang
 import NumberSix.Util
 import NumberSix.Util.Sql
 
-handler :: UninitiazedHandler
+handler :: UninitializedHandler
 handler = makeHandlerWith "quote"
     (map const [addQuoteHook, quoteHook, lastQuoteHook]) initialize
 
