@@ -7,6 +7,7 @@ module NumberSix
 
 
 --------------------------------------------------------------------------------
+import           Control.Applicative            ((<$>))
 import           Control.Concurrent             (forkIO)
 import           Control.Concurrent.Chan.Strict (readChan, writeChan)
 import           Control.Concurrent.MVar        (newMVar)
@@ -14,6 +15,7 @@ import           Control.Monad                  (forever, forM, forM_)
 import           Data.Maybe                     (catMaybes)
 import           Prelude                        hiding (catch)
 import qualified Data.ByteString.Char8          as SBC
+import           System.Environment             (getProgName)
 
 
 --------------------------------------------------------------------------------
@@ -95,6 +97,7 @@ numberSix = numberSixWith handlers
 -- | Launch a bot with given 'SomeHandler's and block forever
 numberSixWith :: [UninitializedHandler] -> IrcConfig -> IO ()
 numberSixWith handlers' config = do
-    logger <- newLogger
+    logName <- (++ ".log") <$> getProgName
+    logger  <- makeLogger logName
     exponentialBackoff 30 (5 * 60) $ sandBox_ logger "numberSixWith" Nothing $
         irc logger handlers' config
