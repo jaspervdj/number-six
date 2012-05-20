@@ -9,7 +9,6 @@ module NumberSix.SandBox
 import Control.Concurrent (forkIO, killThread, threadDelay)
 import Control.Concurrent.MVar (newEmptyMVar, putMVar, readMVar)
 import Control.Exception (try, SomeException)
-import Control.Monad (void)
 import Data.Monoid (mappend)
 
 import Data.ByteString (ByteString)
@@ -77,4 +76,6 @@ sandBox logger name timeout action = do
 -- | Variation of "sandBox" for when you don't care about the result.
 --
 sandBox_ :: Logger -> ByteString -> Maybe Int -> IO a -> IO ()
-sandBox_ logger name timeout = void . sandBox logger name timeout
+sandBox_ logger name timeout f = do
+    _ <- sandBox logger name timeout f
+    return ()
