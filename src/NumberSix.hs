@@ -7,39 +7,32 @@ module NumberSix
 
 
 --------------------------------------------------------------------------------
-import           Control.Applicative            ((<$>))
-import           Control.Concurrent             (forkIO)
-import           Control.Concurrent.Chan.Strict (readChan, writeChan)
-import           Control.Concurrent.MVar        (newMVar)
-import           Control.Monad                  (forever, forM, forM_)
-import           Data.Maybe                     (catMaybes)
-import           Prelude                        hiding (catch)
-import qualified Data.ByteString.Char8          as SBC
-import           System.Environment             (getProgName)
+import           Control.Applicative          ((<$>))
+import           Control.Concurrent           (forkIO)
+import           Control.Concurrent.MVar      (newMVar)
+import           Control.Monad                (forM, forM_)
+import qualified Data.ByteString.Char8        as SBC
+import           Data.Maybe                   (catMaybes)
+import           Prelude                      hiding (catch)
+import           System.Environment           (getProgName)
 
 
 --------------------------------------------------------------------------------
+import           NumberSix.Application
 import           NumberSix.ExponentialBackoff
 import           NumberSix.Handlers
 import           NumberSix.Irc
 import           NumberSix.Logger
 import           NumberSix.Message
-import           NumberSix.Message.Decode
-import           NumberSix.Message.Encode
 import           NumberSix.SandBox
-import           NumberSix.Socket
 
 
 --------------------------------------------------------------------------------
--- | Run a single IRC connection
-irc :: Logger                  -- ^ Logger
-    -> [UninitializedHandler]  -- ^ Handlers
-    -> IrcConfig               -- ^ Configuration
-    -> IO ()
-irc logger uninitialized config = withConnection' $ \inChan outChan -> do
+application :: Logger -> [UninitializedHandler] -> IrcConfig -> Application
+application logger uninitialized config writer = do
     -- Create the environment
     gods <- newMVar []
-    let environment = IrcEnvironment config (writer outChan) logger gods
+    let environment = IrcEnvironment config writer logger gods
 
     -- Initialize handlers
     handlers' <- fmap catMaybes $ forM uninitialized $
@@ -54,37 +47,14 @@ irc logger uninitialized config = withConnection' $ \inChan outChan -> do
 
             return r
 
-    forever $ handleLine environment handlers' inChan
-  where
-    withConnection' =
-        withConnection (SBC.unpack $ ircHost config) (ircPort config)
-
-    -- Writer to the out channel
-    writer chan message = do
-        let bs = encode message
-        writeChan chan $ SocketData bs
-        logger $ "OUT: " <> bs
-
-    -- Processes one line
-    handleLine environment handlers' inChan = do
-        SocketData l <- readChan inChan
-        case decode l of
-            Nothing -> logger "Parse error."
-            Just message' -> do
-                logger $ "IN: " <> l
-
-                -- Run every handler on the message
-                forM_ handlers' $ \h -> do
-                    let state = IrcState
-                            { ircEnvironment = environment
-                            , ircMessage = message'
-                            , ircHandler = h
-                            }
-
-                    -- Run the handler in a separate thread
-                    _ <- forkIO $ sandBox_ logger (handlerName h) (Just 60) $
-                        runHandler h state
-                    return ()
+    -- Return actual application
+    return $ \msg ->
+        -- Run every handler on the message in a separate thread
+        forM_ handlers' $ \h -> do
+            let state = IrcState environment msg h
+            _ <- forkIO $ sandBox_ logger (handlerName h) (Just 60) $
+                runHandler h state
+            return ()
 
 
 --------------------------------------------------------------------------------
@@ -100,4 +70,5 @@ numberSixWith handlers' config = do
     logName <- (++ ".log") <$> getProgName
     logger  <- makeLogger logName
     exponentialBackoff 30 (5 * 60) $ sandBox_ logger "numberSixWith" Nothing $
-        irc logger handlers' config
+        runApplication logger (SBC.unpack $ ircHost config) (ircPort config)
+            $ application logger handlers' config

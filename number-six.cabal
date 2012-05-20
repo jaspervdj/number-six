@@ -15,6 +15,7 @@ Library
 
   Exposed-Modules:
     NumberSix,
+    NumberSix.Application,
     NumberSix.Bang,
     NumberSix.ExponentialBackoff,
     NumberSix.Handlers,
@@ -61,7 +62,6 @@ Library
     NumberSix.Message.Decode,
     NumberSix.Message.Encode,
     NumberSix.SandBox,
-    NumberSix.Socket,
     NumberSix.Util,
     NumberSix.Util.BitLy,
     NumberSix.Util.Http,
@@ -86,7 +86,6 @@ Library
     old-locale           >= 1.0  && < 1.1,
     random               >= 1.0  && < 1.1,
     regex-pcre           >= 0.94 && < 0.95,
-    strict-concurrency   >= 0.2  && < 0.3,
     tagsoup              >= 0.10 && < 0.13,
     text                 >= 0.10 && < 0.12,
     time                 >= 1.0  && < 1.5,
