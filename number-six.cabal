@@ -66,7 +66,6 @@ Library
     NumberSix.Util.BitLy,
     NumberSix.Util.Http,
     NumberSix.Util.Mode,
-    NumberSix.Util.Redis,
     NumberSix.Util.Sql,
     NumberSix.Util.Time
 
@@ -87,8 +86,6 @@ Library
     network              >= 2.3,
     old-locale           >= 1,
     random               >= 1,
-    redis                >= 0.7,
-    redis-simple         >= 0.1,
     regex-pcre           >= 0.94,
     strict-concurrency   >= 0.2,
     tagsoup              >= 0.10,

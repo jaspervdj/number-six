@@ -1,69 +1,101 @@
 -- | Bomb other users, a fun IRC game
---
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Bomb
     ( handler
     ) where
 
-import Control.Monad (when)
-import Control.Applicative ((<$>))
 
-import Data.ByteString.Char8 as SBC
+--------------------------------------------------------------------------------
+import           Control.Applicative     ((<$>))
+import           Control.Concurrent.MVar
+import           Control.Monad.Trans     (liftIO)
+import           Data.ByteString         (ByteString)
+import qualified Data.ByteString.Char8   as SBC
+import           Data.Foldable           (forM_)
+import           Data.Map                (Map)
+import qualified Data.Map                as M
 
-import NumberSix.Irc
-import NumberSix.Bang
-import NumberSix.Message
-import NumberSix.Util
-import NumberSix.Util.Redis
 
+--------------------------------------------------------------------------------
+import           NumberSix.Bang
+import           NumberSix.Irc
+import           NumberSix.Message
+import           NumberSix.Util
+
+
+--------------------------------------------------------------------------------
+-- | A bomb is assigned through (target, sender)
+type Bomb = (ByteString, ByteString)
+
+
+--------------------------------------------------------------------------------
+-- | Bomb state: each channel may have a bomb assigned
+type BombState = Map ByteString Bomb
+
+
+--------------------------------------------------------------------------------
 handler :: UninitiazedHandler
-handler = makeHandler "bomb" [bombHook, passHook]
+handler = makeHandlerWith "bomb" [bombHook, passHook] $ liftIO $ newMVar M.empty
 
-bombHook :: Irc ()
-bombHook = onBangCommand "!bomb" $ do
-    -- No bomb action should be running
-    exists <- withRedis $ \redis -> existsItem redis ChannelRealm "bomb"
-    if exists
-        then writeReply "A bomb is already set."
-        else do
+
+--------------------------------------------------------------------------------
+bombHook :: MVar BombState -> Irc ()
+bombHook mvar = onBangCommand "!bomb" $ do
+    updateBomb mvar $ \b -> case b of
+        Just _  -> writeReply "A bomb is already set." >> return b
+        Nothing -> do
             (target, _) <- breakWord <$> getBangCommandText
-            sender <- getSender
-            when (target /= sender) $ do
-                withRedis $ \r -> setItem r ChannelRealm "bomb" (target, sender)
-                bomb intervals
+            sender      <- getSender
+            if target == sender
+                then return Nothing
+                else do
+                    forkIrc $ bomb intervals
+                    return $ Just (target, sender)
   where
     -- Recursively counts down
-    bomb [] = do
-        withBomb $ \(target, _) -> do
-            write $ "The bomb explodes. Pieces of " <> target
-                <> " fly in all directions."
+    bomb [] = updateBomb mvar $ \b -> do
+        forM_ b $ \(target, _) -> do
+            write $ "The bomb explodes. Pieces of " <> target <>
+                " fly in all directions."
             kick target "Ka-boom"
-        withRedis $ \redis -> deleteItem redis ChannelRealm "bomb"
-    bomb (x : xs) = withBomb $ \(target, _) -> do
-        write $  "Bomb attached to " <> target <> ", blowing up in "
-              <> SBC.pack (show $ sum $ x : xs) <> " seconds."
+        return Nothing
+    bomb (x : xs) = do
+        updateBomb mvar $ \b -> do
+            forM_ b $ \(target, _) ->
+                write $ "Bomb attached to " <> target <> ", blowing up in " <>
+                    SBC.pack (show $ sum $ x : xs) <> " seconds."
+            return b
         sleep x
         bomb xs
 
-    -- Seconds
     intervals = [20, 5, 5]
 
--- | Pass the bomb!
---
-passHook :: Irc ()
-passHook = onBangCommand "!pass" $ withBomb $ \(target, attacker) -> do
-    sender <- getSender
-    (text, _) <- breakWord <$> getBangCommandText
-    let newTarget = if SBC.null text then attacker else text
-    -- Only the current holder of the bomb is allowed to pass it
-    when (sender ==? target) $ do
-        withRedis $ \r -> setItem r ChannelRealm "bomb" (newTarget, sender)
-        write $ sender <> " passes the bomb to " <> newTarget <> "!"
 
+--------------------------------------------------------------------------------
+-- | Pass the bomb!
+passHook :: MVar BombState -> Irc ()
+passHook mvar = onBangCommand "!pass" $ do
+    sender    <- getSender
+    (text, _) <- breakWord <$> getBangCommandText
+    updateBomb mvar $ \bomb -> case bomb of
+        Nothing                 -> return Nothing
+        Just (target, attacker)
+            | sender ==? target -> do
+                let newTarget = if SBC.null text then attacker else text
+                write $ sender <> " passes the bomb to " <> newTarget <> "!"
+                return $ Just (newTarget, sender)
+            | otherwise         -> return $ Just (sender, attacker)
+
+
+--------------------------------------------------------------------------------
 -- | Utility, execute a certain action with (target, attacker)
---
-withBomb :: ((ByteString, ByteString) -> Irc ()) -> Irc ()
-withBomb f = do
-    tupple <- withRedis $ \redis -> getItem redis ChannelRealm "bomb"
-    case tupple of Just t  -> f t
-                   Nothing -> return ()
+updateBomb :: MVar BombState
+           -> (Maybe Bomb -> Irc (Maybe Bomb))
+           -> Irc ()
+updateBomb mvar f = do
+    m    <- liftIO $ takeMVar mvar
+    chan <- getChannel
+    x    <- f (M.lookup chan m)
+    liftIO $ putMVar mvar $ case x of
+        Just x' -> M.insert chan x' m
+        Nothing -> M.delete chan m
