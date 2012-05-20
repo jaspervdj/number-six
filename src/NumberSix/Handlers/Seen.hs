@@ -17,7 +17,7 @@ handler :: UninitiazedHandler
 handler = makeHandlerWith "seen" (map const [storeHook, loadHook]) initialize
 
 initialize :: Irc ()
-initialize = withSqlRun
+initialize = createTableUnlessExists "seen"
     "CREATE TABLE seen (                    \
     \    id SERIAL,                         \
     \    host TEXT, channel TEXT,           \

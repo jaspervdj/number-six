@@ -20,7 +20,7 @@ handler = makeHandlerWith "quote"
     (map const [addQuoteHook, quoteHook, lastQuoteHook]) initialize
 
 initialize :: Irc ()
-initialize = withSqlRun
+initialize = createTableUnlessExists "quotes"
     -- A global ID and an ID per channel
     "CREATE TABLE quotes (                   \
     \    id SERIAL,                          \

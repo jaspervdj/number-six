@@ -17,7 +17,7 @@ handler :: UninitiazedHandler
 handler = makeHandlerWith "tell" (map const [storeHook, loadHook]) initialize
 
 initialize :: Irc ()
-initialize = withSqlRun
+initialize = createTableUnlessExists "tells"
     "CREATE TABLE tells (                                   \
     \    id SERIAL,                                         \
     \    host TEXT, channel TEXT,                           \
@@ -52,7 +52,8 @@ loadHook = onCommand "PRIVMSG" $ do
     -- Find all messages for the recipient
     messages <- withSql $ \c -> quickQuery' c
         "SELECT sender, time, text FROM tells \
-        \WHERE host = ? AND channel = ? AND recipient = ?"
+        \WHERE host = ? AND channel = ? AND recipient = ? \
+        \ORDER BY id"
         [toSql host, toSql channel, toSql recipient]
 
     case messages of
