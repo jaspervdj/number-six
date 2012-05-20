@@ -33,7 +33,7 @@ type Application = (Message -> IO ()) -> IO (Message -> IO ())
 runApplication :: Logger -> String -> Int -> Application -> IO ()
 runApplication logger host port application = do
     sock   <- connect'
-    writer <- makeMessageWriter sock
+    writer <- makeMessageWriter logger sock
     app    <- application writer
     go sock app mempty
     logger "Server cleanly closed connection."
@@ -76,15 +76,16 @@ readLine sock chunk
 --------------------------------------------------------------------------------
 readMessage :: Logger -> Socket -> ReadState -> IO (Maybe (Message, ReadState))
 readMessage logger sock state = do
-    -- TODO: Log!
     mline <- readLine sock state
     case mline of
         Nothing             -> return Nothing
         Just (line, state') -> case decode line of
-            Just msg -> return $ Just (msg, state')
+            Just msg -> do
+                logger $ "IN: " `B.append` line
+                return $ Just (msg, state')
             Nothing  -> do
                 logger $
-                    "NumberSix.Socket.readMessage: Could not parse: " `B.append`
+                    "NumberSix.Socket.readMessage: Can't parse: " `B.append`
                     line
                 readMessage logger sock state'
 
@@ -100,11 +101,11 @@ makeLineWriter sock = do
 
 
 --------------------------------------------------------------------------------
-makeMessageWriter :: Socket -> IO (Message -> IO ())
-makeMessageWriter sock = do
-    -- TODO: Log!
+makeMessageWriter :: Logger -> Socket -> IO (Message -> IO ())
+makeMessageWriter logger sock = do
     lineWriter <- makeLineWriter sock
-    return $ \msg ->
+    return $ \msg -> do
         let bs        = encode msg
             sanitized = B.take 450 $ B.takeWhile (`B.notElem` "\r\n") bs
-        in lineWriter sanitized
+        logger $ "OUT: " `B.append` sanitized
+        lineWriter sanitized
