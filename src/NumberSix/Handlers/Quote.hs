@@ -3,22 +3,29 @@ module NumberSix.Handlers.Quote
     ( handler
     ) where
 
-import Control.Monad.Trans (liftIO)
-import Data.Char (isDigit)
-import System.Random (randomRIO)
 
+--------------------------------------------------------------------------------
+import           Control.Monad.Trans   (liftIO)
+import           Data.Char             (isDigit)
+import           System.Random         (randomRIO)
 import qualified Data.ByteString.Char8 as SBC
 
-import NumberSix.Irc
-import NumberSix.Message
-import NumberSix.Bang
-import NumberSix.Util
-import NumberSix.Util.Sql
 
+--------------------------------------------------------------------------------
+import           NumberSix.Bang
+import           NumberSix.Irc
+import           NumberSix.Message
+import           NumberSix.Util
+import           NumberSix.Util.Sql
+
+
+--------------------------------------------------------------------------------
 handler :: UninitializedHandler
 handler = makeHandlerWith "quote"
     (map const [addQuoteHook, quoteHook, lastQuoteHook]) initialize
 
+
+--------------------------------------------------------------------------------
 initialize :: Irc ()
 initialize = createTableUnlessExists "quotes"
     -- A global ID and an ID per channel
@@ -28,6 +35,8 @@ initialize = createTableUnlessExists "quotes"
     \    host TEXT, channel TEXT, text TEXT  \
     \)"
 
+
+--------------------------------------------------------------------------------
 addQuoteHook :: Irc ()
 addQuoteHook = onBangCommand "!addquote" $ do
     text <- getBangCommandText
@@ -39,6 +48,8 @@ addQuoteHook = onBangCommand "!addquote" $ do
         [toSql localId, toSql host, toSql channel, toSql text]
     write $ "Quote " <> SBC.pack (show localId) <> " added"
 
+
+--------------------------------------------------------------------------------
 quoteHook :: Irc ()
 quoteHook = onBangCommand "!quote" $ do
     query <- getBangCommandText
@@ -54,10 +65,11 @@ quoteHook = onBangCommand "!quote" $ do
             -- A search term was given, search through quotes
             else do
                 qs <- getMatching query
-                showQuote =<< randomElement qs
+                q  <- liftIO $ randomElement qs
+                showQuote q
   where
     getMatching query = do
-        host <- getHost
+        host    <- getHost
         channel <- getChannel
         ls <- withSql $ \c -> quickQuery' c
             "SELECT local_id FROM quotes  \
@@ -65,9 +77,13 @@ quoteHook = onBangCommand "!quote" $ do
             [toSql host, toSql channel, toSql ("%" <> query <> "%")]
         return $ map (\[i] -> fromSql i) ls
 
+
+--------------------------------------------------------------------------------
 lastQuoteHook :: Irc ()
 lastQuoteHook = onBangCommand "!lastquote" $ getLastId >>= showQuote
 
+
+--------------------------------------------------------------------------------
 getLastId :: Irc Integer
 getLastId = do
     host <- getHost
@@ -81,11 +97,13 @@ getLastId = do
         SqlNull -> 0
         _       -> fromSql r
 
+
+--------------------------------------------------------------------------------
 showQuote :: Integer -> Irc ()
 showQuote n = do
-    host <- getHost
+    host    <- getHost
     channel <- getChannel
-    [[r]] <- withSql $ \c -> quickQuery' c
+    [[r]]   <- withSql $ \c -> quickQuery' c
         "SELECT text FROM quotes  \
         \WHERE host = ? AND channel = ? AND local_id = ?"
         [toSql host, toSql channel, toSql n]

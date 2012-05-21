@@ -23,14 +23,13 @@ import Text.HTML.TagSoup
 import Network.Curl (curlGetResponse_, respBody, CurlResponse_)
 import Network.Curl.Opts
 
-import NumberSix.Irc
 import NumberSix.Message
 
 -- | Perform an HTTP get request and return the response body. The response body
 -- is limited in size, for security reasons.
 --
-httpGet :: ByteString      -- ^ URL
-        -> Irc ByteString  -- ^ Response body
+httpGet :: ByteString     -- ^ URL
+        -> IO ByteString  -- ^ Response body
 httpGet url = do
     r <- liftIO $ curlGetResponse_ (BC.unpack $ httpPrefix url) curlOptions
     return $ getBody r
@@ -43,7 +42,7 @@ httpGet url = do
 --
 httpScrape :: ByteString               -- ^ URL
            -> ([Tag ByteString] -> a)  -- ^ Scrape function
-           -> Irc a                    -- ^ Result
+           -> IO a                     -- ^ Result
 httpScrape url f = f . parseTags <$> httpGet url
 
 -- | Add @"http://"@ to the given URL, if needed

@@ -4,19 +4,24 @@ module NumberSix.Handlers.Google
     , google
     ) where
 
-import Data.List (find)
 
-import Data.ByteString (ByteString)
-import Text.HTML.TagSoup
+--------------------------------------------------------------------------------
+import           Control.Monad.Trans (liftIO)
+import           Data.ByteString     (ByteString)
+import           Data.List           (find)
+import           Text.HTML.TagSoup
 
-import NumberSix.Irc
-import NumberSix.Message
-import NumberSix.Bang
-import NumberSix.Util.Http
 
+--------------------------------------------------------------------------------
+import           NumberSix.Bang
+import           NumberSix.Irc
+import           NumberSix.Message
+import           NumberSix.Util.Http
+
+
+--------------------------------------------------------------------------------
 -- | Returns the URL of the first found link
---
-google :: ByteString -> Irc ByteString
+google :: ByteString -> IO ByteString
 google query = httpScrape url $ \tags ->
     let Just (TagOpen _ attrs) =
             find (~== TagOpen ("a" :: ByteString) [("class", "l")]) tags
@@ -25,5 +30,7 @@ google query = httpScrape url $ \tags ->
   where
     url = "http://www.google.com/search?q=" <> urlEncode query
 
+
+--------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "google" ["!google", "!g"] google
+handler = makeBangHandler "google" ["!google", "!g"] $ liftIO . google

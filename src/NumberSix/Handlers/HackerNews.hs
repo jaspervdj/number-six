@@ -1,22 +1,27 @@
 -- | Link to hacker new items (http://news.ycombinator.com)
---
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.HackerNews
     ( handler
     ) where
 
-import Text.HTML.TagSoup
 
-import Data.ByteString (ByteString)
+--------------------------------------------------------------------------------
+import           Control.Monad.Trans   (liftIO)
+import           Data.ByteString       (ByteString)
 import qualified Data.ByteString.Char8 as B
+import           Text.HTML.TagSoup
 
-import NumberSix.Irc
-import NumberSix.Message
-import NumberSix.Bang
-import NumberSix.Util.Http
-import NumberSix.Util.BitLy
 
-hackerNews :: ByteString -> Irc ByteString
+--------------------------------------------------------------------------------
+import           NumberSix.Bang
+import           NumberSix.Irc
+import           NumberSix.Message
+import           NumberSix.Util.BitLy
+import           NumberSix.Util.Http
+
+
+--------------------------------------------------------------------------------
+hackerNews :: ByteString -> IO ByteString
 hackerNews query = do
     (title, url) <- httpScrape "news.ycombinator.com" $ \tags ->
         let (_ : TagOpen _ attrs : TagText text : _)
@@ -29,5 +34,7 @@ hackerNews query = do
         in (text, link)
     textAndUrl title url
 
+
+--------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "hackernews" ["!hn"] hackerNews
+handler = makeBangHandler "hackernews" ["!hn"] $ liftIO . hackerNews

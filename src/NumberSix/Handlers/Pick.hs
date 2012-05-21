@@ -1,15 +1,22 @@
 -- | Pick a random item from a list
---
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Pick
     ( handler
     ) where
 
+
+--------------------------------------------------------------------------------
+import           Control.Monad.Trans   (liftIO)
 import qualified Data.ByteString.Char8 as B
 
-import NumberSix.Irc
-import NumberSix.Bang
-import NumberSix.Util
 
+--------------------------------------------------------------------------------
+import           NumberSix.Bang
+import           NumberSix.Irc
+import           NumberSix.Util
+
+
+--------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "pick" ["!pick", "!who"] $ randomElement . B.words
+handler = makeBangHandler "pick" ["!pick", "!who"] $
+    liftIO . randomElement . B.words

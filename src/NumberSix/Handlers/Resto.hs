@@ -3,29 +3,36 @@ module NumberSix.Handlers.Resto
     ( handler
     ) where
 
-import Control.Monad (mzero)
-import Control.Monad.Trans (liftIO)
-import Data.List (intercalate)
-import Data.Maybe (maybeToList)
-import Data.Time (UTCTime (..), addDays, formatTime, getCurrentTime)
-import System.Locale (defaultTimeLocale)
-import qualified Data.Map as M
 
-import Data.Aeson (FromJSON (..), Value (..))
-import Data.ByteString (ByteString)
+--------------------------------------------------------------------------------
+import           Control.Monad         (mzero)
+import           Control.Monad.Trans   (liftIO)
+import           Data.Aeson            (FromJSON (..), Value (..))
+import           Data.ByteString       (ByteString)
 import qualified Data.ByteString.Char8 as BC
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as T
-import qualified Data.Vector as V
-import qualified Data.HashMap.Lazy as HM
+import qualified Data.HashMap.Lazy     as HM
+import           Data.List             (intercalate)
+import qualified Data.Map              as M
+import           Data.Maybe            (maybeToList)
+import qualified Data.Text             as T
+import qualified Data.Text.Encoding    as T
+import           Data.Time             (UTCTime (..), addDays, formatTime, getCurrentTime)
+import qualified Data.Vector           as V
+import           System.Locale         (defaultTimeLocale)
 
-import NumberSix.Irc
-import NumberSix.Bang
-import NumberSix.Util
-import NumberSix.Util.Http
 
+--------------------------------------------------------------------------------
+import           NumberSix.Bang
+import           NumberSix.Irc
+import           NumberSix.Util
+import           NumberSix.Util.Http
+
+
+--------------------------------------------------------------------------------
 data WeekMenu = WeekMenu (M.Map String [String]) deriving (Show)
 
+
+--------------------------------------------------------------------------------
 instance FromJSON WeekMenu where
     parseJSON (Object o) = return $ WeekMenu $ M.fromListWith (++)
         [ (T.unpack day, [T.unpack name])
@@ -36,9 +43,11 @@ instance FromJSON WeekMenu where
         ]
     parseJSON _          = mzero
 
-resto :: ByteString -> Irc ByteString
+
+--------------------------------------------------------------------------------
+resto :: ByteString -> IO ByteString
 resto arg = do
-    currentTime <- liftIO $ getCurrentTime
+    currentTime <- getCurrentTime
     let (d, e) = days arg
         time   = currentTime {utctDay = d `addDays` utctDay currentTime}
         week   = formatTime defaultTimeLocale "%U"       time
@@ -58,5 +67,7 @@ resto arg = do
     days "overmorgen"         = (2, "the day after tomorrow")
     days _                    = (0, "today")
 
+
+--------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "resto" ["!resto"] resto
+handler = makeBangHandler "resto" ["!resto"] (liftIO . resto)

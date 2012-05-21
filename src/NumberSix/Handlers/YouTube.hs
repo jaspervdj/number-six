@@ -1,23 +1,28 @@
 -- | Handler that allows looking up video's on YouTube
---
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.YouTube
     ( handler
     ) where
 
-import Control.Applicative ((<$>))
 
-import Data.ByteString (ByteString)
-import Text.HTML.TagSoup
+--------------------------------------------------------------------------------
+import           Control.Applicative   ((<$>))
+import           Control.Monad.Trans   (liftIO)
+import           Data.ByteString       (ByteString)
 import qualified Data.ByteString.Char8 as B
+import           Text.HTML.TagSoup
 
-import NumberSix.Irc
-import NumberSix.Message
-import NumberSix.Bang
-import NumberSix.Util.Http
-import NumberSix.Util.BitLy
 
-youTube :: ByteString -> Irc ByteString
+--------------------------------------------------------------------------------
+import           NumberSix.Bang
+import           NumberSix.Irc
+import           NumberSix.Message
+import           NumberSix.Util.BitLy
+import           NumberSix.Util.Http
+
+
+--------------------------------------------------------------------------------
+youTube :: ByteString -> IO ByteString
 youTube query = do
     -- Find the first entry
     entry <- httpScrape url $ insideTag "entry"
@@ -34,5 +39,7 @@ youTube query = do
   where
     url = "http://gdata.youtube.com/feeds/api/videos?q=" <> urlEncode query
 
+
+--------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "youtube" ["!youtube", "!y"] youTube
+handler = makeBangHandler "youtube" ["!youtube", "!y"] $ liftIO . youTube

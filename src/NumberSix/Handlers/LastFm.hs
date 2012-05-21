@@ -1,21 +1,26 @@
 -- | Get a user's last listened track on last.fm
---
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.LastFm
     ( handler
     ) where
 
-import Text.HTML.TagSoup
 
-import Data.ByteString (ByteString)
+--------------------------------------------------------------------------------
+import           Control.Monad.Trans  (liftIO)
+import           Data.ByteString      (ByteString)
+import           Text.HTML.TagSoup
 
-import NumberSix.Irc
-import NumberSix.Message
-import NumberSix.Bang
-import NumberSix.Util.Http
-import NumberSix.Util.BitLy
 
-lastFm :: ByteString -> Irc ByteString
+--------------------------------------------------------------------------------
+import           NumberSix.Bang
+import           NumberSix.Irc
+import           NumberSix.Message
+import           NumberSix.Util.BitLy
+import           NumberSix.Util.Http
+
+
+--------------------------------------------------------------------------------
+lastFm :: ByteString -> IO ByteString
 lastFm query = do
     (text, longUrl) <- httpScrape url $ \tags ->
         let artist = innerText $ insideTag "artist" tags
@@ -27,5 +32,7 @@ lastFm query = do
     url =  "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="
         <> urlEncode query <> "&api_key=87b8b81da496639cb5a295d78e5f8f4d"
 
+
+--------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "lastfm" ["!lastfm"] lastFm
+handler = makeBangHandler "lastfm" ["!lastfm"] $ liftIO . lastFm

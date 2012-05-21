@@ -8,6 +8,7 @@ module NumberSix.Handlers.Tumblr
 --------------------------------------------------------------------------------
 import           Control.Applicative   ((<$>), (<*>))
 import           Control.Monad         (mzero)
+import           Control.Monad.Trans   (liftIO)
 import           Data.Aeson            (FromJSON (..), Value (..), (.:))
 import           Data.ByteString       (ByteString)
 import qualified Data.ByteString.Char8 as B
@@ -60,7 +61,7 @@ cleanTumblrJSON str
 --------------------------------------------------------------------------------
 -- | Get a random tumble from the user, taken from the last 'count' tumbles. To
 -- obtain the last tumble, just pass 1 as the count.
-randomTumble :: ByteString -> Int -> Irc ByteString
+randomTumble :: ByteString -> Int -> IO ByteString
 randomTumble query count = do
     result <- parseJsonEither . cleanTumblrJSON <$> httpGet url
     case result of
@@ -75,7 +76,7 @@ randomTumble query count = do
 
 
 --------------------------------------------------------------------------------
-tumblr :: ByteString -> Irc ByteString
+tumblr :: ByteString -> IO ByteString
 tumblr query =
     let (command : user) = B.words query
     in case command of
@@ -85,4 +86,4 @@ tumblr query =
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "tumblr" ["!tumblr"] tumblr
+handler = makeBangHandler "tumblr" ["!tumblr"] $ liftIO . tumblr

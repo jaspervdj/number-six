@@ -1,19 +1,23 @@
 -- | Provides URL shortening through the bit.ly API
---
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Util.BitLy
     ( shorten
     , textAndUrl
     ) where
 
-import Data.ByteString (ByteString)
-import Text.HTML.TagSoup
 
-import NumberSix.Irc
-import NumberSix.Message
-import NumberSix.Util.Http
+--------------------------------------------------------------------------------
+import           Data.ByteString     (ByteString)
+import           Text.HTML.TagSoup
 
-shorten :: ByteString -> Irc ByteString
+
+--------------------------------------------------------------------------------
+import           NumberSix.Message
+import           NumberSix.Util.Http
+
+
+--------------------------------------------------------------------------------
+shorten :: ByteString -> IO ByteString
 shorten query = do
     result <- httpScrape url getUrl
     return $ case result of "" -> url
@@ -25,7 +29,9 @@ shorten query = do
         <> "&longUrl=" <> urlEncode (httpPrefix query)
         <> "&format=xml"
 
-textAndUrl :: ByteString -> ByteString -> Irc ByteString
+
+--------------------------------------------------------------------------------
+textAndUrl :: ByteString -> ByteString -> IO ByteString
 textAndUrl text url = do
     shortUrl <- shorten url
     return $ case text of

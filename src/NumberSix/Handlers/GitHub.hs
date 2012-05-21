@@ -1,22 +1,27 @@
 -- | Takes the last item from a GitHub activity feed
---
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.GitHub
     ( handler
     ) where
 
-import Data.List (find)
 
-import Data.ByteString (ByteString)
-import Text.HTML.TagSoup
+--------------------------------------------------------------------------------
+import           Control.Monad.Trans  (liftIO)
+import           Data.ByteString      (ByteString)
+import           Data.List            (find)
+import           Text.HTML.TagSoup
 
-import NumberSix.Irc
-import NumberSix.Message
-import NumberSix.Bang
-import NumberSix.Util.Http
-import NumberSix.Util.BitLy
 
-gitHub :: ByteString -> Irc ByteString
+--------------------------------------------------------------------------------
+import           NumberSix.Bang
+import           NumberSix.Irc
+import           NumberSix.Message
+import           NumberSix.Util.BitLy
+import           NumberSix.Util.Http
+
+
+--------------------------------------------------------------------------------
+gitHub :: ByteString -> IO ByteString
 gitHub query = do
     (text, longUrl) <- httpScrape url $ \tags ->
         let e = insideTag "entry" tags
@@ -28,5 +33,7 @@ gitHub query = do
   where
     url = "http://github.com/" <> urlEncode query <> ".atom"
 
+
+--------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "github" ["!github"] gitHub
+handler = makeBangHandler "github" ["!github"] $ liftIO . gitHub

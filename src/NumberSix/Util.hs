@@ -89,9 +89,8 @@ removeNewlines :: ByteString -> ByteString
 removeNewlines = B.map (\x -> if x `elem` "\r\n" then ' ' else x)
 
 -- | Random element from a list
---
-randomElement :: [a] -> Irc a
-randomElement ls = fmap (ls !!) $ liftIO $ randomRIO (0, length ls - 1)
+randomElement :: [a] -> IO a
+randomElement ls = fmap (ls !!) $ randomRIO (0, length ls - 1)
 
 -- | Parse JSON from a bytestring
 --
