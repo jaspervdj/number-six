@@ -190,7 +190,10 @@ Reddit
 
 Print a random item from a subreddit. Commands:
 
-- `!reddit name`: Prints a random item from the given subreddit
+- `!reddit subreddit`: Prints a random item from the given subreddit
+- `!reddit subreddit number`: Print the given item from the given subreddit
+- `!reddit`: Print a random item from the front page
+- `!reddit number`: Print the given item from the front page
 
 Resto
 -----

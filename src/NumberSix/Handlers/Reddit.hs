@@ -5,12 +5,13 @@ module NumberSix.Handlers.Reddit
 
 
 --------------------------------------------------------------------------------
-import           Control.Applicative  ((<$>), (<*>))
-import           Control.Monad        (mzero)
-import           Control.Monad.Trans  (liftIO)
-import           Data.Aeson           (FromJSON (..), Object, Value (..), (.:))
-import qualified Data.HashMap.Lazy    as HM
-import           Data.ByteString      (ByteString)
+import           Control.Applicative   ((<$>), (<*>))
+import           Control.Monad         (mzero)
+import           Control.Monad.Trans   (liftIO)
+import           Data.Aeson            (FromJSON (..), Object, Value (..), (.:))
+import           Data.ByteString       (ByteString)
+import qualified Data.ByteString.Char8 as BC
+import qualified Data.HashMap.Lazy     as HM
 
 
 --------------------------------------------------------------------------------
@@ -51,11 +52,20 @@ unData o = case HM.lookup "data" o of Just (Object o') -> o'; _ -> HM.empty
 --------------------------------------------------------------------------------
 reddit :: ByteString -> IO ByteString
 reddit query = httpGet url >>= \bs -> case parseJsonEither bs of
-        Left _ -> return "Reddit is down, keep refreshing!"
-        Right (Reddit l) -> randomElement l >>= textAndUrl'
+        Left  _           -> return "Reddit is down, keep refreshing!"
+        Right (Reddit ls) -> do
+            Link t u <- case idx of
+                Nothing -> randomElement ls
+                Just i  -> return $ ls !! (i - 1)
+            textAndUrl t u
   where
-    url = "http://reddit.com/r/" <> query <> ".json"
-    textAndUrl' (Link t u) = textAndUrl t u
+    url              = "http://reddit.com/r/" <> subreddit <> ".json"
+    (subreddit, idx) = case BC.words query of
+        [s, i] -> (s, readByteString i)
+        [s]    -> case readByteString s of
+            Just i  -> ("all", Just i)
+            Nothing -> (s, Nothing)
+        _      -> ("all", Nothing)
 
 
 --------------------------------------------------------------------------------
