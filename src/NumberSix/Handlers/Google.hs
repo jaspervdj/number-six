@@ -6,29 +6,65 @@ module NumberSix.Handlers.Google
 
 
 --------------------------------------------------------------------------------
+import           Control.Applicative ((<$>), (<*>))
+import           Control.Monad       (mzero)
 import           Control.Monad.Trans (liftIO)
+import           Data.Aeson          (FromJSON (..), Value (..), (.:))
 import           Data.ByteString     (ByteString)
-import           Data.List           (find)
-import           Text.HTML.TagSoup
 
 
 --------------------------------------------------------------------------------
 import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Message
+import           NumberSix.Util
 import           NumberSix.Util.Http
+
+
+--------------------------------------------------------------------------------
+googleApiKey :: ByteString
+googleApiKey = "AIzaSyBIYwie0BY-Txs92F5196V7iZb5Xn3cMxw"
+
+
+--------------------------------------------------------------------------------
+googleCseId :: ByteString
+googleCseId = "015170067376393226585:deqxftulnbm"
+
+
+--------------------------------------------------------------------------------
+data Result = Result [Item] deriving (Show)
+
+
+--------------------------------------------------------------------------------
+instance FromJSON Result where
+    parseJSON (Object o) = Result <$> o .: "items"
+    parseJSON _          = mzero
+
+
+--------------------------------------------------------------------------------
+data Item = Item ByteString ByteString deriving (Show)
+
+
+--------------------------------------------------------------------------------
+instance FromJSON Item where
+    parseJSON (Object o) = Item <$> o .: "title" <*> o .: "link"
+    parseJSON _          = mzero
 
 
 --------------------------------------------------------------------------------
 -- | Returns the URL of the first found link
 google :: ByteString -> IO ByteString
-google query = httpScrape url $ \tags ->
-    let Just (TagOpen _ attrs) =
-            find (~== TagOpen ("a" :: ByteString) [("class", "l")]) tags
-        Just t = lookup "href" attrs
-    in t
+google query = do
+    json <- httpGet url
+    return $ case parseJsonEither json of
+        Right (Result (Item _ link : _)) -> link
+        _                                -> "Something went wrong"
   where
-    url = "http://www.google.com/search?q=" <> urlEncode query
+    url = "https://www.googleapis.com/customsearch/v1" <>
+        "?q=" <> urlEncode query <>
+        "&key=" <> googleApiKey <>
+        "&cx=" <> googleCseId <>
+        "&alt=json"
 
 
 --------------------------------------------------------------------------------
