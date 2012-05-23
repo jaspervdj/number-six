@@ -8,7 +8,9 @@ module NumberSix.Util.BitLy
 
 --------------------------------------------------------------------------------
 import           Data.ByteString     (ByteString)
-import           Text.HTML.TagSoup
+import qualified Data.Text.Encoding  as T
+import           Text.XmlHtml
+import           Text.XmlHtml.Cursor
 
 
 --------------------------------------------------------------------------------
@@ -19,15 +21,16 @@ import           NumberSix.Util.Http
 --------------------------------------------------------------------------------
 shorten :: ByteString -> IO ByteString
 shorten query = do
-    result <- httpScrape url getUrl
-    return $ case result of "" -> url
-                            _  -> result
+    result <- httpGetScrape Xml url $
+        fmap (nodeText . current) . findRec (byTagName "url")
+    return $ case result of
+        Just x  -> T.encodeUtf8 x
+        Nothing -> url
   where
-    getUrl = innerText . insideTag "url"
-    url =  "http://api.bit.ly/v3/shorten?login=jaspervdj"
-        <> "&apiKey=R_578fb5b17a40fa1f94669c6cba844df1"
-        <> "&longUrl=" <> urlEncode (httpPrefix query)
-        <> "&format=xml"
+    url = "http://api.bit.ly/v3/shorten?login=jaspervdj" <>
+        "&apiKey=R_578fb5b17a40fa1f94669c6cba844df1" <>
+        "&longUrl=" <> urlEncode (httpPrefix query) <>
+        "&format=xml"
 
 
 --------------------------------------------------------------------------------

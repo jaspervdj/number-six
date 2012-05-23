@@ -251,13 +251,6 @@ Send a message to a user who is currently away. Commands:
 - `!tell username message`: Tell the message to the given user when he becomes
   active.
 
-Title
------
-
-Prints the title of a web page. Commands:
-
-- `!title url`: Print the title of the given webpage
-
 Topic
 -----
 

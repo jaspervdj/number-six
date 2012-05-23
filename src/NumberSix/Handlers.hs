@@ -31,7 +31,6 @@ import qualified NumberSix.Handlers.Shorten
 import qualified NumberSix.Handlers.Slap
 import qualified NumberSix.Handlers.Sup
 import qualified NumberSix.Handlers.Tell
-import qualified NumberSix.Handlers.Title
 import qualified NumberSix.Handlers.Topic
 import qualified NumberSix.Handlers.TryHaskell
 import qualified NumberSix.Handlers.Tumblr
@@ -70,7 +69,6 @@ handlers =
     , NumberSix.Handlers.Slap.handler
     , NumberSix.Handlers.Sup.handler
     , NumberSix.Handlers.Tell.handler
-    , NumberSix.Handlers.Title.handler
     , NumberSix.Handlers.Topic.handler
     , NumberSix.Handlers.TryHaskell.handler
     , NumberSix.Handlers.Tumblr.handler
