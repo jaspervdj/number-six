@@ -6,11 +6,13 @@ module NumberSix.Handlers.NowPlaying
 
 
 --------------------------------------------------------------------------------
-import           Control.Monad.Trans   (liftIO)
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString.Char8 as B
-import qualified Network.Curl          as Curl
-import           Text.HTML.TagSoup
+import           Control.Applicative ((<$>))
+import           Control.Monad.Trans (liftIO)
+import           Data.ByteString     (ByteString)
+import qualified Data.Text.Encoding  as T
+import qualified Network.Curl        as Curl
+import           Text.XmlHtml
+import           Text.XmlHtml.Cursor
 
 
 --------------------------------------------------------------------------------
@@ -22,28 +24,35 @@ import           NumberSix.Util.Http
 
 --------------------------------------------------------------------------------
 stubru :: IO ByteString
-stubru = httpScrape url $ \tags ->
-    let sel = dropWhile (~/= TagOpen (B.pack "item") [("index", "0")]) tags
-        title = innerText $ insideTag "titlename" sel
-        artist = innerText $ insideTag "artistname" sel
-    in if B.null title || B.null artist
-            then "No information found (blame stubru)"
-            else title <> " by " <> artist
+stubru = do
+    result <- httpGetScrape Xml url $ \cursor -> do
+        sel    <- findRec (byTagNameAttrs "item" [("index", "0")]) cursor
+        title  <- nodeText . current <$> findRec (byTagName "titlename") sel
+        artist <- nodeText . current <$> findRec (byTagName "artistname") sel
+        return (T.encodeUtf8 title, T.encodeUtf8 artist)
+
+    return $ case result of
+        Just (title, "")     -> title
+        Just (title, artist) -> title <> " by " <> artist
+        _                    -> "No information found (blame stubru)"
   where
-    url =  "http://internetradio.vrt.be/internetradio_master/"
-        <> "productiesysteem2/song_noa/noa_41.xml"
+    url = "http://internetradio.vrt.be/internetradio_master/" <>
+        "productiesysteem2/song_noa/noa_41.xml"
 
 
 --------------------------------------------------------------------------------
 rgrfm :: IO ByteString
 rgrfm = do
-    bs <- Curl.curlGetResponse_ url options ::
+    -- This code is a monster. But I don't feel bad about it because it's
+    -- obviously still way better than the code written by the rgrfm webmaster.
+    rsp <- Curl.curlGetResponse_ url options ::
         IO (Curl.CurlResponse_ [(String, String)] ByteString)
-    return $ innerText $
-        map (\x -> case x of TagOpen "br" [] -> TagText " - "; _ -> x) $
-        takeWhile (~/= TagOpen (B.pack "p") [("class", "volgende")]) $
-        dropWhile (~/= TagOpen (B.pack "p") [("class", "huidige")]) $
-        parseTags $ Curl.respBody bs
+    let Right doc   = parseHTML "rgrfm" $ Curl.respBody rsp
+        Just cursor = fromNodes $ docContent doc
+        Just curr   = findRec (byTagNameAttrs "p" [("class", "huidige")]) cursor
+        [x, _, y]   = map nodeText . childNodes $ current curr
+
+    return $ T.encodeUtf8 x <> " - " <> T.encodeUtf8 y
   where
     url     = "http://www.rgrfm.be/core/jajaxfiles/nowplaying.php" 
     options = [Curl.CurlPost True, Curl.CurlPostFields ["ajax=jajax"]] ++
