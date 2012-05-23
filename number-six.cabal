@@ -32,7 +32,6 @@ Library
     NumberSix.Handlers.Identify,
     NumberSix.Handlers.Join,
     NumberSix.Handlers.LastFm,
-    NumberSix.Handlers.Meme,
     NumberSix.Handlers.NickServ,
     NumberSix.Handlers.NowPlaying,
     NumberSix.Handlers.Op,

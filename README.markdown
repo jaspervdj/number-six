@@ -141,13 +141,6 @@ Check what track a user last listened to on last.fm. Commands:
 
 - `!lastfm username`: Print the track the given user last listened to.
 
-Meme
-----
-
-Lookup a meme on knowyourmeme.com. Commands:
-
-- `!meme term`: Search for the given term in the meme database
-
 NickServ
 --------
 
