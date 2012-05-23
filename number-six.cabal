@@ -65,7 +65,7 @@ Library
     NumberSix.Util,
     NumberSix.Util.BitLy,
     NumberSix.Util.Http,
-    NumberSix.Util.Mode,
+    NumberSix.Util.Irc,
     NumberSix.Util.Sql,
     NumberSix.Util.Time
 

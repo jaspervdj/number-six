@@ -7,7 +7,7 @@ module NumberSix.Handlers.Op
 
 import NumberSix.Irc
 import NumberSix.Bang
-import NumberSix.Util.Mode
+import NumberSix.Util.Irc
 
 handler :: UninitializedHandler
 handler = makeHandler "op" [opHook, deopHook]

@@ -21,6 +21,7 @@ import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Message
 import           NumberSix.Util
+import           NumberSix.Util.Irc
 
 
 --------------------------------------------------------------------------------

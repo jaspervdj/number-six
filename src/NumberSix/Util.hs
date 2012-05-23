@@ -9,8 +9,6 @@ module NumberSix.Util
     , breakWord
     , prettyList
     , trim
-    , meAction
-    , kick
     , removeNewlines
     , randomElement
     , parseJsonEither
@@ -21,7 +19,6 @@ module NumberSix.Util
 --------------------------------------------------------------------------------
 import           Control.Arrow         (second)
 import           Control.Concurrent    (threadDelay, forkIO)
-import           Control.Monad         (when)
 import           Control.Monad.Reader  (ask)
 import           Control.Monad.Trans   (liftIO)
 import           Data.Aeson            (FromJSON, json, parseJSON)
@@ -74,25 +71,6 @@ prettyList (x : y : z : r) = x <> ", " <> prettyList (y : z : r)
 -- | Drop spaces around a string
 trim :: ByteString -> ByteString
 trim = BC.dropWhile isSpace . B.reverse . BC.dropWhile isSpace . B.reverse
-
-
---------------------------------------------------------------------------------
--- | Make an action a /me command
-meAction :: ByteString -> ByteString
-meAction x = "\SOHACTION " <> x <> "\SOH"
-
-
---------------------------------------------------------------------------------
--- | Kick someone
-kick :: ByteString  -- ^ Nick to kick
-     -> ByteString  -- ^ Reason
-     -> Irc ()
-kick nick reason = do
-    channel <- getChannel
-    myNick <- getNick
-    -- The bot won't kick itself
-    when (not $ nick ==? myNick) $
-        writeMessage "KICK" [channel, nick, reason]
 
 
 --------------------------------------------------------------------------------
