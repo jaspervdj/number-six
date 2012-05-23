@@ -24,7 +24,7 @@ import           NumberSix.Util.Http
 --------------------------------------------------------------------------------
 urban :: ByteString -> IO ByteString
 urban query = do
-    result <- httpGetHtmlScrape url $ \cursor -> do
+    result <- httpGetScrape Html url $ \cursor -> do
         def <- findRec (byTagNameAttrs "div" [("class", "definition")]) cursor
         return $ T.encodeUtf8 $ nodeText $ current def
     return $ fromMaybe "Look it up yourself" result

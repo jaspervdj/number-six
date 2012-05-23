@@ -24,7 +24,7 @@ import           NumberSix.Util.Http
 --------------------------------------------------------------------------------
 gitHub :: ByteString -> IO ByteString
 gitHub query = do
-    result <- httpGetHtmlScrape url $ \cursor -> do
+    result <- httpGetScrape Xml url $ \cursor -> do
         entry <- findChild (byTagName "entry") cursor
         title <- findChild (byTagName "title") entry
         link  <- findRec (byTagName "link") entry

@@ -26,7 +26,7 @@ import           NumberSix.Util.Http
 --------------------------------------------------------------------------------
 youTube :: ByteString -> IO ByteString
 youTube query = do
-    result <- httpGetHtmlScrape url $ \cursor -> do
+    result <- httpGetScrape Xml url $ \cursor -> do
         -- Find entry and title, easy...
         entry <- findChild (byTagName "entry") cursor
         title <- nodeText . current <$> findChild (byTagName "title") entry

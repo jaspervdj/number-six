@@ -2,9 +2,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Util.Http
     ( httpGet
-    , httpGetHtmlNodes
-    , httpGetHtmlScrape
+
+    , Doc (..)
+    , httpGetNodes
+    , httpGetScrape
     , httpScrape
+
     , httpPrefix
     , curlOptions
     , insideTag
@@ -47,17 +50,24 @@ httpGet url = do
 
 
 --------------------------------------------------------------------------------
-httpGetHtmlNodes :: ByteString -> IO [Node]
-httpGetHtmlNodes url = httpGet url >>= \bs -> case parseHTML source bs of
-    Left err  -> error err
-    Right doc -> return $ docContent doc
-  where
-    source = BC.unpack url
+data Doc = Html | Xml deriving (Show)
 
 
 --------------------------------------------------------------------------------
-httpGetHtmlScrape :: ByteString -> (Cursor -> Maybe a) -> IO (Maybe a)
-httpGetHtmlScrape url f = (>>= f) . fromNodes <$> httpGetHtmlNodes url
+httpGetNodes :: Doc -> ByteString -> IO [Node]
+httpGetNodes doc url = httpGet url >>= \bs -> case parse source bs of
+    Left err   -> error err
+    Right doc' -> return $ docContent doc'
+  where
+    source = BC.unpack url
+    parse  = case doc of Html -> parseHTML; Xml -> parseXML
+
+
+--------------------------------------------------------------------------------
+httpGetScrape :: Doc -> ByteString -> (Cursor -> Maybe a)
+              -> IO (Maybe a)
+httpGetScrape doc url f =
+    (>>= f) . fromNodes <$> httpGetNodes doc url
 
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
