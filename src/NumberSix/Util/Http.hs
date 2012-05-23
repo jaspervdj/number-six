@@ -1,8 +1,9 @@
--- | HTTP utility functions
---
+-- | HTTP and HTML utility functions
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Util.Http
     ( httpGet
+    , httpGetHtmlNodes
+    , httpGetHtmlScrape
     , httpScrape
     , httpPrefix
     , curlOptions
@@ -10,6 +11,9 @@ module NumberSix.Util.Http
     , nextTag
     , nextTagText
     , urlEncode
+
+    , byTagName
+    , byTagNameAttrs
     ) where
 
 import Control.Applicative ((<$>))
@@ -22,12 +26,16 @@ import qualified Codec.Binary.Url as Url
 import Text.HTML.TagSoup
 import Network.Curl (curlGetResponse_, respBody, CurlResponse_)
 import Network.Curl.Opts
+import Text.XmlHtml
+import Text.XmlHtml.Cursor
+import Data.Text (Text)
 
 import NumberSix.Message
 
+
+--------------------------------------------------------------------------------
 -- | Perform an HTTP get request and return the response body. The response body
 -- is limited in size, for security reasons.
---
 httpGet :: ByteString     -- ^ URL
         -> IO ByteString  -- ^ Response body
 httpGet url = do
@@ -36,6 +44,21 @@ httpGet url = do
   where
     getBody :: CurlResponse_ [(String, String)] ByteString -> ByteString
     getBody = respBody
+
+
+--------------------------------------------------------------------------------
+httpGetHtmlNodes :: ByteString -> IO [Node]
+httpGetHtmlNodes url = httpGet url >>= \bs -> case parseHTML source bs of
+    Left err  -> error err
+    Right doc -> return $ docContent doc
+  where
+    source = BC.unpack url
+
+
+--------------------------------------------------------------------------------
+httpGetHtmlScrape :: ByteString -> (Cursor -> Maybe a) -> IO (Maybe a)
+httpGetHtmlScrape url f = (>>= f) . fromNodes <$> httpGetHtmlNodes url
+
 
 -- | Perform an HTTP get request, and scrape the body using a user-defined
 -- function.
@@ -104,3 +127,18 @@ nextTagText tags name = do
 --
 urlEncode :: ByteString -> ByteString
 urlEncode = BC.pack . Url.encode . B.unpack
+
+
+--------------------------------------------------------------------------------
+byTagName :: Text -> Cursor -> Bool
+byTagName t = (== Just t) . tagName . current
+
+
+--------------------------------------------------------------------------------
+byTagNameAttrs :: Text -> [(Text, Text)] -> Cursor -> Bool
+byTagNameAttrs name attrs cursor =
+    tagName node == Just name &&
+    all (uncurry present) attrs
+  where
+    node              = current cursor
+    present key value = getAttribute key node == Just value

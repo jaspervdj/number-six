@@ -6,11 +6,13 @@ module NumberSix.Handlers.YouTube
 
 
 --------------------------------------------------------------------------------
-import           Control.Applicative   ((<$>))
-import           Control.Monad.Trans   (liftIO)
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString.Char8 as B
-import           Text.HTML.TagSoup
+import           Control.Applicative  ((<$>))
+import           Control.Monad.Trans  (liftIO)
+import           Data.ByteString      (ByteString)
+import qualified Data.Text            as T
+import qualified Data.Text.Encoding   as T
+import           Text.XmlHtml
+import           Text.XmlHtml.Cursor
 
 
 --------------------------------------------------------------------------------
@@ -24,18 +26,19 @@ import           NumberSix.Util.Http
 --------------------------------------------------------------------------------
 youTube :: ByteString -> IO ByteString
 youTube query = do
-    -- Find the first entry
-    entry <- httpScrape url $ insideTag "entry"
+    result <- httpGetHtmlScrape url $ \cursor -> do
+        -- Find entry and title, easy...
+        entry <- findChild (byTagName "entry") cursor
+        title <- nodeText . current <$> findChild (byTagName "title") entry
 
-    -- Find the title & URL in the entry
-    let title = innerText $ insideTag "title" entry
-        [TagOpen _ attrs] = take 1 $
-            dropWhile (~/= TagOpen (B.pack "link") [("rel", "alternate")]) entry
         -- Also drop the '&feature...' part from the URL
-        Just link = B.takeWhile (/= '&') <$> lookup "href" attrs
+        link  <- findChild (byTagNameAttrs "link" [("rel", "alternate")]) entry
+        href  <- T.takeWhile (/= '&') <$> getAttribute "href" (current link)
 
-    -- Format and return
-    textAndUrl title link
+        return (T.encodeUtf8 title, T.encodeUtf8 href)
+    case result of
+        Just (text, href) -> textAndUrl text href
+        Nothing           -> return "Malformed data!"
   where
     url = "http://gdata.youtube.com/feeds/api/videos?q=" <> urlEncode query
 

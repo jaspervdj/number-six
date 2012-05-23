@@ -8,8 +8,9 @@ module NumberSix.Handlers.GitHub
 --------------------------------------------------------------------------------
 import           Control.Monad.Trans  (liftIO)
 import           Data.ByteString      (ByteString)
-import           Data.List            (find)
-import           Text.HTML.TagSoup
+import qualified Data.Text.Encoding   as T
+import           Text.XmlHtml
+import           Text.XmlHtml.Cursor
 
 
 --------------------------------------------------------------------------------
@@ -23,13 +24,16 @@ import           NumberSix.Util.Http
 --------------------------------------------------------------------------------
 gitHub :: ByteString -> IO ByteString
 gitHub query = do
-    (text, longUrl) <- httpScrape url $ \tags ->
-        let e = insideTag "entry" tags
-            text = innerText $ insideTag "title" e
-            Just (TagOpen _ a) = find (~== TagOpen ("link" :: ByteString) []) e
-            Just url' = lookup "href" a
-        in (text, url')
-    textAndUrl text longUrl
+    result <- httpGetHtmlScrape url $ \cursor -> do
+        entry <- findChild (byTagName "entry") cursor
+        title <- findChild (byTagName "title") entry
+        link  <- findRec (byTagName "link") entry
+        href  <- getAttribute "href" $ current link
+        let text = nodeText $ current title
+        return (T.encodeUtf8 text, T.encodeUtf8 href)
+    case result of
+        Just (text, href) -> textAndUrl text href
+        Nothing           -> return "Malformed data!"
   where
     url = "http://github.com/" <> urlEncode query <> ".atom"
 

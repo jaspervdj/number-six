@@ -90,4 +90,5 @@ Library
     text                 >= 0.10 && < 0.12,
     time                 >= 1.0  && < 1.5,
     unordered-containers >= 0.1  && < 0.3,
-    vector               >= 0.7  && < 0.10
+    vector               >= 0.7  && < 0.10,
+    xmlhtml              >= 0.1  && < 0.3
