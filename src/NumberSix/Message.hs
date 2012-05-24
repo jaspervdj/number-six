@@ -28,7 +28,7 @@ data Message = Message
     { messagePrefix     :: Maybe Prefix
     , messageCommand    :: ByteString
     , messageParameters :: [ByteString]
-    } deriving (Show)
+    } deriving (Eq, Show)
 
 
 --------------------------------------------------------------------------------

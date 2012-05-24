@@ -1,3 +1,4 @@
+--------------------------------------------------------------------------------
 -- | HTTP and HTML utility functions
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Util.Http
