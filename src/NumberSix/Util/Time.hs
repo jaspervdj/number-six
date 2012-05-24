@@ -1,6 +1,6 @@
 -- | Working with time for an IRC bot is slightly confusing because it might
--- join multiple channels in different time zones
---
+-- join multiple channels in different time zones. This is why we always try to
+-- format times as: X hours ago, X minutes ago...
 {-# LANGUAGE GeneralizedNewtypeDeriving, OverloadedStrings #-}
 module NumberSix.Util.Time
     ( IrcTime (..)
@@ -8,28 +8,30 @@ module NumberSix.Util.Time
     , prettyTime
     ) where
 
-import Control.Monad.Trans (liftIO)
-import Control.Applicative ((<$>))
-import Data.Time (diffUTCTime)
-import Data.Time.Clock (getCurrentTime)
 
-import Data.Binary (Binary)
-import Data.ByteString (ByteString)
+--------------------------------------------------------------------------------
+import           Control.Applicative   ((<$>))
+import           Control.Monad.Trans   (liftIO)
+import           Data.ByteString       (ByteString)
 import qualified Data.ByteString.Char8 as SBC
+import           Data.Time             (diffUTCTime)
+import           Data.Time.Clock       (getCurrentTime)
 
-import NumberSix.Irc
 
-newtype IrcTime = IrcTime {unIrcTime :: String}
-                deriving (Show, Read, Binary)
+--------------------------------------------------------------------------------
+-- Basically we delegate everything to the show and read instance of UTCTime
+newtype IrcTime = IrcTime {unIrcTime :: String} deriving (Show, Read)
 
+
+--------------------------------------------------------------------------------
 -- | Get the current time
---
-getTime :: Irc IrcTime
+getTime :: IO IrcTime
 getTime = IrcTime . show <$> liftIO getCurrentTime
 
+
+--------------------------------------------------------------------------------
 -- | Get the time in a pretty format
---
-prettyTime :: IrcTime -> Irc ByteString
+prettyTime :: IrcTime -> IO ByteString
 prettyTime (IrcTime time) = do
     (IrcTime now) <- getTime
     let d = floor $ toRational $ diffUTCTime (read now) (read time)
@@ -43,8 +45,8 @@ prettyTime (IrcTime time) = do
         | otherwise  = pluralize (d `div` day)    "day"
 
     minute = 60
-    hour = 60 * minute
-    day = 24 * hour
+    hour   = 60 * minute
+    day    = 24 * hour
 
     pluralize 1 x = "1"    ++ " " ++ x ++        " ago"
     pluralize n x = show n ++ " " ++ x ++ "s" ++ " ago"

@@ -3,6 +3,7 @@ module NumberSix.Handlers.Seen
     ( handler
     ) where
 
+import Control.Monad.Trans (liftIO)
 import Control.Applicative ((<$>))
 import Control.Arrow (first)
 
@@ -29,7 +30,7 @@ storeHook = onCommand "PRIVMSG" $ do
     host <- getHost
     channel <- getChannel
     sender <- toLower <$> getSender
-    IrcTime time <- getTime
+    IrcTime time <- liftIO getTime
     text <- getMessageText
     _ <- withSql $ \c -> do
         r <- quickQuery' c
@@ -61,7 +62,7 @@ loadHook = onBangCommand "!seen" $ do
     case r of
         -- In the database: seen
         [[time, text]] -> do
-            pretty <- prettyTime $ IrcTime $ fromSql time
+            pretty <- liftIO $ prettyTime $ IrcTime $ fromSql time
             writeReply $ "I last saw " <> sender <> " " <> pretty
                                        <> " saying: " <> fromSql text
         -- Not yet in the database: not seen

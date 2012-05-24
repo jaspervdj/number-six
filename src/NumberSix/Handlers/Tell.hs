@@ -3,6 +3,7 @@ module NumberSix.Handlers.Tell
     ( handler
     ) where
 
+import Control.Monad.Trans (liftIO)
 import Control.Applicative ((<$>))
 import Control.Monad (forM_)
 
@@ -29,7 +30,7 @@ storeHook = onBangCommand "!tell" $ do
     host <- getHost
     channel <- getChannel
     sender <- getSender
-    IrcTime time <- getTime
+    IrcTime time <- liftIO getTime
     text' <- getBangCommandText
     let (recipient, text) = breakWord text'
     if recipient ==? sender
@@ -67,7 +68,7 @@ loadHook = onCommand "PRIVMSG" $ do
 
             -- Print the messages
             forM_ ls $ \[sender, time, text] -> do
-                pretty <- prettyTime $ IrcTime $ fromSql time
+                pretty <- liftIO $ prettyTime $ IrcTime $ fromSql time
                 writeReply $ fromSql sender <> " (" <> pretty <> "): "
                                             <> fromSql text
                 sleep 1
