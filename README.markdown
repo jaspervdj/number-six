@@ -3,7 +3,7 @@ Number Six
 
 [![Build Status](https://secure.travis-ci.org/jaspervdj/number-six.png?branch=master)](http://travis-ci.org/jaspervdj/number-six)
 
-Number six is a custom IRC bot, developped for the `#ghentfpg` IRC channels.
+Number six is a custom IRC bot, developed for student IRC channels at UGent.
 
 Compiling & Running
 ===================
