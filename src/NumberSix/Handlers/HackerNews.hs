@@ -12,6 +12,7 @@ import           Control.Monad        (mzero)
 import           Control.Monad.Trans  (liftIO)
 import           Data.Aeson           (FromJSON (..), Value (..), (.:))
 import           Data.ByteString      (ByteString)
+import qualified Data.ByteString.Char8 as BC
 
 
 --------------------------------------------------------------------------------
@@ -28,8 +29,26 @@ data HackerNews = HackerNews [Item] deriving (Show)
 
 --------------------------------------------------------------------------------
 instance FromJSON HackerNews where
-    parseJSON (Object o) = HackerNews <$> o .: "items"
+    parseJSON (Object o) = resolveSelfPosts . HackerNews <$> o .: "items"
     parseJSON _          = mzero
+
+
+--------------------------------------------------------------------------------
+-- | Make an URLs in items absolute if needed
+--
+-- The HN api returns
+--
+-- > /comments/1234
+--
+-- as URL for these links, and we need
+--
+-- > http://news.ycombinator.com/item?id=1234
+resolveSelfPosts :: HackerNews -> HackerNews
+resolveSelfPosts (HackerNews items) = HackerNews $ map resolve items
+  where
+    resolve (Item title url) = Item title $ case (BC.split '/' url) of
+        ["", "comments", nr] -> "http://news.ycombinator.com/item?id=" <> nr
+        _                    -> url
 
 
 --------------------------------------------------------------------------------
@@ -50,7 +69,7 @@ hackerNews query = do
         Right (HackerNews items) ->
             let Item title url = items !! idx
             in textAndUrl title url
-        _ -> return "Something went wrong"
+        _ -> return "Error: data center on fire"
   where
     idx = case readByteString query of
         Just n -> n - 1
