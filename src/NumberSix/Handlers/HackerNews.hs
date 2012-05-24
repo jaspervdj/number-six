@@ -20,6 +20,7 @@ import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Util
 import           NumberSix.Util.BitLy
+import           NumberSix.Util.Error
 import           NumberSix.Util.Http
 
 
@@ -69,7 +70,7 @@ hackerNews query = do
         Right (HackerNews items) ->
             let Item title url = items !! idx
             in textAndUrl title url
-        _ -> return "Error: data center on fire"
+        _ -> randomError
   where
     idx = case readByteString query of
         Just n -> n - 1

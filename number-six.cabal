@@ -62,6 +62,7 @@ Library
     NumberSix.SandBox,
     NumberSix.Util,
     NumberSix.Util.BitLy,
+    NumberSix.Util.Error,
     NumberSix.Util.Http,
     NumberSix.Util.Irc,
     NumberSix.Util.Sql,

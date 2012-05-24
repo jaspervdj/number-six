@@ -19,6 +19,7 @@ import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Util
 import           NumberSix.Util.BitLy
+import           NumberSix.Util.Error
 import           NumberSix.Util.Http
 
 
@@ -52,7 +53,7 @@ unData o = case HM.lookup "data" o of Just (Object o') -> o'; _ -> HM.empty
 --------------------------------------------------------------------------------
 reddit :: ByteString -> IO ByteString
 reddit query = httpGet url >>= \bs -> case parseJsonEither bs of
-        Left  _           -> return "Reddit is down, keep refreshing!"
+        Left  _           -> randomError
         Right (Reddit ls) -> do
             Link t u <- case idx of
                 Nothing -> randomElement ls

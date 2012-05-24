@@ -25,6 +25,7 @@ import           System.Locale         (defaultTimeLocale)
 import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Util
+import           NumberSix.Util.Error
 import           NumberSix.Util.Http
 
 
@@ -55,9 +56,9 @@ resto arg = do
         url    = "http://kelder.zeus.ugent.be/~blackskad/resto/api/0.1/week/" ++
             dropWhile (== '0') week ++ ".json"
    
-    httpGet (BC.pack url) >>= \bs -> return $ case parseJsonEither bs of
-        Left _             -> "Please throw some rotten tomatoes at blackskad."
-        Right (WeekMenu m) -> case M.lookup day m of
+    httpGet (BC.pack url) >>= \bs -> case parseJsonEither bs of
+        Left _             -> randomError
+        Right (WeekMenu m) -> return $ case M.lookup day m of
             Nothing -> "Resto's not open " <> e <> "..."
             Just ms -> T.encodeUtf8 $ T.pack $ intercalate ", " ms
   where

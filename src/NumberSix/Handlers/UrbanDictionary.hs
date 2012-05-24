@@ -8,7 +8,6 @@ module NumberSix.Handlers.UrbanDictionary
 --------------------------------------------------------------------------------
 import           Control.Monad.Trans (liftIO)
 import           Data.ByteString     (ByteString)
-import           Data.Maybe          (fromMaybe)
 import qualified Data.Text.Encoding  as T
 import           Text.XmlHtml
 import           Text.XmlHtml.Cursor
@@ -18,6 +17,7 @@ import           Text.XmlHtml.Cursor
 import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Message
+import           NumberSix.Util.Error
 import           NumberSix.Util.Http
 
 
@@ -27,7 +27,7 @@ urban query = do
     result <- httpGetScrape Html url $ \cursor -> do
         def <- findRec (byTagNameAttrs "div" [("class", "definition")]) cursor
         return $ T.encodeUtf8 $ nodeText $ current def
-    return $ fromMaybe "Look it up yourself" result
+    maybe randomError return result
   where
     url = "http://www.urbandictionary.com/define.php?term=" <> urlEncode query
 

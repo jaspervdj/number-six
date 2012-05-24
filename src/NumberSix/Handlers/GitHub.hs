@@ -18,6 +18,7 @@ import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Message
 import           NumberSix.Util.BitLy
+import           NumberSix.Util.Error
 import           NumberSix.Util.Http
 
 
@@ -33,7 +34,7 @@ gitHub query = do
         return (T.encodeUtf8 text, T.encodeUtf8 href)
     case result of
         Just (text, href) -> textAndUrl text href
-        Nothing           -> return "Malformed data!"
+        Nothing           -> randomError
   where
     url = "http://github.com/" <> urlEncode query <> ".atom"
 
