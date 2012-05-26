@@ -52,6 +52,7 @@ Library
     NumberSix.Handlers.Twitter,
     NumberSix.Handlers.UrbanDictionary,
     NumberSix.Handlers.Voice,
+    NumberSix.Handlers.Weather,
     NumberSix.Handlers.Wikipedia,
     NumberSix.Handlers.YouTube,
     NumberSix.Irc,

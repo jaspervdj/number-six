@@ -301,6 +301,14 @@ be set manually, altough this requires god privileges:
 - `!voice nick`: Give a user voice
 - `!devoice nick`, `!stfu nick`: Take voice from a user
 
+Weather
+-------
+
+How is the fucking weather? Commands:
+
+- `!weather`: Prints the weather in Ghent
+- `!weather city`: Prints the weather in the given city
+
 Wikipedia
 ---------
 

@@ -37,6 +37,7 @@ import qualified NumberSix.Handlers.Tumblr
 import qualified NumberSix.Handlers.Twitter
 import qualified NumberSix.Handlers.UrbanDictionary
 import qualified NumberSix.Handlers.Voice
+import qualified NumberSix.Handlers.Weather
 import qualified NumberSix.Handlers.Wikipedia
 import qualified NumberSix.Handlers.YouTube
 
@@ -75,6 +76,7 @@ handlers =
     , NumberSix.Handlers.Twitter.handler
     , NumberSix.Handlers.UrbanDictionary.handler
     , NumberSix.Handlers.Voice.handler
+    , NumberSix.Handlers.Weather.handler
     , NumberSix.Handlers.Wikipedia.handler
     , NumberSix.Handlers.YouTube.handler
     ]
