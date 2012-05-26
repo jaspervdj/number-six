@@ -20,6 +20,7 @@ import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Message
 import           NumberSix.Util
+import           NumberSix.Util.Error
 import           NumberSix.Util.Http
 
 
@@ -45,19 +46,19 @@ instance FromJSON Tweet where
 
 
 --------------------------------------------------------------------------------
-getTweet :: ByteString -> ByteString
+getTweet :: ByteString -> IO ByteString
 getTweet bs = case parseJsonEither bs of
-    Left _ -> "Tweet not found"
-    Right (Tweet (User user) text) ->
+    Left  _                        -> randomError
+    Right (Tweet (User user) text) -> return $
         if "RT " `B.isPrefixOf` text then text else "@" <> user <> ": " <> text
 
 
 --------------------------------------------------------------------------------
 twitter :: ByteString -> IO ByteString
 twitter argument
-    | B.all isDigit argument = getTweet <$> httpGet (tweet argument)
-    | B.all isDigit fromUrl  = getTweet <$> httpGet (tweet fromUrl)
-    | otherwise              = getTweet <$> httpGet (user argument)
+    | B.all isDigit argument = getTweet =<< httpGet (tweet argument)
+    | B.all isDigit fromUrl  = getTweet =<< httpGet (tweet fromUrl)
+    | otherwise              = getTweet =<< httpGet (user argument)
   where
     fromUrl = B.reverse $ B.takeWhile (/= '/') $ B.reverse argument
 

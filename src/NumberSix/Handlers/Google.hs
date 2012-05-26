@@ -6,11 +6,11 @@ module NumberSix.Handlers.Google
 
 
 --------------------------------------------------------------------------------
-import           Control.Applicative ((<$>), (<*>))
-import           Control.Monad       (mzero)
-import           Control.Monad.Trans (liftIO)
-import           Data.Aeson          (FromJSON (..), Value (..), (.:))
-import           Data.ByteString     (ByteString)
+import           Control.Applicative  ((<$>), (<*>))
+import           Control.Monad        (mzero)
+import           Control.Monad.Trans  (liftIO)
+import           Data.Aeson           (FromJSON(..), Value(..), (.:))
+import           Data.ByteString      (ByteString)
 
 
 --------------------------------------------------------------------------------
@@ -18,6 +18,7 @@ import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Message
 import           NumberSix.Util
+import           NumberSix.Util.Error
 import           NumberSix.Util.Http
 
 
@@ -56,9 +57,9 @@ instance FromJSON Item where
 google :: ByteString -> IO ByteString
 google query = do
     json <- httpGet url
-    return $ case parseJsonEither json of
-        Right (Result (Item _ link : _)) -> link
-        _                                -> "Something went wrong"
+    case parseJsonEither json of
+        Right (Result (Item _ link : _)) -> return link
+        _                                -> randomError
   where
     url = "https://www.googleapis.com/customsearch/v1" <>
         "?q=" <> urlEncode query <>

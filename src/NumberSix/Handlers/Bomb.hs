@@ -21,6 +21,7 @@ import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Message
 import           NumberSix.Util
+import           NumberSix.Util.Error
 import           NumberSix.Util.Irc
 
 
@@ -43,7 +44,7 @@ handler = makeHandlerWith "bomb" [bombHook, passHook] $ liftIO $ newMVar M.empty
 bombHook :: MVar BombState -> Irc ()
 bombHook mvar = onBangCommand "!bomb" $ do
     updateBomb mvar $ \b -> case b of
-        Just _  -> writeReply "A bomb is already set." >> return b
+        Just _  -> (write =<< liftIO randomError) >> return b
         Nothing -> do
             (target, _) <- breakWord <$> getBangCommandText
             sender      <- getSender
@@ -85,7 +86,9 @@ passHook mvar = onBangCommand "!pass" $ do
                 let newTarget = if SBC.null text then attacker else text
                 write $ sender <> " passes the bomb to " <> newTarget <> "!"
                 return $ Just (newTarget, sender)
-            | otherwise         -> return $ Just (sender, attacker)
+            | otherwise         -> do
+                write =<< liftIO randomError
+                return $ Just (sender, attacker)
 
 
 --------------------------------------------------------------------------------

@@ -3,20 +3,29 @@ module NumberSix.Handlers.Tell
     ( handler
     ) where
 
-import Control.Monad.Trans (liftIO)
-import Control.Applicative ((<$>))
-import Control.Monad (forM_)
 
-import NumberSix.Irc
-import NumberSix.Message
-import NumberSix.Bang
-import NumberSix.Util
-import NumberSix.Util.Time
-import NumberSix.Util.Sql
+--------------------------------------------------------------------------------
+import           Control.Applicative  ((<$>))
+import           Control.Monad        (forM_)
+import           Control.Monad.Trans  (liftIO)
 
+
+--------------------------------------------------------------------------------
+import           NumberSix.Bang
+import           NumberSix.Irc
+import           NumberSix.Message
+import           NumberSix.Util
+import           NumberSix.Util.Error
+import           NumberSix.Util.Sql
+import           NumberSix.Util.Time
+
+
+--------------------------------------------------------------------------------
 handler :: UninitializedHandler
 handler = makeHandlerWith "tell" (map const [storeHook, loadHook]) initialize
 
+
+--------------------------------------------------------------------------------
 initialize :: Irc ()
 initialize = createTableUnlessExists "tells"
     "CREATE TABLE tells (                                   \
@@ -25,16 +34,18 @@ initialize = createTableUnlessExists "tells"
     \    sender TEXT, recipient TEXT, time TEXT, text TEXT  \
     \)"
 
+
+--------------------------------------------------------------------------------
 storeHook :: Irc ()
 storeHook = onBangCommand "!tell" $ do
-    host <- getHost
-    channel <- getChannel
-    sender <- getSender
+    host         <- getHost
+    channel      <- getChannel
+    sender       <- getSender
     IrcTime time <- liftIO getTime
-    text' <- getBangCommandText
+    text'        <- getBangCommandText
     let (recipient, text) = breakWord text'
     if recipient ==? sender
-        then write "Sigh. The Universe is winning..."
+        then write =<< liftIO randomError
         else do
             _ <- withSql $ \c -> run c
                 "INSERT INTO tells (host, channel, sender, recipient, \
@@ -44,6 +55,8 @@ storeHook = onBangCommand "!tell" $ do
             writeReply $
                 "I'll pass that on when I see " <> recipient <> " here."
 
+
+--------------------------------------------------------------------------------
 loadHook :: Irc ()
 loadHook = onCommand "PRIVMSG" $ do
     host <- getHost
