@@ -38,6 +38,13 @@ errors =
     , "This command is available. BUT NOT FOR YOU."
     , "Error: too many regrets"
     , "Oh non! Il y a eu une erreur!"
+    , "Error: Mersenne vector requires recalibration of the EMP engine"
+    , "Error: press any key to continue"
+    , "Error: retrying in -1 seconds"
+    , "Error: short circuit detected (possible poop in network port)"
+    , "Cannot fulfill request (0x4F99E2: datacenter infested with zombies)"
+    , "Error: unexpected C_OPERA_VOICE in carrier signal"
+    , "packet lost in traffic jam (waited 3188 seconds, then went back home)"
     ]
 
 
