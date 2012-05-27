@@ -70,4 +70,4 @@ twitter argument
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "twitter" ["!twitter"] $ liftIO . twitter
+handler = makeBangHandler "Twitter" ["!twitter"] $ liftIO . twitter

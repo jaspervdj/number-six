@@ -83,4 +83,4 @@ flickr query = case words query of
                 \last, random, fave"
 
 handler :: UninitializedHandler String
-handler = makeBangHandler "flickr" ["!flickr"] flickr
+handler = makeBangHandler "Flickr" ["!flickr"] flickr

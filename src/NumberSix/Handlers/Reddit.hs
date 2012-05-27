@@ -71,4 +71,4 @@ reddit query = httpGet url >>= \bs -> case parseJsonEither bs of
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "reddit" ["!reddit"] $ liftIO . reddit
+handler = makeBangHandler "Reddit" ["!reddit"] $ liftIO . reddit

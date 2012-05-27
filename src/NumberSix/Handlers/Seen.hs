@@ -15,7 +15,7 @@ import NumberSix.Util.Sql
 import NumberSix.Util.Time
 
 handler :: UninitializedHandler
-handler = makeHandlerWith "seen" (map const [storeHook, loadHook]) initialize
+handler = makeHandlerWith "Seen" (map const [storeHook, loadHook]) initialize
 
 initialize :: Irc ()
 initialize = createTableUnlessExists "seen"

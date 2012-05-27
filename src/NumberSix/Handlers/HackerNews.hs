@@ -79,4 +79,4 @@ hackerNews query = do
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "hackernews" ["!hn"] $ liftIO . hackerNews
+handler = makeBangHandler "HackerNews" ["!hn"] $ liftIO . hackerNews

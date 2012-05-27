@@ -11,7 +11,7 @@ import Control.Monad.Reader (ask)
 import NumberSix.Irc
 
 handler :: UninitializedHandler
-handler = makeHandler "nickserv" [authHook]
+handler = makeHandler "NickServ" [authHook]
 
 authHook :: Irc ()
 authHook = onCommand "376" $ do

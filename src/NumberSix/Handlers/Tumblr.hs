@@ -86,4 +86,4 @@ tumblr query =
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "tumblr" ["!tumblr"] $ liftIO . tumblr
+handler = makeBangHandler "Tumblr" ["!tumblr"] $ liftIO . tumblr

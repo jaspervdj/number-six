@@ -9,5 +9,5 @@ import NumberSix.Irc
 import NumberSix.Bang
 
 handler :: UninitializedHandler
-handler = makeBangHandler "help" ["!help"] $ const $ return $
+handler = makeBangHandler "Help" ["!help"] $ const $ return $
     "Documentation can be found at http://github.com/jaspervdj/number-six"

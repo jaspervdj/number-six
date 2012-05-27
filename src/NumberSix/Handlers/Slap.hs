@@ -14,7 +14,7 @@ import           NumberSix.Util.Irc
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "slap" ["!slap"] $ \nick -> do
+handler = makeBangHandler "Slap" ["!slap"] $ \nick -> do
     myNick <- getNick
     sender <- getSender
     let bitch = if nick ==? myNick then sender else nick

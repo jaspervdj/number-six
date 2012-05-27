@@ -13,7 +13,7 @@ import           NumberSix.Util.Irc
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeHandler "voice" [autoVoiceHook, voiceHook, devoiceHook]
+handler = makeHandler "Voice" [autoVoiceHook, voiceHook, devoiceHook]
 
 
 --------------------------------------------------------------------------------

@@ -41,4 +41,4 @@ gitHub query = do
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "github" ["!github"] $ liftIO . gitHub
+handler = makeBangHandler "GitHub" ["!github"] $ liftIO . gitHub

@@ -42,4 +42,4 @@ lastFm query = do
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "lastfm" ["!lastfm"] $ liftIO . lastFm
+handler = makeBangHandler "LastFm" ["!lastfm"] $ liftIO . lastFm

@@ -10,7 +10,7 @@ import NumberSix.Bang
 import NumberSix.Util.Irc
 
 handler :: UninitializedHandler
-handler = makeHandler "op" [opHook, deopHook]
+handler = makeHandler "Op" [opHook, deopHook]
 
 opHook :: Irc ()
 opHook = onBangCommand "!op" $ onGod $ do

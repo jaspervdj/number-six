@@ -7,4 +7,4 @@ import NumberSix.Irc
 import NumberSix.Bang
 
 handler :: UninitializedHandler
-handler = makeBangHandler "hello" ["!hello"] $ const $ return "O hai!"
+handler = makeBangHandler "Hello" ["!hello"] $ const $ return "O hai!"

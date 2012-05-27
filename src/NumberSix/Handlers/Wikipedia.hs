@@ -40,4 +40,4 @@ wiki query = fmap (T.encodeUtf8 . fromMaybe "Not found") $
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "wikipedia" ["!w", "!wik", "!wiki"] $ liftIO . wiki
+handler = makeBangHandler "Wikipedia" ["!w", "!wik", "!wiki"] $ liftIO . wiki

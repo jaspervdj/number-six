@@ -70,4 +70,4 @@ google query = do
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "google" ["!google", "!g"] $ liftIO . google
+handler = makeBangHandler "Google" ["!google", "!g"] $ liftIO . google

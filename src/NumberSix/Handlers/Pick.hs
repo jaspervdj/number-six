@@ -18,5 +18,5 @@ import           NumberSix.Util
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "pick" ["!pick", "!who"] $
+handler = makeBangHandler "Pick" ["!pick", "!who"] $
     liftIO . randomElement . B.words

@@ -16,4 +16,4 @@ import           NumberSix.Util.BitLy
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "shorten" ["!shorten"] $ liftIO . shorten
+handler = makeBangHandler "Shorten" ["!shorten"] $ liftIO . shorten

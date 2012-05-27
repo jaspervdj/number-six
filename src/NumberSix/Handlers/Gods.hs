@@ -15,7 +15,7 @@ import NumberSix.Bang
 import NumberSix.Util
 
 handler :: UninitializedHandler
-handler = makeHandler "gods" [godsHook, addGodHook, removeGodHook]
+handler = makeHandler "Gods" [godsHook, addGodHook, removeGodHook]
 
 godsHook :: Irc ()
 godsHook = onBangCommand "!gods" printGods

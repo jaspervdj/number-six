@@ -41,4 +41,4 @@ weather query = do
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "weather" ["!weather"] $ liftIO . weather
+handler = makeBangHandler "Weather" ["!weather"] $ liftIO . weather

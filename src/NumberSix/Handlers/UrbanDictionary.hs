@@ -34,4 +34,4 @@ urban query = do
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "urbandictionary" ["!urban"] $ liftIO . urban
+handler = makeBangHandler "UrbanDictionary" ["!urban"] $ liftIO . urban

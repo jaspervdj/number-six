@@ -16,7 +16,7 @@ import NumberSix.Irc
 import NumberSix.Bang
 
 handler :: UninitializedHandler
-handler = makeHandler "binary" [binHook, unBinHook, hexHook, unHexHook]
+handler = makeHandler "Binary" [binHook, unBinHook, hexHook, unHexHook]
 
 binHook :: Irc ()
 binHook = onBangCommand "!bin" $ do

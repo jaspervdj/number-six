@@ -61,7 +61,7 @@ rgrfm = do
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "nowplaying" ["!nowplaying"] $ \str -> liftIO $
+handler = makeBangHandler "NowPlaying" ["!nowplaying"] $ \str -> liftIO $
     case str of
         "stubru" -> stubru
         "rgrfm"  -> rgrfm

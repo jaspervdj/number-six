@@ -49,4 +49,4 @@ eval query = httpGet url >>= \bs -> return $ case parseJsonEither bs of
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "tryhaskell" [">", "!haskell"] $ liftIO . eval
+handler = makeBangHandler "TryHaskell" [">", "!haskell"] $ liftIO . eval

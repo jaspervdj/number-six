@@ -46,4 +46,4 @@ youTube query = do
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "youtube" ["!youtube", "!y"] $ liftIO . youTube
+handler = makeBangHandler "YouTube" ["!youtube", "!y"] $ liftIO . youTube

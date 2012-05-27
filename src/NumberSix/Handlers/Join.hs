@@ -13,7 +13,7 @@ import NumberSix.Bang
 import NumberSix.Util
 
 handler :: UninitializedHandler
-handler = makeHandler "join" [autoJoinHook, joinHook, rejoinHook]
+handler = makeHandler "Join" [autoJoinHook, joinHook, rejoinHook]
 
 autoJoinHook :: Irc ()
 autoJoinHook = onCommand "376" $ do

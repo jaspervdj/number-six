@@ -12,7 +12,7 @@ import NumberSix.Irc
 import NumberSix.Message
 
 handler :: UninitializedHandler
-handler = makeHandler "sup" [supHook]
+handler = makeHandler "Sup" [supHook]
 
 supHook :: Irc ()
 supHook = onCommand "PRIVMSG" $ do

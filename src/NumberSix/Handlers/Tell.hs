@@ -22,7 +22,7 @@ import           NumberSix.Util.Time
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeHandlerWith "tell" (map const [storeHook, loadHook]) initialize
+handler = makeHandlerWith "Tell" (map const [storeHook, loadHook]) initialize
 
 
 --------------------------------------------------------------------------------

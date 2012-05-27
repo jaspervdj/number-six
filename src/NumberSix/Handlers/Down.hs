@@ -36,4 +36,4 @@ down query = do
     fixType' = id
 
 handler :: UninitializedHandler
-handler = makeBangHandler "down" ["!down"] down
+handler = makeBangHandler "Down" ["!down"] down

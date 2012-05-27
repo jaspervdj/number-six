@@ -117,6 +117,9 @@ newtype Irc a = Irc {unIrc :: ReaderT IrcState IO a}
 data UninitializedHandler = forall a.
         UninitializedHandler ByteString [a -> Irc ()] (Irc a)
 
+instance Eq UninitializedHandler where
+    (UninitializedHandler x _ _) == (UninitializedHandler y _ _) = x == y
+
 -- | Handler for IRC messages
 --
 data Handler = Handler

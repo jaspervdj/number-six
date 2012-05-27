@@ -71,4 +71,4 @@ resto arg = do
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "resto" ["!resto"] (liftIO . resto)
+handler = makeBangHandler "Resto" ["!resto"] (liftIO . resto)
