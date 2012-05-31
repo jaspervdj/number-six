@@ -29,7 +29,6 @@ import qualified NumberSix.Handlers.Resto
 import qualified NumberSix.Handlers.Say
 import qualified NumberSix.Handlers.Seen
 import qualified NumberSix.Handlers.Shorten
-import qualified NumberSix.Handlers.Slap
 import qualified NumberSix.Handlers.Sup
 import qualified NumberSix.Handlers.Tell
 import qualified NumberSix.Handlers.Topic
@@ -69,7 +68,6 @@ handlers =
     , NumberSix.Handlers.Say.handler
     , NumberSix.Handlers.Seen.handler
     , NumberSix.Handlers.Shorten.handler
-    , NumberSix.Handlers.Slap.handler
     , NumberSix.Handlers.Sup.handler
     , NumberSix.Handlers.Tell.handler
     , NumberSix.Handlers.Topic.handler

@@ -227,13 +227,6 @@ Shortens a URL using bit.ly. Commands:
 
 - `!shorten url`: Shorten the given URL
 
-Slap
-----
-
-Shows the bot's superiority to a user. Commands:
-
-- `!slap nick`: Slaps the specified user around a bit.
-
 Sup
 ---
 

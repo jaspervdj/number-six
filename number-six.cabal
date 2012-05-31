@@ -44,7 +44,6 @@ Library
     NumberSix.Handlers.Say,
     NumberSix.Handlers.Seen,
     NumberSix.Handlers.Shorten,
-    NumberSix.Handlers.Slap,
     NumberSix.Handlers.Sup,
     NumberSix.Handlers.Tell,
     NumberSix.Handlers.Topic,
