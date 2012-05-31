@@ -30,6 +30,7 @@ Library
     NumberSix.Handlers.Hello,
     NumberSix.Handlers.Help,
     NumberSix.Handlers.Identify,
+    NumberSix.Handlers.Insult,
     NumberSix.Handlers.Join,
     NumberSix.Handlers.LastFm,
     NumberSix.Handlers.NickServ,

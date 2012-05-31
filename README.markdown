@@ -115,6 +115,13 @@ Identify
 System handler which sets the nickname and the real name of the bot. This
 handler has no commands.
 
+Insult
+------
+
+Insult a user.
+
+- `!insult user`: Insults the given user.
+
 Join
 ----
 
