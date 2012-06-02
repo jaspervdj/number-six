@@ -50,7 +50,11 @@ runApplication logger host port application = do
         mmsg <- readMessage logger sock state
         case mmsg of
             Nothing            -> return ()
-            Just (msg, state') -> app msg >> go sock app state'
+            Just (msg, state') -> do
+                logger $ "DEBUG: giving msg to app"
+                _ <- app msg
+                logger $ "DEBUG: app returned"
+                go sock app state'
 
 
 --------------------------------------------------------------------------------
@@ -58,8 +62,8 @@ type ReadState = ByteString
 
 
 --------------------------------------------------------------------------------
-readLine :: Socket -> ReadState -> IO (Maybe (ByteString, ReadState))
-readLine sock chunk
+readLine :: Logger -> Socket -> ReadState -> IO (Maybe (ByteString, ReadState))
+readLine logger sock chunk
     -- We don't have a line yet
     | B.null rest = receiveMore
     -- We have at least one line to consume
@@ -67,16 +71,20 @@ readLine sock chunk
   where
     (line, rest) = BC.breakSubstring "\r\n" chunk
     receiveMore  = do
+        logger $ "DEBUG: receiving with chunk " `B.append` BC.pack (show chunk)
         more <- recv sock 4096
+        logger $ "DEBUG: received more " `B.append` BC.pack (show more)
         if B.null more
             then return Nothing
-            else readLine sock $ mappend chunk more
+            else readLine logger sock $ mappend chunk more
 
 
 --------------------------------------------------------------------------------
 readMessage :: Logger -> Socket -> ReadState -> IO (Maybe (Message, ReadState))
 readMessage logger sock state = do
-    mline <- readLine sock state
+    logger $ "DEBUG: reading line"
+    mline <- readLine logger sock state
+    logger $ "DEBUG: got line: " `B.append` BC.pack (show mline)
     case mline of
         Nothing             -> return Nothing
         Just (line, state') -> case decode line of
