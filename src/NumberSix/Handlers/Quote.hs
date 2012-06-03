@@ -6,9 +6,10 @@ module NumberSix.Handlers.Quote
 
 --------------------------------------------------------------------------------
 import           Control.Monad.Trans   (liftIO)
+import           Data.ByteString       (ByteString)
+import qualified Data.ByteString.Char8 as BC
 import           Data.Char             (isDigit)
 import           System.Random         (randomRIO)
-import qualified Data.ByteString.Char8 as SBC
 
 
 --------------------------------------------------------------------------------
@@ -16,6 +17,7 @@ import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Message
 import           NumberSix.Util
+import           NumberSix.Util.Error
 import           NumberSix.Util.Sql
 
 
@@ -46,28 +48,30 @@ addQuoteHook = onBangCommand "!addquote" $ do
     _ <- withSql $ \c -> run c
         "INSERT INTO quotes (local_id, host, channel, text) VALUES (?, ?, ?, ?)"
         [toSql localId, toSql host, toSql channel, toSql text]
-    write $ "Quote " <> SBC.pack (show localId) <> " added"
+    write $ "Quote " <> BC.pack (show localId) <> " added"
 
 
 --------------------------------------------------------------------------------
 quoteHook :: Irc ()
 quoteHook = onBangCommand "!quote" $ do
     query <- getBangCommandText
-    if SBC.null query
+    if BC.null query
         -- No query, return a random quote
         then do
             lastId <- getLastId
             r <- liftIO $ randomRIO (1, lastId)
             showQuote r
-        else if SBC.all isDigit query
+        else if BC.all isDigit query
             -- A number was given, lookup the quote
-            then showQuote (read $ SBC.unpack query)
+            then showQuote (read $ BC.unpack query)
             -- A search term was given, search through quotes
             else do
                 qs <- getMatching query
-                q  <- liftIO $ randomElement qs
-                showQuote q
+                case qs of
+                    [] -> write     =<< liftIO randomError
+                    _  -> showQuote =<< liftIO (randomElement qs)
   where
+    getMatching :: ByteString -> Irc [Integer]
     getMatching query = do
         host    <- getHost
         channel <- getChannel
@@ -107,4 +111,4 @@ showQuote n = do
         "SELECT text FROM quotes  \
         \WHERE host = ? AND channel = ? AND local_id = ?"
         [toSql host, toSql channel, toSql n]
-    write $ "Quote " <> (SBC.pack $ show n) <> ": " <> fromSql r
+    write $ "Quote " <> (BC.pack $ show n) <> ": " <> fromSql r
