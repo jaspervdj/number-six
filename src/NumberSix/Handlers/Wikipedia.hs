@@ -35,7 +35,7 @@ wiki query = do
     url = "http://en.wikipedia.org/w/api.php" <>
         "?action=opensearch" <>
         "&format=xml" <>
-        "&search=" <> query
+        "&search=" <> urlEncode query
 
 
 --------------------------------------------------------------------------------
