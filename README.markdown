@@ -248,6 +248,13 @@ Bindings to the haskell evaluation service of tryhaskell.org. Commands:
 
 - `> expression`, `!haskell expression`: Evaluate the given expression
 
+TryRuby
+-------
+
+Bindings to the ruby evaluation service of tryruby.org. Commands:
+
+- `!ruby expression`: Evaluate the given expression
+
 Tumblr
 ------
 

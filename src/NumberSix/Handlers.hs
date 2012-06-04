@@ -1,9 +1,11 @@
+--------------------------------------------------------------------------------
 {-# LANGUAGE Rank2Types #-}
 module NumberSix.Handlers
     ( handlers
     ) where
 
-import NumberSix.Irc (UninitializedHandler)
+
+--------------------------------------------------------------------------------
 import qualified NumberSix.Handlers.Binary
 import qualified NumberSix.Handlers.Bomb
 import qualified NumberSix.Handlers.EightBall
@@ -32,6 +34,7 @@ import qualified NumberSix.Handlers.Sup
 import qualified NumberSix.Handlers.Tell
 import qualified NumberSix.Handlers.Topic
 import qualified NumberSix.Handlers.TryHaskell
+import qualified NumberSix.Handlers.TryRuby
 import qualified NumberSix.Handlers.Tumblr
 import qualified NumberSix.Handlers.Twitter
 import qualified NumberSix.Handlers.UrbanDictionary
@@ -39,7 +42,10 @@ import qualified NumberSix.Handlers.Voice
 import qualified NumberSix.Handlers.Weather
 import qualified NumberSix.Handlers.Wikipedia
 import qualified NumberSix.Handlers.YouTube
+import           NumberSix.Irc
 
+
+--------------------------------------------------------------------------------
 handlers :: [UninitializedHandler]
 handlers =
     [ NumberSix.Handlers.Binary.handler
@@ -70,6 +76,7 @@ handlers =
     , NumberSix.Handlers.Tell.handler
     , NumberSix.Handlers.Topic.handler
     , NumberSix.Handlers.TryHaskell.handler
+    , NumberSix.Handlers.TryRuby.handler
     , NumberSix.Handlers.Tumblr.handler
     , NumberSix.Handlers.Twitter.handler
     , NumberSix.Handlers.UrbanDictionary.handler

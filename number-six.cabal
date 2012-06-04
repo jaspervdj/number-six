@@ -47,6 +47,7 @@ Library
     NumberSix.Handlers.Tell,
     NumberSix.Handlers.Topic,
     NumberSix.Handlers.TryHaskell,
+    NumberSix.Handlers.TryRuby,
     NumberSix.Handlers.Tumblr,
     NumberSix.Handlers.Twitter,
     NumberSix.Handlers.UrbanDictionary,
