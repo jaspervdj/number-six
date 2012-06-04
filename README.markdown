@@ -102,6 +102,14 @@ Provides information. Commands:
 
 - `!help`: Print help information
 
+Http
+----
+
+Sends an HTTP GET request to a server and returns the status line, useful if you
+want to check if a web service is down for everyone or just you. Commands:
+
+- `!http uri`: Check the given URI
+
 Identify
 --------
 
