@@ -24,7 +24,7 @@ import           NumberSix.Util.Http
 --------------------------------------------------------------------------------
 weather :: ByteString -> IO ByteString
 weather query = do
-    result <- httpGetScrape Html url $ \cursor -> do
+    result <- httpScrape Html url id $ \cursor -> do
         -- Find content div
         con    <- findRec (byTagNameAttrs "div" [("class", "content")]) cursor
         temp   <- findRec (byTagNameAttrs "span" [("class", "temperature")]) con

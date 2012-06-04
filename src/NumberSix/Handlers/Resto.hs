@@ -56,7 +56,7 @@ resto arg = do
         url    = "http://kelder.zeus.ugent.be/~blackskad/resto/api/0.1/week/" ++
             dropWhile (== '0') week ++ ".json"
    
-    httpGet (BC.pack url) >>= \bs -> case parseJsonEither bs of
+    http (BC.pack url) id >>= \bs -> case parseJsonEither bs of
         Left _             -> randomError
         Right (WeekMenu m) -> return $ case M.lookup day m of
             Nothing -> "Resto's not open " <> e <> "..."

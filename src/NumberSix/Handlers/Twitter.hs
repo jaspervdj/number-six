@@ -56,9 +56,9 @@ getTweet bs = case parseJsonEither bs of
 --------------------------------------------------------------------------------
 twitter :: ByteString -> IO ByteString
 twitter argument
-    | B.all isDigit argument = getTweet =<< httpGet (tweet argument)
-    | B.all isDigit fromUrl  = getTweet =<< httpGet (tweet fromUrl)
-    | otherwise              = getTweet =<< httpGet (user argument)
+    | B.all isDigit argument = getTweet =<< http (tweet argument) id
+    | B.all isDigit fromUrl  = getTweet =<< http (tweet fromUrl)  id
+    | otherwise              = getTweet =<< http (user argument)  id
   where
     fromUrl = B.reverse $ B.takeWhile (/= '/') $ B.reverse argument
 

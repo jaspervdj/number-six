@@ -52,13 +52,13 @@ unData o = case HM.lookup "data" o of Just (Object o') -> o'; _ -> HM.empty
 
 --------------------------------------------------------------------------------
 reddit :: ByteString -> IO ByteString
-reddit query = httpGet url >>= \bs -> case parseJsonEither bs of
-        Left  _           -> randomError
-        Right (Reddit ls) -> do
-            Link t u <- case idx of
-                Nothing -> randomElement ls
-                Just i  -> return $ ls !! (i - 1)
-            textAndUrl t u
+reddit query = http url id >>= \bs -> case parseJsonEither bs of
+    Left  _           -> randomError
+    Right (Reddit ls) -> do
+        Link t u <- case idx of
+            Nothing -> randomElement ls
+            Just i  -> return $ ls !! (i - 1)
+        textAndUrl t u
   where
     url              = "http://reddit.com/r/" <> subreddit <> ".json"
     (subreddit, idx) = case BC.words query of

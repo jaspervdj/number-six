@@ -26,7 +26,7 @@ import           NumberSix.Util.Http
 --------------------------------------------------------------------------------
 lastFm :: ByteString -> IO ByteString
 lastFm query = do
-    result <- httpGetScrape Xml url $ \cursor -> do
+    result <- httpScrape Xml url id $ \cursor -> do
         artist <- nodeText . current <$> findRec (byTagName "artist") cursor
         title  <- nodeText . current <$> findRec (byTagName "name")   cursor
         link   <- nodeText . current <$> findRec (byTagName "url")    cursor
