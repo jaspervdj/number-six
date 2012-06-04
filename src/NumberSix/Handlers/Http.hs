@@ -28,7 +28,8 @@ import           NumberSix.Util.Http   (httpPrefix)
 http :: ByteString -> IO ByteString
 http uri = do
     req <- H.parseUrl uri'
-    rsp <- H.withManager $ \m -> H.httpLbs req m
+    let req' = req {H.redirectCount = 0, H.checkStatus = \_ _ -> Nothing}
+    rsp <- H.withManager $ \m -> H.httpLbs req' m
     let status = H.responseStatus rsp
     return $ BC.pack (show $ H.responseVersion rsp) <> " " <>
         BC.pack (show $ H.statusCode status) <> " " <>
