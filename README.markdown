@@ -47,13 +47,6 @@ A cool IRC game.
   only be issued by the current person owning them bomb.
 - `!pass nick`: Passes the bomb to the specified user
 
-Down
-----
-
-Check if a website is down. Commands:
-
-- `!down url`: Check if the website is down
-
 EightBall
 ---------
 

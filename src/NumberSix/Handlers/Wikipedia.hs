@@ -25,7 +25,7 @@ import           NumberSix.Util.Http
 --------------------------------------------------------------------------------
 wiki :: ByteString -> IO ByteString
 wiki query = do
-    result <- httpGetScrape Xml url $ \cursor -> do
+    result <- httpScrape Xml url id $ \cursor -> do
         item  <- findRec   (byTagName "Item")        cursor
         descr <- findChild (byTagName "Description") item
         return $ T.encodeUtf8 $ nodeText $ current descr

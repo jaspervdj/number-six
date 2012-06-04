@@ -63,7 +63,7 @@ cleanTumblrJSON str
 -- obtain the last tumble, just pass 1 as the count.
 randomTumble :: ByteString -> Int -> IO ByteString
 randomTumble query count = do
-    result <- parseJsonEither . cleanTumblrJSON <$> httpGet url
+    result <- parseJsonEither . cleanTumblrJSON <$> http url id
     case result of
         Right (Tumblr posts) -> do
             Post url' slug <- randomElement posts

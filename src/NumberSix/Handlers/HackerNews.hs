@@ -65,7 +65,7 @@ instance FromJSON Item where
 --------------------------------------------------------------------------------
 hackerNews :: ByteString -> IO ByteString
 hackerNews query = do
-    json <- httpGet "api.ihackernews.com/page"
+    json <- http "api.ihackernews.com/page" id
     case parseJsonEither json of
         Right (HackerNews items) ->
             let Item title url = items !! idx

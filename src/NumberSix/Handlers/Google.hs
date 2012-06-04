@@ -56,7 +56,7 @@ instance FromJSON Item where
 -- | Returns the URL of the first found link
 google :: ByteString -> IO ByteString
 google query = do
-    json <- httpGet url
+    json <- http url id
     case parseJsonEither json of
         Right (Result (Item _ link : _)) -> return link
         _                                -> randomError

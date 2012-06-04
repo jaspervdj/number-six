@@ -21,7 +21,7 @@ import           NumberSix.Util.Http
 --------------------------------------------------------------------------------
 shorten :: ByteString -> IO ByteString
 shorten query = do
-    result <- httpGetScrape Xml url $
+    result <- httpScrape Xml url id $
         fmap (nodeText . current) . findRec (byTagName "url")
     return $ case result of
         Just x  -> T.encodeUtf8 x

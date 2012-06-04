@@ -38,7 +38,7 @@ instance FromJSON Result where
 
 --------------------------------------------------------------------------------
 eval :: ByteString -> IO ByteString
-eval query = httpGet url >>= \bs -> return $ case parseJsonEither bs of
+eval query = http url id >>= \bs -> return $ case parseJsonEither bs of
     Left _             -> "Request failed!"
     Right (Result t r) -> if ":t" `B.isPrefixOf` query then t else r
     Right (Error e)    -> "Error: " <> e
