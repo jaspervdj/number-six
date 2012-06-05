@@ -53,4 +53,4 @@ ruby cmd = do
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "TryRuby" ["!ruby"] $ liftIO . ruby
+handler = makeBangHandler "TryRuby" ["@"] $ liftIO . ruby
