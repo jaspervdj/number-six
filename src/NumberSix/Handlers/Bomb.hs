@@ -6,18 +6,19 @@ module NumberSix.Handlers.Bomb
 
 
 --------------------------------------------------------------------------------
-import           Control.Applicative     ((<$>))
+import           Control.Applicative       ((<$>))
 import           Control.Concurrent.MVar
-import           Control.Monad.Trans     (liftIO)
-import           Data.ByteString         (ByteString)
-import qualified Data.ByteString.Char8   as SBC
-import           Data.Foldable           (forM_)
-import           Data.Map                (Map)
-import qualified Data.Map                as M
+import           Control.Monad.Trans       (liftIO)
+import           Data.ByteString           (ByteString)
+import qualified Data.ByteString.Char8     as SBC
+import           Data.Foldable             (forM_)
+import           Data.Map                  (Map)
+import qualified Data.Map                  as M
 
 
 --------------------------------------------------------------------------------
 import           NumberSix.Bang
+import           NumberSix.Handlers.Insult (randomInsult)
 import           NumberSix.Irc
 import           NumberSix.Message
 import           NumberSix.Util
@@ -48,8 +49,11 @@ bombHook mvar = onBangCommand "!bomb" $ do
         Nothing -> do
             (target, _) <- breakWord <$> getBangCommandText
             sender      <- getSender
-            if target == sender
-                then return Nothing
+            nick        <- getNick
+            if target == sender || target == nick
+                then do
+                    liftIO randomInsult >>= kick sender
+                    return Nothing
                 else do
                     forkIrc $ bomb intervals
                     return $ Just (target, sender)
