@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Insult
     ( handler
+    , randomInsult
     ) where
 
 
@@ -19,12 +20,13 @@ import           NumberSix.Util
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeBangHandler "Insult" ["!insult"] $ liftIO . insult
+handler = makeBangHandler "Insult" ["!insult"] $ \user ->
+    (user <> ": " <>) <$> liftIO randomInsult
 
 
 --------------------------------------------------------------------------------
-insult :: ByteString -> IO ByteString
-insult user = (user <> ": " <>) <$> randomElement insults
+randomInsult :: IO ByteString
+randomInsult = randomElement insults
 
 
 --------------------------------------------------------------------------------
