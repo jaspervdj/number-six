@@ -43,6 +43,7 @@ runApplication logger host port application = do
     connect' = do
         addr <- head <$> S.getAddrInfo Nothing (Just host) (Just $ show port)
         sock <- S.socket (S.addrFamily addr) S.Stream S.defaultProtocol
+        S.setSocketOption sock S.KeepAlive 1
         S.connect sock $ S.addrAddress addr
         return sock
 
