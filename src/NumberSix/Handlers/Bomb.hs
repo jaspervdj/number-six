@@ -92,7 +92,7 @@ passHook mvar = onBangCommand "!pass" $ do
                 return $ Just (newTarget, sender)
             | otherwise         -> do
                 write =<< liftIO randomError
-                return $ Just (sender, attacker)
+                return $ Just (target, attacker)
 
 
 --------------------------------------------------------------------------------
