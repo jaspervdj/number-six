@@ -28,7 +28,7 @@ errors =
     , "Error: error occurred while printing error message"
     , "OHHHH... I give up Core dumped"
     , "COMPILER UNABLE TO ABORT RUN FAST AND DON'T LOOK BACK"
-    , "This is exactly the 1000th error, contact Javache for your price!"
+    , "This is exactly the 1000th error, contact Javache for your prize!"
     , "Maybe you should try asking a human?"
     , "Your request was bad, and you should feel bad"
     , "can't go mucking with a 'void *'"
