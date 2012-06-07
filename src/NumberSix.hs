@@ -19,7 +19,6 @@ import           System.Environment           (getProgName)
 
 --------------------------------------------------------------------------------
 import           NumberSix.Application
-import           NumberSix.ExponentialBackoff
 import           NumberSix.Handlers
 import           NumberSix.Irc
 import           NumberSix.Logger
@@ -69,6 +68,5 @@ numberSixWith :: [UninitializedHandler] -> IrcConfig -> IO ()
 numberSixWith handlers' config = do
     logName <- (++ ".log") <$> getProgName
     logger  <- makeLogger logName
-    exponentialBackoff 30 (5 * 60) $ sandBox_ logger "numberSixWith" Nothing $
-        runApplication logger (SBC.unpack $ ircHost config) (ircPort config)
-            $ application logger handlers' config
+    runApplication logger (SBC.unpack $ ircHost config) (ircPort config) $
+        application logger handlers' config
