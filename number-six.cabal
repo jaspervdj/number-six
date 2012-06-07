@@ -17,7 +17,6 @@ Library
     NumberSix,
     NumberSix.Application,
     NumberSix.Bang,
-    NumberSix.ExponentialBackoff,
     NumberSix.Handlers,
     NumberSix.Handlers.Binary,
     NumberSix.Handlers.Bomb,
