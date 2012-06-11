@@ -7,16 +7,16 @@ module NumberSix.Handlers.Resto
 --------------------------------------------------------------------------------
 import           Control.Monad         (mzero)
 import           Control.Monad.Trans   (liftIO)
-import           Data.Aeson            (FromJSON (..), Value (..))
+import           Data.Aeson            (FromJSON(..), Value(..))
 import           Data.ByteString       (ByteString)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.HashMap.Lazy     as HM
-import           Data.List             (intercalate)
 import qualified Data.Map              as M
 import           Data.Maybe            (maybeToList)
+import           Data.Text             (Text)
 import qualified Data.Text             as T
 import qualified Data.Text.Encoding    as T
-import           Data.Time             (UTCTime (..), addDays, formatTime, getCurrentTime)
+import           Data.Time             (UTCTime(..), addDays, formatTime, getCurrentTime)
 import qualified Data.Vector           as V
 import           System.Locale         (defaultTimeLocale)
 
@@ -30,19 +30,27 @@ import           NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
-data WeekMenu = WeekMenu (M.Map String [String]) deriving (Show)
+data WeekMenu = WeekMenu (M.Map Text [Text]) deriving (Show)
 
 
 --------------------------------------------------------------------------------
 instance FromJSON WeekMenu where
     parseJSON (Object o) = return $ WeekMenu $ M.fromListWith (++)
-        [ (T.unpack day, [T.unpack name])
+        [ (day, [stripMenu name])
         | (day, Object menu) <- HM.toList o
         , Array meats        <- maybeToList $ HM.lookup "meat" menu
         , Object meat        <- V.toList meats
         , String name        <- maybeToList $ HM.lookup "name" meat
         ]
     parseJSON _          = mzero
+
+
+--------------------------------------------------------------------------------
+-- | Strip trailing # or * character
+stripMenu :: Text -> Text
+stripMenu bs
+    | "*" `T.isSuffixOf` bs || "#" `T.isSuffixOf` bs = T.init bs
+    | otherwise                                      = bs
 
 
 --------------------------------------------------------------------------------
@@ -55,12 +63,12 @@ resto arg = do
         day    = formatTime defaultTimeLocale "%Y-%m-%d" time
         url    = "http://kelder.zeus.ugent.be/~blackskad/resto/api/0.1/week/" ++
             dropWhile (== '0') week ++ ".json"
-   
+
     http (BC.pack url) id >>= \bs -> case parseJsonEither bs of
         Left _             -> randomError
-        Right (WeekMenu m) -> return $ case M.lookup day m of
+        Right (WeekMenu m) -> return $ case M.lookup (T.pack day) m of
             Nothing -> "Resto's not open " <> e <> "..."
-            Just ms -> T.encodeUtf8 $ T.pack $ intercalate ", " ms
+            Just ms -> T.encodeUtf8 $ T.intercalate ", " ms
   where
     days "tomorrow"           = (1, "tomorrow")
     days "morgen"             = (1, "tomorrow")
