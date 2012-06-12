@@ -8,6 +8,7 @@ module NumberSix.Util.BitLy
 
 --------------------------------------------------------------------------------
 import           Data.ByteString     (ByteString)
+import qualified Data.ByteString     as B
 import qualified Data.Text.Encoding  as T
 import           Text.XmlHtml
 import           Text.XmlHtml.Cursor
@@ -15,6 +16,7 @@ import           Text.XmlHtml.Cursor
 
 --------------------------------------------------------------------------------
 import           NumberSix.Message
+import           NumberSix.Util
 import           NumberSix.Util.Http
 
 
@@ -35,8 +37,11 @@ shorten query = do
 
 --------------------------------------------------------------------------------
 textAndUrl :: ByteString -> ByteString -> IO ByteString
-textAndUrl text url = do
-    shortUrl <- shorten url
-    return $ case text of
-        "" -> shortUrl
-        _  -> text <> " >> " <> shortUrl
+textAndUrl text url
+    | B.length long <= maxLineLength = return long
+    | otherwise                      = do
+        shortUrl <- shorten url
+        return $ join text shortUrl
+  where
+    join t u = if B.null t then u else t <> " >> " <> u
+    long     = join text url

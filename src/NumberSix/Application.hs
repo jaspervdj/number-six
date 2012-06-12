@@ -11,7 +11,7 @@ import           Control.Concurrent.MVar   (newMVar, putMVar, takeMVar)
 import           Data.ByteString           (ByteString)
 import qualified Data.ByteString           as B
 import qualified Data.ByteString.Char8     as BC
-import           Data.Monoid               (mempty, mappend)
+import           Data.Monoid               (mappend, mempty)
 import           Network.Socket            (Socket)
 import qualified Network.Socket            as S
 import           Network.Socket.ByteString
@@ -22,6 +22,7 @@ import           NumberSix.Logger
 import           NumberSix.Message
 import           NumberSix.Message.Decode
 import           NumberSix.Message.Encode
+import           NumberSix.Util
 
 
 --------------------------------------------------------------------------------
@@ -106,7 +107,7 @@ makeMessageWriter :: Logger -> Socket -> IO (Message -> IO ())
 makeMessageWriter logger sock = do
     lineWriter <- makeLineWriter sock
     return $ \msg -> do
-        let bs        = encode msg
-            sanitized = B.take 450 $ B.takeWhile (`B.notElem` "\r\n") bs
-        logger $ "OUT: " `B.append` sanitized
-        lineWriter sanitized
+        let bs  = encode msg
+            san = B.take maxLineLength $ B.takeWhile (`B.notElem` "\r\n") bs
+        logger $ "OUT: " `B.append` san
+        lineWriter san

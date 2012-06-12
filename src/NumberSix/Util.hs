@@ -13,6 +13,7 @@ module NumberSix.Util
     , randomElement
     , parseJsonEither
     , readByteString
+    , maxLineLength
     ) where
 
 
@@ -97,3 +98,9 @@ readByteString :: Read a => ByteString -> Maybe a
 readByteString bs = case reads (BC.unpack bs) of
     [(x, "")] -> Just x
     _         -> Nothing
+
+
+--------------------------------------------------------------------------------
+-- | To prevent flooding
+maxLineLength :: Int
+maxLineLength = 450
