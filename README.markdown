@@ -1,12 +1,20 @@
 Number Six
 ==========
 
-Number six is a custom IRC bot, developped for the `#ghentfpg` IRC channels.
+[![Build Status](https://secure.travis-ci.org/jaspervdj/number-six.png?branch=master)](http://travis-ci.org/jaspervdj/number-six)
+
+Number six is a custom IRC bot, developed for student IRC channels at UGent.
 
 Compiling & Running
 ===================
 
-The best way to get started is to copy `Sample.hs` and start from there.
+Begin by installing the library:
+
+    cabal configure
+    cabal build
+    cabal install
+
+Them, you can get started by copying `Sample.hs` and starting from there.
 Configure it, then compile & run using:
 
     `ghc --make Sample.hs`
@@ -39,41 +47,12 @@ A cool IRC game.
   only be issued by the current person owning them bomb.
 - `!pass nick`: Passes the bomb to the specified user
 
-Cubits
-------
-
-Give or take cubits from a user. God is required for giving or taking cubits.
-Commands:
-
-- `!cubits`: Print the number of cubits of the sender
-- `!cubits nick`: Print the number of cubits of the specified user
-- `!cubits nick n`: Give `n` (possibly negative) cubits to the specified user
-
-Down
-----
-
-Check if a website is down. Commands:
-
-- `!down url`: Check if the website is down
-
 EightBall
 ---------
 
 Ask a question to the wise 8-ball handler. Commands:
 
 - `!8ball question`: Ask a question
-
-Flickr
-------
-
-Get the last picture of the given flickr member. You need to
-provide the user's nickname, e.g., itkovian for pictures reached
-at http://flickr.com/photos/itkovian. Requires the flickr package
-(http://hackage.haskell.org/package/flickr-0.3.3).
-
-- `!flickr fave nickname`: Get the last faved picture for the user
-- `!flickr last nickname`: Get the last available picture from the user
-- `!flickr random nickname`: Get a random picture from the user
 
 GitHub
 ------
@@ -123,11 +102,26 @@ Provides information. Commands:
 
 - `!help`: Print help information
 
+Http
+----
+
+Sends an HTTP GET request to a server and returns the status line, useful if you
+want to check if a web service is down for everyone or just you. Commands:
+
+- `!http uri`: Check the given URI
+
 Identify
 --------
 
 System handler which sets the nickname and the real name of the bot. This
 handler has no commands.
+
+Insult
+------
+
+Insult a user.
+
+- `!insult user`: Insults the given user.
 
 Join
 ----
@@ -144,13 +138,6 @@ LastFm
 Check what track a user last listened to on last.fm. Commands:
 
 - `!lastfm username`: Print the track the given user last listened to.
-
-Meme
-----
-
-Lookup a meme on knowyourmeme.com. Commands:
-
-- `!meme term`: Search for the given term in the meme database
 
 NickServ
 --------
@@ -177,6 +164,13 @@ Give channel operator privileges. Commands:
 - `!op nick`: Given channel operator privileges to the specified user
 - `!deop nick`: Take away channel operator privileges from the specified user
 
+Pick
+----
+
+Pick a random item from a list. Commands:
+
+- `!pick item1 item2 item3 ...`, `!who ...`: Print a random item from the list.
+
 Ping
 ----
 
@@ -187,7 +181,20 @@ Reddit
 
 Print a random item from a subreddit. Commands:
 
-- `!reddit name`: Prints a random item from the given subreddit
+- `!reddit subreddit`: Prints a random item from the given subreddit
+- `!reddit subreddit number`: Print the given item from the given subreddit
+- `!reddit`: Print a random item from the front page
+- `!reddit number`: Print the given item from the front page
+
+Resto
+-----
+
+Print the menu of today in the Ghent University resto's, see also
+<https://github.com/blackskad/Resto-menu>
+
+- `!resto`: Print today's menu
+- `!resto day`: `day` can be: `morgen`, `tomorrow`, `overmorgen`,
+  `day after tomorrow`
 
 Quote
 -----
@@ -221,13 +228,6 @@ Shortens a URL using bit.ly. Commands:
 
 - `!shorten url`: Shorten the given URL
 
-Slap
-----
-
-Shows the bot's superiority to a user. Commands:
-
-- `!slap nick`: Slaps the specified user around a bit.
-
 Sup
 ---
 
@@ -242,13 +242,6 @@ Send a message to a user who is currently away. Commands:
 - `!tell username message`: Tell the message to the given user when he becomes
   active.
 
-Title
------
-
-Prints the title of a web page. Commands:
-
-- `!title url`: Print the title of the given webpage
-
 Topic
 -----
 
@@ -262,6 +255,13 @@ TryHaskell
 Bindings to the haskell evaluation service of tryhaskell.org. Commands:
 
 - `> expression`, `!haskell expression`: Evaluate the given expression
+
+TryRuby
+-------
+
+Bindings to the ruby evaluation service of tryruby.org. Commands:
+
+- `!ruby expression`: Evaluate the given expression
 
 Tumblr
 ------
@@ -296,6 +296,14 @@ be set manually, altough this requires god privileges:
 
 - `!voice nick`: Give a user voice
 - `!devoice nick`, `!stfu nick`: Take voice from a user
+
+Weather
+-------
+
+How is the fucking weather? Commands:
+
+- `!weather`: Prints the weather in Ghent
+- `!weather city`: Prints the weather in the given city
 
 Wikipedia
 ---------
