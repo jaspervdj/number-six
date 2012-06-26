@@ -18,6 +18,7 @@ import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Message
 import           NumberSix.Util
+import           NumberSix.Util.BitLy
 import           NumberSix.Util.Error
 import           NumberSix.Util.Http
 
@@ -58,8 +59,8 @@ google :: ByteString -> IO ByteString
 google query = do
     json <- http url id
     case parseJsonEither json of
-        Right (Result (Item _ link : _)) -> return link
-        _                                -> randomError
+        Right (Result (Item title link : _)) -> textAndUrl title link
+        _                                    -> randomError
   where
     url = "https://www.googleapis.com/customsearch/v1" <>
         "?q=" <> urlEncode query <>
