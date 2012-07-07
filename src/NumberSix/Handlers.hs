@@ -27,6 +27,7 @@ import qualified NumberSix.Handlers.Pick
 import qualified NumberSix.Handlers.Ping
 import qualified NumberSix.Handlers.Quote
 import qualified NumberSix.Handlers.Reddit
+import qualified NumberSix.Handlers.Remind
 import qualified NumberSix.Handlers.Resto
 import qualified NumberSix.Handlers.Say
 import qualified NumberSix.Handlers.Seen
