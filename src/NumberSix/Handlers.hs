@@ -71,6 +71,7 @@ handlers =
     , NumberSix.Handlers.Ping.handler
     , NumberSix.Handlers.Quote.handler
     , NumberSix.Handlers.Reddit.handler
+    , NumberSix.Handlers.Remind.handler
     , NumberSix.Handlers.Resto.handler
     , NumberSix.Handlers.Say.handler
     , NumberSix.Handlers.Seen.handler
