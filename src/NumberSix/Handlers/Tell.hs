@@ -5,7 +5,6 @@ module NumberSix.Handlers.Tell
 
 
 --------------------------------------------------------------------------------
---------------------------------------------------------------------------------
 import           Control.Applicative  ((<$>))
 import           Control.Monad        (forM_)
 import           Control.Monad.Trans  (liftIO)

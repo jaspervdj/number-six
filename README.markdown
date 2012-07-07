@@ -186,6 +186,14 @@ Print a random item from a subreddit. Commands:
 - `!reddit`: Print a random item from the front page
 - `!reddit number`: Print the given item from the front page
 
+Remind
+------
+
+Set reminders for yourself. Commands:
+
+- `!remind some note`: Store a note
+- `!remind`: Collect stored notes
+
 Resto
 -----
 
