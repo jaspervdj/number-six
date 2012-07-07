@@ -78,7 +78,7 @@ loadHook = onBangCommand "!reminders" $ do
         [] -> return ()
         rs -> do
             -- delete the messages from the DB
-            withSql $ \c -> run c
+            _ <- withSql $ \c -> run c
                 "DELETE FROM reminders \
                 \WHERE host = ? AND channel = ? AND recipient = ?"
                 [ toSql host, toSql channel, toSql recipient ]
