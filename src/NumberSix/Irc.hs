@@ -34,6 +34,7 @@ module NumberSix.Irc
       -- * Sending responses
     , writeMessage
     , writeChannel
+    , writeNick
 
       -- * Simple responses
     , write
@@ -241,6 +242,13 @@ writeChannel destination string =
   where
     string' | SB.length string <= 400 = string
             | otherwise = SB.take 400 string <> "..."
+
+-- | Write a message to a specific nick
+--
+writeNick :: ByteString  -- ^ The user's nickname
+          -> ByteString  -- ^ Message text
+          -> Irc ()
+writeNick = writeChannel
 
 -- | Write a message to the active channel
 --
