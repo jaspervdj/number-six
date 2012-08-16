@@ -61,7 +61,7 @@ resto arg = do
         time   = currentTime {utctDay = d `addDays` utctDay currentTime}
         week   = formatTime defaultTimeLocale "%U"       time
         day    = formatTime defaultTimeLocale "%Y-%m-%d" time
-        url    = "http://kelder.zeus.ugent.be/~blackskad/resto/api/0.1/week/" ++
+        url    = "http://zeus.ugent.be/hydra/api/1.0/resto/week/" ++
             dropWhile (== '0') week ++ ".json"
 
     http (BC.pack url) id >>= \bs -> case parseJsonEither bs of
