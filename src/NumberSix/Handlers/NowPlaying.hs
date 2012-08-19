@@ -54,7 +54,7 @@ rgrfm = do
         Just [x, _, y] -> return $ T.encodeUtf8 x <> " - " <> T.encodeUtf8 y
         _              -> randomError
   where
-    url  = "http://www.rgrfm.be/core/jajaxfiles/nowplaying.php"
+    url = "http://www.rgrfm.be/core/jajaxfiles/nowplaying.php"
 
     mreq :: Monad m => HC.Request m -> HC.Request m
     mreq = HC.urlEncodedBody [("ajax", "jajax")]
@@ -62,9 +62,10 @@ rgrfm = do
 
 --------------------------------------------------------------------------------
 urgent :: IO ByteString
-urgent = catch (http url id) (\(SomeException e) -> randomError)
+urgent = catch (http url id) (\(SomeException _) -> randomError)
   where
-    url  = "http://urgent.fm/nowplaying/livetrack.txt"
+    url = "http://urgent.fm/nowplaying/livetrack.txt"
+
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler

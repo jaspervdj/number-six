@@ -154,7 +154,8 @@ Show the currently playing track on a radio station. Commands:
 
 Supported radio stations:
 
-- `stubru`
+- [rgrfm](http://www.rgrfm.be/), [stubru](http://www.stubru.be/) and
+  [urgent](http://urgent.fm/)
 
 Op
 --
