@@ -7,10 +7,12 @@ module NumberSix.Handlers.NowPlaying
 
 --------------------------------------------------------------------------------
 import           Control.Applicative  ((<$>))
+import           Control.Exception
 import           Control.Monad.Trans  (liftIO)
 import           Data.ByteString      (ByteString)
 import qualified Data.Text.Encoding   as T
 import qualified Network.HTTP.Conduit as HC
+import           Prelude hiding (catch)
 import           Text.XmlHtml
 import           Text.XmlHtml.Cursor
 
@@ -59,9 +61,16 @@ rgrfm = do
 
 
 --------------------------------------------------------------------------------
+urgent :: IO ByteString
+urgent = catch (http url id) (\(SomeException e) -> randomError)
+  where
+    url  = "http://urgent.fm/nowplaying/livetrack.txt"
+
+--------------------------------------------------------------------------------
 handler :: UninitializedHandler
 handler = makeBangHandler "NowPlaying" ["!nowplaying"] $ \str -> liftIO $
     case str of
         "stubru" -> stubru
         "rgrfm"  -> rgrfm
+        "urgent" -> urgent
         _        -> return "That's not even a real radio station anyway."
