@@ -7,6 +7,7 @@ module NumberSix.Handlers.RotatingLogger
 --------------------------------------------------------------------------------
 import           Control.Applicative     ((<$>))
 import           Control.Concurrent.MVar (MVar, newMVar, putMVar, takeMVar)
+import           Control.Monad.Reader    (ask)
 import           Control.Monad.Trans     (liftIO)
 import           Data.ByteString         (ByteString)
 import qualified Data.ByteString.Char8   as BC
@@ -49,12 +50,14 @@ logHook mvar = onCommand "PRIVMSG" $ do
     now <- liftIO getCurrentTime
     text <- getMessageText
 
+    channelLogDir <- ircChannelLogDir . ircConfig . ircEnvironment <$> ask
+
     liftIO $ do
         let ymd = formatTime defaultTimeLocale "%Y-%m-%d" now
         let time = formatTime defaultTimeLocale "%c" now
 
         logState <- takeMVar mvar
-        (logHandle, logState') <- getLog logState channel ymd
+        (logHandle, logState') <- getLog channelLogDir logState channel ymd
 
         BC.hPutStrLn logHandle $ formatMessage (BC.pack time) sender text
         IO.hFlush logHandle
@@ -74,11 +77,12 @@ formatMessage time sender message = BC.concat ["[", time, "] : (", sender, ") : 
 --------------------------------------------------------------------------------
 -- | Get the handle to the log file for the (channel, date) combo or
 -- open a new log file for that
-getLog :: LogState              -- ^ Current map between channels and (log name, handle)
+getLog :: String                -- ^ Base directory for storing channel logs
+       -> LogState              -- ^ Current map between channels and (log name, handle)
        -> ByteString            -- ^ Channel name
        -> String                -- ^ Date string, i.e., log name
        -> IO (Handle, LogState) -- ^ New mapping
-getLog state channel ymd =
+getLog channelLogBaseDir state channel ymd =
     case Map.lookup channel state of
         Just (currentYmd, currentHandle)
             | currentYmd == ymd -> return (currentHandle, state)
@@ -86,7 +90,7 @@ getLog state channel ymd =
                                       newLog
         Nothing -> newLog
   where newLog = do
-            let logDirectory = joinPath ["log", BC.unpack channel]
+            let logDirectory = joinPath [channelLogBaseDir, BC.unpack channel]
             createDirectoryIfMissing True logDirectory
             handle <- IO.openFile (joinPath [logDirectory, ymd]) IO.AppendMode
             let state' = Map.alter (\_ -> Just (ymd, handle)) channel state
