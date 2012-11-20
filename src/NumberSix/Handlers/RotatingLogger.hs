@@ -51,7 +51,7 @@ logHook mvar = onCommand "PRIVMSG" $ do
 
     liftIO $ do
         let ymd = formatTime defaultTimeLocale "%Y-%m-%d" now
-        let time = formatTime defaultTimeLocale "%c " now
+        let time = formatTime defaultTimeLocale "%c" now
 
         logState <- takeMVar mvar
         (logHandle, logState') <- getLog logState channel ymd
