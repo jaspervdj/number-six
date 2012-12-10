@@ -80,7 +80,7 @@ Library
     containers           >= 0.3  && < 0.6,
     dataenc              >= 0.13 && < 0.15,
     deepseq              >= 1.0  && < 1.4,
-    http-conduit         >= 1.4  && < 1.7,
+    http-conduit         >= 1.4  && < 1.9,
     http-types           >= 0.6  && < 0.8,
     mtl                  >= 2    && < 2.2,
     network              >= 2.3  && < 2.4,
@@ -89,7 +89,7 @@ Library
     text                 >= 0.10 && < 0.12,
     time                 >= 1.0  && < 1.5,
     unordered-containers >= 0.1  && < 0.3,
-    vector               >= 0.7  && < 0.10,
+    vector               >= 0.7  && < 0.11,
     xmlhtml              >= 0.1  && < 0.3
 
 Test-suite number-six-tests
@@ -100,7 +100,6 @@ Test-suite number-six-tests
 
   Build-depends:
     HUnit                >= 1.2 && < 1.3,
-    containers           >= 0.3 && < 0.5,
     test-framework       >= 0.4 && < 0.7,
     test-framework-hunit >= 0.2 && < 0.3,
     -- Copied from regular dependencies...
@@ -113,7 +112,7 @@ Test-suite number-six-tests
     containers           >= 0.3  && < 0.6,
     dataenc              >= 0.13 && < 0.15,
     deepseq              >= 1.0  && < 1.4,
-    http-conduit         >= 1.4  && < 1.7,
+    http-conduit         >= 1.4  && < 1.9,
     http-types           >= 0.6  && < 0.8,
     mtl                  >= 2    && < 2.2,
     network              >= 2.3  && < 2.4,
@@ -122,5 +121,5 @@ Test-suite number-six-tests
     text                 >= 0.10 && < 0.12,
     time                 >= 1.0  && < 1.5,
     unordered-containers >= 0.1  && < 0.3,
-    vector               >= 0.7  && < 0.10,
+    vector               >= 0.7  && < 0.11,
     xmlhtml              >= 0.1  && < 0.3
