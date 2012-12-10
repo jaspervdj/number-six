@@ -90,9 +90,8 @@ passHook mvar = onBangCommand "!pass" $ do
                 let newTarget = if SBC.null text then attacker else text
                 write $ sender <> " passes the bomb to " <> newTarget <> "!"
                 return $ Just (newTarget, sender)
-            | otherwise         -> do
-                write =<< liftIO randomError
-                return $ Just (target, attacker)
+            -- Nothing changes
+            | otherwise         -> return $ Just (target, attacker)
 
 
 --------------------------------------------------------------------------------
