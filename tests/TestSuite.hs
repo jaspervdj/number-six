@@ -1,13 +1,15 @@
 --------------------------------------------------------------------------------
-import Test.Framework (defaultMain)
+import           Test.Framework                 (defaultMain)
 
 
 --------------------------------------------------------------------------------
+import qualified NumberSix.Handlers.Imdb.Tests
 import qualified NumberSix.Message.Decode.Tests
 
 
 --------------------------------------------------------------------------------
 main :: IO ()
 main = defaultMain
-    [ NumberSix.Message.Decode.Tests.tests
+    [ NumberSix.Handlers.Imdb.Tests.tests
+    , NumberSix.Message.Decode.Tests.tests
     ]
