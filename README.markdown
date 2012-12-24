@@ -212,6 +212,13 @@ Print the menu of today in the Ghent University resto's, see also
 - `!resto day`: `day` can be: `morgen`, `tomorrow`, `overmorgen`,
   `day after tomorrow`
 
+Rr
+--
+
+Challenge a user to a game of russian roulette. Commands:
+
+- `!rr username`: Challenge the specified user
+
 Quote
 -----
 
