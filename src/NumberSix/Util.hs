@@ -39,9 +39,9 @@ import           NumberSix.Message
 
 --------------------------------------------------------------------------------
 -- | Sleep a while.
-sleep :: Int     -- ^ Number of seconds to sleep
+sleep :: Double  -- ^ Number of seconds to sleep
       -> Irc ()  -- ^ Result
-sleep = liftIO . threadDelay . (* 1000000)
+sleep x = liftIO $ threadDelay (round $ x * 1000000)
 
 
 --------------------------------------------------------------------------------
