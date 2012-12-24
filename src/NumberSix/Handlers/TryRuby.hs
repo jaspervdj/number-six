@@ -1,7 +1,8 @@
 --------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.TryRuby
-    ( handler
+    ( ruby
+    , handler
     ) where
 
 
