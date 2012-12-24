@@ -48,7 +48,7 @@ rr = do
             liftIO randomInsult >>= kick shooter
         else do
             write $ shooter <> " takes the gun... CLICK!"
-            sleep 1
+            sleep 0.5
 
 
 --------------------------------------------------------------------------------
