@@ -64,6 +64,8 @@ resto arg = do
         url    = "http://zeus.ugent.be/hydra/api/1.0/resto/week/" ++
             dropWhile (== '0') week ++ ".json"
 
+    putStrLn day
+    putStrLn url
     http (BC.pack url) id >>= \bs -> case parseJsonEither bs of
         Left _             -> randomError
         Right (WeekMenu m) -> return $ case M.lookup (T.pack day) m of

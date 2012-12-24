@@ -7,14 +7,14 @@ module NumberSix
 
 
 --------------------------------------------------------------------------------
-import           Control.Applicative          ((<$>))
-import           Control.Concurrent           (forkIO)
-import           Control.Concurrent.MVar      (newMVar)
-import           Control.Monad                (forM, forM_)
-import qualified Data.ByteString.Char8        as SBC
-import           Data.Maybe                   (catMaybes)
-import           Prelude                      hiding (catch)
-import           System.Environment           (getProgName)
+import           Control.Applicative     ((<$>))
+import           Control.Concurrent      (forkIO)
+import           Control.Concurrent.MVar (newMVar)
+import           Control.Monad           (forM, forM_)
+import qualified Data.ByteString.Char8   as SBC
+import           Data.Maybe              (catMaybes)
+import           Prelude                 hiding (catch)
+import           System.Environment      (getProgName)
 
 
 --------------------------------------------------------------------------------

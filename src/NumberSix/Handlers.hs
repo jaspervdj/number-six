@@ -17,6 +17,7 @@ import qualified NumberSix.Handlers.Hello
 import qualified NumberSix.Handlers.Help
 import qualified NumberSix.Handlers.Http
 import qualified NumberSix.Handlers.Identify
+import qualified NumberSix.Handlers.Imdb
 import qualified NumberSix.Handlers.Insult
 import qualified NumberSix.Handlers.Join
 import qualified NumberSix.Handlers.LastFm
@@ -61,6 +62,7 @@ handlers =
     , NumberSix.Handlers.Help.handler
     , NumberSix.Handlers.Http.handler
     , NumberSix.Handlers.Identify.handler
+    , NumberSix.Handlers.Imdb.handler
     , NumberSix.Handlers.Insult.handler
     , NumberSix.Handlers.Join.handler
     , NumberSix.Handlers.LastFm.handler

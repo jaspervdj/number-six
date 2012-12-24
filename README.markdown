@@ -116,10 +116,17 @@ Identify
 System handler which sets the nickname and the real name of the bot. This
 handler has no commands.
 
+Imdb
+----
+
+Lookup a movie on IMDB. Commands:
+
+- `!imdb title`: Lookup the given movie.
+
 Insult
 ------
 
-Insult a user.
+Insult a user. Commands:
 
 - `!insult user`: Insults the given user.
 
