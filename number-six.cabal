@@ -42,6 +42,7 @@ Library
     NumberSix.Handlers.Reddit,
     NumberSix.Handlers.Remind,
     NumberSix.Handlers.Resto,
+    NumberSix.Handlers.Rr,
     NumberSix.Handlers.Say,
     NumberSix.Handlers.Seen,
     NumberSix.Handlers.Shorten,
