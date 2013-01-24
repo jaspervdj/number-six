@@ -49,7 +49,7 @@ instance FromJSON Tweet where
 getTweet :: ByteString -> IO ByteString
 getTweet bs = case parseJsonEither bs of
     Left  _                        -> randomError
-    Right (Tweet (User user) text) -> return $
+    Right (Tweet (User user) text) -> return $ removeNewlines $
         if "RT " `B.isPrefixOf` text then text else "@" <> user <> ": " <> text
 
 
