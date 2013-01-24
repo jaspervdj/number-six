@@ -102,8 +102,8 @@ Test-suite number-six-tests
 
   Build-depends:
     HUnit                >= 1.2 && < 1.3,
-    test-framework       >= 0.4 && < 0.7,
-    test-framework-hunit >= 0.2 && < 0.3,
+    test-framework       >= 0.4 && < 0.9,
+    test-framework-hunit >= 0.2 && < 0.4,
     -- Copied from regular dependencies...
     HDBC                 >= 2.2  && < 2.4,
     HDBC-postgresql      >= 2.2  && < 2.4,
