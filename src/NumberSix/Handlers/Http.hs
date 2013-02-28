@@ -28,7 +28,7 @@ import           NumberSix.Util.Http   (httpPrefix)
 http :: ByteString -> IO ByteString
 http uri = do
     req <- H.parseUrl uri'
-    let req' = req {H.redirectCount = 0, H.checkStatus = \_ _ -> Nothing}
+    let req' = req {H.redirectCount = 0, H.checkStatus = \_ _ _ -> Nothing}
     rsp <- H.withManager $ \m -> H.httpLbs req' m
     let status   = H.responseStatus rsp
         location
