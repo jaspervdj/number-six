@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Google
-    ( handler
-    , google
+    ( google
+    , handler
     ) where
 
 

@@ -28,12 +28,20 @@ import           NumberSix.Util.Http   (httpPrefix)
 http :: ByteString -> IO ByteString
 http uri = do
     req <- H.parseUrl uri'
-    let req' = req {H.redirectCount = 0, H.checkStatus = \_ _ -> Nothing}
+    let req' = req {H.redirectCount = 0, H.checkStatus = \_ _ _ -> Nothing}
     rsp <- H.withManager $ \m -> H.httpLbs req' m
-    let status = H.responseStatus rsp
+    let status   = H.responseStatus rsp
+        location
+            | H.statusCode status < 300  = ""
+            | H.statusCode status >= 400 = ""
+            | otherwise                  =
+                case lookup "Location" (H.responseHeaders rsp) of
+                    Nothing  -> ""
+                    Just loc -> " (Location: " <> loc <> ")"
+
     return $ BC.pack (show $ H.responseVersion rsp) <> " " <>
         BC.pack (show $ H.statusCode status) <> " " <>
-        H.statusMessage status
+        H.statusMessage status <> location
   where
     uri' = T.unpack $ T.decodeUtf8 $ httpPrefix uri
 

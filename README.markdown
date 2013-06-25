@@ -116,10 +116,17 @@ Identify
 System handler which sets the nickname and the real name of the bot. This
 handler has no commands.
 
+Imdb
+----
+
+Lookup a movie on IMDB. Commands:
+
+- `!imdb title`: Lookup the given movie.
+
 Insult
 ------
 
-Insult a user.
+Insult a user. Commands:
 
 - `!insult user`: Insults the given user.
 
@@ -204,6 +211,13 @@ Print the menu of today in the Ghent University resto's, see also
 - `!resto`: Print today's menu
 - `!resto day`: `day` can be: `morgen`, `tomorrow`, `overmorgen`,
   `day after tomorrow`
+
+Rr
+--
+
+Challenge a user to a game of russian roulette. Commands:
+
+- `!rr username`: Challenge the specified user
 
 Quote
 -----

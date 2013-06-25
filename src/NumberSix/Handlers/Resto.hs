@@ -7,7 +7,7 @@ module NumberSix.Handlers.Resto
 --------------------------------------------------------------------------------
 import           Control.Monad         (mzero)
 import           Control.Monad.Trans   (liftIO)
-import           Data.Aeson            (FromJSON(..), Value(..))
+import           Data.Aeson            (FromJSON (..), Value (..))
 import           Data.ByteString       (ByteString)
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.HashMap.Lazy     as HM
@@ -16,7 +16,8 @@ import           Data.Maybe            (maybeToList)
 import           Data.Text             (Text)
 import qualified Data.Text             as T
 import qualified Data.Text.Encoding    as T
-import           Data.Time             (UTCTime(..), addDays, formatTime, getCurrentTime)
+import           Data.Time             (UTCTime (..), addDays, formatTime,
+                                        getCurrentTime)
 import qualified Data.Vector           as V
 import           System.Locale         (defaultTimeLocale)
 
@@ -36,7 +37,7 @@ data WeekMenu = WeekMenu (M.Map Text [Text]) deriving (Show)
 --------------------------------------------------------------------------------
 instance FromJSON WeekMenu where
     parseJSON (Object o) = return $ WeekMenu $ M.fromListWith (++)
-        [ (day, [stripMenu name])
+        [ (day, [T.strip $ stripMenu name])
         | (day, Object menu) <- HM.toList o
         , Array meats        <- maybeToList $ HM.lookup "meat" menu
         , Object meat        <- V.toList meats
@@ -59,7 +60,7 @@ resto arg = do
     currentTime <- getCurrentTime
     let (d, e) = days arg
         time   = currentTime {utctDay = d `addDays` utctDay currentTime}
-        week   = formatTime defaultTimeLocale "%U"       time
+        week   = formatTime defaultTimeLocale "%V"       time
         day    = formatTime defaultTimeLocale "%Y-%m-%d" time
         url    = "http://zeus.ugent.be/hydra/api/1.0/resto/week/" ++
             dropWhile (== '0') week ++ ".json"
