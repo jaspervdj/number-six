@@ -1,13 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-module NumberSix.Handlers.Sup
+module NumberSix.Handlers.AlfaPapaTango
     ( handler
     ) where
 
-import Control.Applicative ((<$>))
-import Control.Monad (when)
-
-import qualified Data.ByteString as B
-import           Data.List (intercalate)
+import qualified Data.ByteString.Char8 as BC
 import qualified Data.Map as M
 
 import NumberSix.Irc
@@ -20,10 +16,11 @@ alfaPapaTangoHook :: Irc ()
 alfaPapaTangoHook = onCommand "PRIVMSG" $ do
     text <- getMessageText
     sender <- getSender
-    let replyText = map translate text
-    write $ sender <> " " <> replyText
+    let replyText = translate text
+    write $ sender <> replyText
 
-letterMap = M.fromList $ zip [a..z] $
+letterMap :: M.Map Char BC.ByteString
+letterMap = M.fromList $ zip ['a'..'z'] $ map BC.pack
     [ "alfa"
     , "bravo"
     , "charlie"
@@ -52,9 +49,7 @@ letterMap = M.fromList $ zip [a..z] $
     , "zulu"
     ]
 
-translate :: String -> String
-translate letters = 
-    let ws = map (\c -> case Map.lookup c letterMap of 
-                            Just s -> s
-                            Nothing -> [c]) letters
-    in intercalate (" " :: String) ws
+translate :: BC.ByteString -> BC.ByteString
+translate letters = BC.concatMap (\c -> case M.lookup c letterMap of 
+                                            Just s -> s
+                                            Nothing -> BC.pack [c]) letters
