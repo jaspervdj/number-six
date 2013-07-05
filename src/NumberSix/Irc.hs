@@ -72,15 +72,16 @@ import NumberSix.Message.Encode (encodePrefix)
 -- | User-specified IRC configuration
 --
 data IrcConfig = IrcConfig
-    { ircNick        :: ByteString
-    , ircRealName    :: ByteString
-    , ircChannels    :: [ByteString]
-    , ircHost        :: ByteString
-    , ircPort        :: Int
-    , ircGodPassword :: ByteString
-    , ircDatabase    :: String
+    { ircNick          :: ByteString
+    , ircRealName      :: ByteString
+    , ircChannels      :: [ByteString]
+    , ircHost          :: ByteString
+    , ircPort          :: Int
+    , ircGodPassword   :: ByteString
+    , ircDatabase      :: String
+    , ircChannelLogDir :: String
     , -- (NickServ service name, auth line)
-      ircNickServ    :: Maybe (ByteString, ByteString)
+      ircNickServ      :: Maybe (ByteString, ByteString)
     }
 
 -- | An IRC God
