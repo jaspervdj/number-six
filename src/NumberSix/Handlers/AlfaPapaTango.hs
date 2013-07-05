@@ -6,14 +6,15 @@ module NumberSix.Handlers.AlfaPapaTango
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.Map as M
 
-import NumberSix.Irc
-import NumberSix.Message
+import           NumberSix.Bang
+import           NumberSix.Irc
+import           NumberSix.Message
 
 handler :: UninitializedHandler
 handler = makeHandler "AlfaPapaTango" [alfaPapaTangoHook]
 
 alfaPapaTangoHook :: Irc ()
-alfaPapaTangoHook = onCommand "PRIVMSG" $ do
+alfaPapaTangoHook = onBangCommand "!nato" $ do
     text <- getMessageText
     sender <- getSender
     let replyText = translate text
