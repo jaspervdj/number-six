@@ -4,6 +4,7 @@ module NumberSix.Handlers.AlfaPapaTango
     ) where
 
 import qualified Data.ByteString.Char8 as BC
+import qualified Data.Char as DC (toLower)
 import qualified Data.Map as M
 
 import           NumberSix.Bang
@@ -51,6 +52,6 @@ letterMap = M.fromList $ zip ['a'..'z'] $ map BC.pack
     ]
 
 translate :: BC.ByteString -> BC.ByteString
-translate letters = BC.tail $ BC.concatMap (\c -> case M.lookup c letterMap of 
+translate letters = BC.tail $ BC.concatMap (\c -> case M.lookup (DC.toLower c) letterMap of 
                                                     Just s -> s
                                                     Nothing -> BC.pack [' ',c]) letters
