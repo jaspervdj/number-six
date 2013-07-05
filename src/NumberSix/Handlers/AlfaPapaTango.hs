@@ -15,7 +15,7 @@ handler = makeHandler "AlfaPapaTango" [alfaPapaTangoHook]
 
 alfaPapaTangoHook :: Irc ()
 alfaPapaTangoHook = onBangCommand "!nato" $ do
-    text <- getMessageText
+    text <- getBangCommandText
     sender <- getSender
     let replyText = translate text
     write $ sender <> replyText
