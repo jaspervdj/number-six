@@ -6,6 +6,7 @@ module NumberSix.Handlers
 
 
 --------------------------------------------------------------------------------
+import qualified NumberSix.Handlers.AlfaPapaTango
 import qualified NumberSix.Handlers.Binary
 import qualified NumberSix.Handlers.Bomb
 import qualified NumberSix.Handlers.EightBall
@@ -52,7 +53,8 @@ import           NumberSix.Irc
 --------------------------------------------------------------------------------
 handlers :: [UninitializedHandler]
 handlers =
-    [ NumberSix.Handlers.Binary.handler
+    [ NumberSix.Handlers.AlfaPapaTango.handler
+    , NumberSix.Handlers.Binary.handler
     , NumberSix.Handlers.Bomb.handler
     , NumberSix.Handlers.EightBall.handler
     , NumberSix.Handlers.GitHub.handler
