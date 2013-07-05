@@ -18,6 +18,7 @@ Library
     NumberSix.Application,
     NumberSix.Bang,
     NumberSix.Handlers,
+    NumberSix.Handlers.AlfaPapaTango,
     NumberSix.Handlers.Binary,
     NumberSix.Handlers.Bomb,
     NumberSix.Handlers.EightBall,
