@@ -9,7 +9,6 @@ import qualified Data.Map as M
 
 import           NumberSix.Bang
 import           NumberSix.Irc
-import           NumberSix.Message
 
 handler :: UninitializedHandler
 handler = makeHandler "AlfaPapaTango" [alfaPapaTangoHook]
@@ -17,9 +16,7 @@ handler = makeHandler "AlfaPapaTango" [alfaPapaTangoHook]
 alfaPapaTangoHook :: Irc ()
 alfaPapaTangoHook = onBangCommand "!nato" $ do
     text <- getBangCommandText
-    sender <- getSender
-    let replyText = translate text
-    write $ sender <> replyText
+    writeReply $ translate text
 
 letterMap :: M.Map Char BC.ByteString
 letterMap = M.fromList $ zip ['a'..'z'] $ map BC.pack
