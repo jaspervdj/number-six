@@ -74,8 +74,6 @@ Library
     NumberSix.Util.Time
 
   Build-depends:
-    HDBC                 >= 2.2  && < 2.4,
-    HDBC-postgresql      >= 2.2  && < 2.4,
     aeson                >= 0.5  && < 0.7,
     attoparsec           >= 0.8  && < 0.11,
     base                 >= 4    && < 5,
@@ -89,6 +87,7 @@ Library
     network              >= 2.3  && < 2.5,
     old-locale           >= 1.0  && < 1.1,
     random               >= 1.0  && < 1.1,
+    sqlite-simple        >= 0.4  && < 0.5,
     text                 >= 0.10 && < 0.12,
     time                 >= 1.0  && < 1.5,
     unordered-containers >= 0.1  && < 0.3,
@@ -106,8 +105,6 @@ Test-suite number-six-tests
     test-framework       >= 0.4 && < 0.9,
     test-framework-hunit >= 0.2 && < 0.4,
     -- Copied from regular dependencies...
-    HDBC                 >= 2.2  && < 2.4,
-    HDBC-postgresql      >= 2.2  && < 2.4,
     aeson                >= 0.5  && < 0.7,
     attoparsec           >= 0.8  && < 0.11,
     base                 >= 4    && < 5,
@@ -121,6 +118,7 @@ Test-suite number-six-tests
     network              >= 2.3  && < 2.5,
     old-locale           >= 1.0  && < 1.1,
     random               >= 1.0  && < 1.1,
+    sqlite-simple        >= 0.4  && < 0.5,
     text                 >= 0.10 && < 0.12,
     time                 >= 1.0  && < 1.5,
     unordered-containers >= 0.1  && < 0.3,

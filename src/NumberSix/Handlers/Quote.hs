@@ -1,3 +1,4 @@
+--------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Quote
     ( handler
@@ -5,11 +6,12 @@ module NumberSix.Handlers.Quote
 
 
 --------------------------------------------------------------------------------
-import           Control.Monad.Trans   (liftIO)
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString.Char8 as BC
-import           Data.Char             (isDigit)
-import           System.Random         (randomRIO)
+import           Control.Monad.Trans    (liftIO)
+import           Data.ByteString        (ByteString)
+import qualified Data.ByteString.Char8  as BC
+import           Data.Char              (isDigit)
+import qualified Database.SQLite.Simple as Sqlite
+import           System.Random          (randomRIO)
 
 
 --------------------------------------------------------------------------------
@@ -18,7 +20,6 @@ import           NumberSix.Irc
 import           NumberSix.Message
 import           NumberSix.Util
 import           NumberSix.Util.Error
-import           NumberSix.Util.Sql
 
 
 --------------------------------------------------------------------------------
@@ -29,25 +30,27 @@ handler = makeHandlerWith "Quote"
 
 --------------------------------------------------------------------------------
 initialize :: Irc ()
-initialize = createTableUnlessExists "quotes"
+initialize = withDatabase $ \db -> Sqlite.execute_ db
     -- A global ID and an ID per channel
-    "CREATE TABLE quotes (                   \
-    \    id SERIAL,                          \
-    \    local_id INT,                       \
-    \    host TEXT, channel TEXT, text TEXT  \
+    "CREATE TABLE IF NOT EXISTS quotes (     \
+    \    id       INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,  \
+    \    local_id INTEGER                           NOT NULL,  \
+    \    host     TEXT                              NOT NULL,  \
+    \    channel  TEXT                              NOT NULL,  \
+    \    text     TEXT                              NOT NULL   \
     \)"
 
 
 --------------------------------------------------------------------------------
 addQuoteHook :: Irc ()
 addQuoteHook = onBangCommand "!addquote" $ do
-    text <- getBangCommandText
-    host <- getHost
+    text    <- getBangCommandText
+    host    <- getHost
     channel <- getChannel
     localId <- (fmap (+ 1)) getLastId
-    _ <- withSql $ \c -> run c
+    withDatabase $ \db -> Sqlite.execute db
         "INSERT INTO quotes (local_id, host, channel, text) VALUES (?, ?, ?, ?)"
-        [toSql localId, toSql host, toSql channel, toSql text]
+        (localId, host, channel, text)
     write $ "Quote " <> BC.pack (show localId) <> " added"
 
 
@@ -75,11 +78,11 @@ quoteHook = onBangCommand "!quote" $ do
     getMatching query = do
         host    <- getHost
         channel <- getChannel
-        ls <- withSql $ \c -> quickQuery' c
+        ls      <- withDatabase $ \db -> Sqlite.query db
             "SELECT local_id FROM quotes  \
-            \WHERE host = ? AND channel = ? AND text ILIKE ?"
-            [toSql host, toSql channel, toSql ("%" <> query <> "%")]
-        return $ map (\[i] -> fromSql i) ls
+            \WHERE host = ? AND channel = ? AND LOWER(text) LIKE ?"
+            (host, channel, "%" <> toLower query <> "%")
+        return [i | Sqlite.Only i <- ls]
 
 
 --------------------------------------------------------------------------------
@@ -90,25 +93,25 @@ lastQuoteHook = onBangCommand "!lastquote" $ getLastId >>= showQuote
 --------------------------------------------------------------------------------
 getLastId :: Irc Integer
 getLastId = do
-    host <- getHost
+    host    <- getHost
     channel <- getChannel
-    [[r]] <- withSql $ \c -> quickQuery' c
+    rs      <- withDatabase $ \db -> Sqlite.query db
         "SELECT MAX(local_id) FROM quotes  \
         \WHERE host = ? AND channel = ?"
-        [toSql host, toSql channel]
+        (host, channel)
 
-    return $ case r of
-        SqlNull -> 0
-        _       -> fromSql r
+    return $ case rs of
+        [Sqlite.Only (Just r)] -> r
+        _                      -> 0
 
 
 --------------------------------------------------------------------------------
 showQuote :: Integer -> Irc ()
 showQuote n = do
-    host    <- getHost
-    channel <- getChannel
-    [[r]]   <- withSql $ \c -> quickQuery' c
+    host            <- getHost
+    channel         <- getChannel
+    [Sqlite.Only r] <- withDatabase $ \db -> Sqlite.query db
         "SELECT text FROM quotes  \
         \WHERE host = ? AND channel = ? AND local_id = ?"
-        [toSql host, toSql channel, toSql n]
-    write $ "Quote " <> (BC.pack $ show n) <> ": " <> fromSql r
+        (host, channel, n)
+    write $ "Quote " <> (BC.pack $ show n) <> ": " <> r

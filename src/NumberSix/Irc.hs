@@ -1,5 +1,7 @@
-{-# LANGUAGE OverloadedStrings, GeneralizedNewtypeDeriving,
-        ExistentialQuantification #-}
+--------------------------------------------------------------------------------
+{-# LANGUAGE ExistentialQuantification  #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings          #-}
 module NumberSix.Irc
     ( -- * Core types
       IrcConfig (..)
@@ -53,24 +55,34 @@ module NumberSix.Irc
 
       -- * Utility
     , modifyGods
+
+      -- * SQL
+    , withDatabase
     ) where
 
-import Control.Concurrent (MVar, readMVar, modifyMVar_)
-import Control.Applicative ((<$>))
-import Control.Monad (when)
-import Control.Monad.Reader (MonadReader, ReaderT, ask, runReaderT)
-import Control.Monad.Trans (MonadIO, liftIO)
-import Data.Char (toUpper)
 
-import Data.ByteString (ByteString)
-import qualified Data.ByteString as SB
-import qualified Data.ByteString.Char8 as SBC
+--------------------------------------------------------------------------------
+import           Control.Applicative      ((<$>))
+import           Control.Concurrent       (MVar, modifyMVar_, readMVar)
+import           Control.Concurrent.MVar  (withMVar)
+import           Control.Monad            (when)
+import           Control.Monad.Reader     (MonadReader, ReaderT, ask,
+                                           runReaderT)
+import           Control.Monad.Trans      (MonadIO, liftIO)
+import           Data.ByteString          (ByteString)
+import qualified Data.ByteString          as SB
+import qualified Data.ByteString.Char8    as SBC
+import           Data.Char                (toUpper)
+import qualified Database.SQLite.Simple   as Sqlite
 
-import NumberSix.Message
-import NumberSix.Message.Encode (encodePrefix)
 
+--------------------------------------------------------------------------------
+import           NumberSix.Message
+import           NumberSix.Message.Encode (encodePrefix)
+
+
+--------------------------------------------------------------------------------
 -- | User-specified IRC configuration
---
 data IrcConfig = IrcConfig
     { ircNick        :: ByteString
     , ircRealName    :: ByteString
@@ -78,7 +90,7 @@ data IrcConfig = IrcConfig
     , ircHost        :: ByteString
     , ircPort        :: Int
     , ircGodPassword :: ByteString
-    , ircDatabase    :: String
+    , ircDatabase    :: FilePath
     , -- (NickServ service name, auth line)
       ircNickServ    :: Maybe (ByteString, ByteString)
     }
@@ -94,10 +106,11 @@ instance Show God where
 -- | Represents the outer IRC state
 --
 data IrcEnvironment = IrcEnvironment
-    { ircConfig   :: IrcConfig
-    , ircWriter   :: Message -> IO ()
-    , ircLogger   :: ByteString -> IO ()
-    , ircGods     :: MVar [God]
+    { ircConfig     :: IrcConfig
+    , ircConnection :: MVar Sqlite.Connection
+    , ircWriter     :: Message -> IO ()
+    , ircLogger     :: ByteString -> IO ()
+    , ircGods       :: MVar [God]
     }
 
 -- | Represents the internal IRC state
@@ -346,3 +359,11 @@ modifyGods f password = do
     password' <- getGodPassword
     mvar <- ircGods . ircEnvironment <$> ask
     when (password == password') $ liftIO $ modifyMVar_ mvar $ return . f
+
+
+--------------------------------------------------------------------------------
+-- | Execute a statement
+withDatabase :: (Sqlite.Connection -> IO a) -> Irc a
+withDatabase f = do
+    mvar <- ircConnection . ircEnvironment <$> ask
+    liftIO $ withMVar mvar f

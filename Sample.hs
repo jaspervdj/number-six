@@ -8,12 +8,12 @@ import NumberSix.Irc
 
 main :: IO ()
 main = numberSix IrcConfig
-    { ircNick        = "number-six"
+    { ircNick        = "herpy"
     , ircRealName    = "Number Six Testing Bot"
     , ircChannels    = ["#testing"]
     , ircHost        = "wina.ugent.be"
     , ircPort        = 6669
     , ircGodPassword = "foobar"
-    , ircDatabase    = "dbname = number-six"
+    , ircDatabase    = "number-six.db"
     , ircNickServ    = Just ("NickServ@services.wina.ugent.be", "auth hunter2")
     }

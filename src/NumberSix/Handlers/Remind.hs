@@ -6,17 +6,17 @@ module NumberSix.Handlers.Remind
 
 
 --------------------------------------------------------------------------------
-import           Control.Applicative ((<$>))
-import           Control.Monad       (forM_)
-import           Control.Monad.Trans (liftIO)
-import           Data.ByteString     (ByteString)
+import           Control.Applicative    ((<$>))
+import           Control.Monad          (forM_)
+import           Control.Monad.Trans    (liftIO)
+import           Data.ByteString        (ByteString)
+import qualified Database.SQLite.Simple as Sqlite
 
 
 --------------------------------------------------------------------------------
 import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Message
-import           NumberSix.Util.Sql
 import           NumberSix.Util.Time
 
 
@@ -27,13 +27,13 @@ handler = makeHandlerWith "Remind" [const remindHook] initialize
 
 --------------------------------------------------------------------------------
 initialize :: Irc ()
-initialize = createTableUnlessExists "reminds"
-    "CREATE TABLE reminds (  \
-    \    id SERIAL,          \
-    \    host TEXT,          \
-    \    sender TEXT,        \
-    \    time TEXT,          \
-    \    text TEXT           \
+initialize = withDatabase $ \db -> Sqlite.execute_ db
+    "CREATE TABLE IF NOT EXISTS reminds (  \
+    \    id     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,  \
+    \    host   TEXT                              NOT NULL,  \
+    \    sender TEXT                              NOT NULL,  \
+    \    time   TEXT                              NOT NULL,  \
+    \    text   TEXT                              NOT NULL  \
     \)"
 
 
@@ -54,9 +54,9 @@ storeHook text = do
     sender       <- toLower <$> getSender
     IrcTime time <- liftIO getTime
 
-    _ <- withSql $ \c -> run c
+    withDatabase $ \db -> Sqlite.execute db
         "INSERT INTO reminds (host, sender, time, text) VALUES (?, ?, ?, ?)"
-        [toSql host, toSql sender, toSql time, toSql text]
+        (host, sender, time, text)
 
     writeReply "Noted"
 
@@ -70,21 +70,21 @@ loadHook = do
     let sender' = toLower sender
 
     -- Find the reminders for the user, if any
-    reminds <- withSql $ \c -> quickQuery' c
+    reminds <- withDatabase $ \db -> Sqlite.query db
         "SELECT time, text FROM reminds \
         \WHERE host = ? AND sender = ?  \
         \ORDER BY id"
-        [toSql host, toSql sender']
+        (host, sender')
 
     case reminds of
         [] -> writeNick sender "No reminders"
         _  -> do
             -- delete the messages from the DB
-            _ <- withSql $ \c -> run c
+            withDatabase $ \db -> Sqlite.execute db
                 "DELETE FROM reminds WHERE host = ? AND sender = ?"
-                [toSql host, toSql sender']
+                (host, sender')
 
             -- send the reminders to the user in a PRIVMSG
-            forM_ reminds $ \[time, text] -> do
-                pretty <- liftIO $ prettyTime $ IrcTime $ fromSql time
-                writeNick sender $ "(" <> pretty <> "): " <> fromSql text
+            forM_ reminds $ \(time, text) -> do
+                pretty <- liftIO $ prettyTime $ IrcTime time
+                writeNick sender $ "(" <> pretty <> "): " <> text
