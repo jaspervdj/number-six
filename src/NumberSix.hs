@@ -12,8 +12,8 @@ import           Control.Applicative     ((<$>))
 import           Control.Concurrent      (forkIO)
 import           Control.Concurrent.MVar (newMVar)
 import           Control.Monad           (forM, forM_)
-import qualified Data.ByteString.Char8   as SBC
 import           Data.Maybe              (catMaybes)
+import qualified Data.Text               as T
 import qualified Database.SQLite.Simple  as Sqlite
 import           Prelude                 hiding (catch)
 import           System.Environment      (getProgName)
@@ -71,5 +71,5 @@ numberSixWith :: [UninitializedHandler] -> IrcConfig -> IO ()
 numberSixWith handlers' config = do
     logName <- (++ ".log") <$> getProgName
     logger  <- makeLogger logName
-    runApplication logger (SBC.unpack $ ircHost config) (ircPort config) $
+    runApplication logger (T.unpack $ ircHost config) (ircPort config) $
         application logger handlers' config

@@ -5,13 +5,13 @@ module NumberSix.Handlers.Reddit
 
 
 --------------------------------------------------------------------------------
-import           Control.Applicative   ((<$>), (<*>))
-import           Control.Monad         (mzero)
-import           Control.Monad.Trans   (liftIO)
-import           Data.Aeson            (FromJSON (..), Object, Value (..), (.:))
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString.Char8 as BC
-import qualified Data.HashMap.Lazy     as HM
+import           Control.Applicative  ((<$>), (<*>))
+import           Control.Monad        (mzero)
+import           Control.Monad.Trans  (liftIO)
+import           Data.Aeson           (FromJSON (..), Object, Value (..), (.:))
+import qualified Data.HashMap.Lazy    as HM
+import           Data.Text            (Text)
+import qualified Data.Text            as T
 
 
 --------------------------------------------------------------------------------
@@ -34,13 +34,13 @@ instance FromJSON Reddit where
 
 
 --------------------------------------------------------------------------------
-data Link = Link ByteString ByteString deriving (Show)
+data Link = Link Text Text deriving (Show)
 
 
 --------------------------------------------------------------------------------
 instance FromJSON Link where
     parseJSON (Object o) =
-        let o' = unData o in Link <$> o' .: "title" <*> o' .: "url" 
+        let o' = unData o in Link <$> o' .: "title" <*> o' .: "url"
     parseJSON _          = mzero
 
 
@@ -51,7 +51,7 @@ unData o = case HM.lookup "data" o of Just (Object o') -> o'; _ -> HM.empty
 
 
 --------------------------------------------------------------------------------
-reddit :: ByteString -> IO ByteString
+reddit :: Text -> IO Text
 reddit query = http url id >>= \bs -> case parseJsonEither bs of
     Left  _           -> randomError
     Right (Reddit ls) -> do
@@ -61,9 +61,9 @@ reddit query = http url id >>= \bs -> case parseJsonEither bs of
         textAndUrl t u
   where
     url              = "http://reddit.com/r/" <> subreddit <> ".json"
-    (subreddit, idx) = case BC.words query of
-        [s, i] -> (s, readByteString i)
-        [s]    -> case readByteString s of
+    (subreddit, idx) = case T.words query of
+        [s, i] -> (s, readText i)
+        [s]    -> case readText s of
             Just i  -> ("all", Just i)
             Nothing -> (s, Nothing)
         _      -> ("all", Nothing)

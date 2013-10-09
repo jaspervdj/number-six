@@ -1,34 +1,40 @@
+--------------------------------------------------------------------------------
 -- | Provides a sandbox in which plugins can run
---
-{-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module NumberSix.SandBox
     ( sandBox
     , sandBox_
     ) where
 
-import Control.Concurrent (forkIO, killThread, threadDelay)
-import Control.Concurrent.MVar (newEmptyMVar, putMVar, readMVar)
-import Control.Exception (try, SomeException)
-import Data.Monoid (mappend)
 
-import Data.ByteString (ByteString)
-import qualified Data.ByteString.Char8 as SBC
+--------------------------------------------------------------------------------
+import           Control.Concurrent      (forkIO, killThread, threadDelay)
+import           Control.Concurrent.MVar (newEmptyMVar, putMVar, readMVar)
+import           Control.Exception       (SomeException, try)
+import           Data.Monoid             (mappend)
+import           Data.Text               (Text)
+import qualified Data.Text               as T
 
-import NumberSix.Logger
 
+--------------------------------------------------------------------------------
+import           NumberSix.Logger
+
+
+--------------------------------------------------------------------------------
 -- | Action finish signal
---
 data Signal a
     = Finished a
-    | Crashed ByteString
+    | Crashed Text
     | Timeout
     deriving (Show, Eq)
 
+
+--------------------------------------------------------------------------------
 -- | Execute an IO action in a "sandbox" environment
---
 sandBox :: forall a.
            Logger        -- ^ Logger
-        -> ByteString    -- ^ Name
+        -> Text          -- ^ Name
         -> Maybe Int     -- ^ Timeout (in seconds)
         -> IO a          -- ^ Sandbox action
         -> IO (Maybe a)  -- ^ Blocks until timeout (or action finished)
@@ -40,7 +46,7 @@ sandBox logger name timeout action = do
     actionThreadId <- forkIO $ do
         r <- try action
         putMVar mvar $ case (r :: Either SomeException a) of
-            Left  e -> Crashed (SBC.pack $ show e)
+            Left  e -> Crashed (T.pack $ show e)
             Right x -> Finished x
 
     -- Thread signaling a timeout (if there is a timeout)
@@ -73,9 +79,10 @@ sandBox logger name timeout action = do
         Finished x -> return (Just x)
         _          -> return Nothing
 
+
+--------------------------------------------------------------------------------
 -- | Variation of "sandBox" for when you don't care about the result.
---
-sandBox_ :: Logger -> ByteString -> Maybe Int -> IO a -> IO ()
+sandBox_ :: Logger -> Text -> Maybe Int -> IO a -> IO ()
 sandBox_ logger name timeout f = do
     _ <- sandBox logger name timeout f
     return ()

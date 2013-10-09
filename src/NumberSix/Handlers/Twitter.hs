@@ -5,15 +5,16 @@ module NumberSix.Handlers.Twitter
 
 
 --------------------------------------------------------------------------------
-import           Control.Applicative   ((<$>), (<*>))
-import           Control.Monad         (mzero)
-import           Control.Monad.Trans   (liftIO)
+import           Control.Applicative  ((<$>), (<*>))
+import           Control.Monad        (mzero)
+import           Control.Monad.Trans  (liftIO)
 import           Data.Aeson
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString.Char8 as B
-import           Data.Char             (isDigit)
-import qualified Data.Vector           as V
-import qualified Network.HTTP.Conduit  as HC
+import           Data.ByteString      (ByteString)
+import           Data.Char            (isDigit)
+import           Data.Text            (Text)
+import qualified Data.Text            as T
+import qualified Data.Vector          as V
+import qualified Network.HTTP.Conduit as HC
 
 
 --------------------------------------------------------------------------------
@@ -26,7 +27,7 @@ import           NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
-data User = User ByteString
+newtype User = User Text
 
 
 --------------------------------------------------------------------------------
@@ -36,7 +37,7 @@ instance FromJSON User where
 
 
 --------------------------------------------------------------------------------
-data Tweet = Tweet User ByteString
+data Tweet = Tweet User Text
 
 
 --------------------------------------------------------------------------------
@@ -53,21 +54,21 @@ twitterApiKey = "AAAAAAAAAAAAAAAAAAAAAO5eRQAAAAAAdBaUWq2vDVmrhUaPN05c4wr2J3c%3D\
 
 
 --------------------------------------------------------------------------------
-getTweet :: ByteString -> IO ByteString
+getTweet :: ByteString -> IO Text
 getTweet bs = case parseJsonEither bs of
     Left  _                        -> randomError
     Right (Tweet (User user) text) -> return $ removeNewlines $
-        if "RT " `B.isPrefixOf` text then text else "@" <> user <> ": " <> text
+        if "RT " `T.isPrefixOf` text then text else "@" <> user <> ": " <> text
 
 
 --------------------------------------------------------------------------------
-twitter :: ByteString -> IO ByteString
+twitter :: Text -> IO Text
 twitter argument
-    | B.all isDigit argument = getTweet =<< http (tweet argument) auth
-    | B.all isDigit fromUrl  = getTweet =<< http (tweet fromUrl)  auth
+    | T.all isDigit argument = getTweet =<< http (tweet argument) auth
+    | T.all isDigit fromUrl  = getTweet =<< http (tweet fromUrl)  auth
     | otherwise              = getTweet =<< http (user argument)  auth
   where
-    fromUrl = B.reverse $ B.takeWhile (/= '/') $ B.reverse argument
+    fromUrl = T.reverse $ T.takeWhile (/= '/') $ T.reverse argument
     auth req = let header = ("Authorization", "Bearer " <> twitterApiKey)
                in req { HC.requestHeaders = header : HC.requestHeaders req }
 

@@ -7,8 +7,7 @@ module NumberSix.Handlers.GitHub
 
 --------------------------------------------------------------------------------
 import           Control.Monad.Trans  (liftIO)
-import           Data.ByteString      (ByteString)
-import qualified Data.Text.Encoding   as T
+import           Data.Text            (Text)
 import           Text.XmlHtml
 import           Text.XmlHtml.Cursor
 
@@ -23,15 +22,15 @@ import           NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
-gitHub :: ByteString -> IO ByteString
+gitHub :: Text -> IO Text
 gitHub query = do
     result <- httpScrape Xml url id $ \cursor -> do
         entry <- findChild (byTagName "entry") cursor
         title <- findChild (byTagName "title") entry
-        link  <- findRec (byTagName "link") entry
+        link  <- findRec   (byTagName "link") entry
         href  <- getAttribute "href" $ current link
         let text = nodeText $ current title
-        return (T.encodeUtf8 text, T.encodeUtf8 href)
+        return (text, href)
     case result of
         Just (text, href) -> textAndUrl text href
         Nothing           -> randomError

@@ -1,7 +1,8 @@
 -- | Working with time for an IRC bot is slightly confusing because it might
 -- join multiple channels in different time zones. This is why we always try to
 -- format times as: X hours ago, X minutes ago...
-{-# LANGUAGE GeneralizedNewtypeDeriving, OverloadedStrings #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings          #-}
 module NumberSix.Util.Time
     ( IrcTime (..)
     , getTime
@@ -10,12 +11,12 @@ module NumberSix.Util.Time
 
 
 --------------------------------------------------------------------------------
-import           Control.Applicative   ((<$>))
-import           Control.Monad.Trans   (liftIO)
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString.Char8 as SBC
-import           Data.Time             (diffUTCTime)
-import           Data.Time.Clock       (getCurrentTime)
+import           Control.Applicative ((<$>))
+import           Control.Monad.Trans (liftIO)
+import           Data.Text           (Text)
+import qualified Data.Text           as T
+import           Data.Time           (diffUTCTime)
+import           Data.Time.Clock     (getCurrentTime)
 
 
 --------------------------------------------------------------------------------
@@ -31,11 +32,11 @@ getTime = IrcTime . show <$> liftIO getCurrentTime
 
 --------------------------------------------------------------------------------
 -- | Get the time in a pretty format
-prettyTime :: IrcTime -> IO ByteString
+prettyTime :: IrcTime -> IO Text
 prettyTime (IrcTime time) = do
     (IrcTime now) <- getTime
     let d = floor $ toRational $ diffUTCTime (read now) (read time)
-    return $ SBC.pack $ format d
+    return $ T.pack $ format d
   where
     format :: Integer -> String
     format d

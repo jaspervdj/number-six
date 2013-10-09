@@ -1,3 +1,4 @@
+--------------------------------------------------------------------------------
 -- | Provides URL shortening through the bit.ly API
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Util.BitLy
@@ -7,9 +8,8 @@ module NumberSix.Util.BitLy
 
 
 --------------------------------------------------------------------------------
-import           Data.ByteString     (ByteString)
-import qualified Data.ByteString     as B
-import qualified Data.Text.Encoding  as T
+import           Data.Text           (Text)
+import qualified Data.Text           as T
 import           Text.XmlHtml
 import           Text.XmlHtml.Cursor
 
@@ -21,12 +21,12 @@ import           NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
-shorten :: ByteString -> IO ByteString
+shorten :: Text -> IO Text
 shorten query = do
     result <- httpScrape Xml url id $
         fmap (nodeText . current) . findRec (byTagName "url")
     return $ case result of
-        Just x  -> T.encodeUtf8 x
+        Just x  -> x
         Nothing -> url
   where
     url = "http://api.bit.ly/v3/shorten?login=jaspervdj" <>
@@ -36,12 +36,12 @@ shorten query = do
 
 
 --------------------------------------------------------------------------------
-textAndUrl :: ByteString -> ByteString -> IO ByteString
+textAndUrl :: Text -> Text -> IO Text
 textAndUrl text url
-    | B.length long <= maxLineLength = return long
+    | T.length long <= maxLineLength = return long
     | otherwise                      = do
         shortUrl <- shorten url
         return $ join text shortUrl
   where
-    join t u = if B.null t then u else t <> " >> " <> u
+    join t u = if T.null t then u else t <> " >> " <> u
     long     = join text url

@@ -7,13 +7,13 @@ module NumberSix.Handlers.Imdb
 
 
 --------------------------------------------------------------------------------
-import           Control.Applicative   ((<$>), (<*>))
-import           Control.Monad         (mzero)
-import           Control.Monad.Trans   (liftIO)
-import           Data.Aeson            (FromJSON (..), Value (..), (.:))
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString.Char8 as BC
-import           Data.Char             (isDigit)
+import           Control.Applicative  ((<$>), (<*>))
+import           Control.Monad        (mzero)
+import           Control.Monad.Trans  (liftIO)
+import           Data.Aeson           (FromJSON (..), Value (..), (.:))
+import           Data.Char            (isDigit)
+import           Data.Text            (Text)
+import qualified Data.Text            as T
 
 
 --------------------------------------------------------------------------------
@@ -28,11 +28,11 @@ import           NumberSix.Util.Http
 
 --------------------------------------------------------------------------------
 data Movie = Movie
-    { movieTitle  :: ByteString
-    , movieYear   :: ByteString
-    , movieRating :: ByteString
-    , movieVotes  :: ByteString
-    , movieId     :: ByteString
+    { movieTitle  :: Text
+    , movieYear   :: Text
+    , movieRating :: Text
+    , movieVotes  :: Text
+    , movieId     :: Text
     } deriving (Show)
 
 
@@ -49,16 +49,16 @@ instance FromJSON Movie where
 
 --------------------------------------------------------------------------------
 -- | Parse optional trailing year
-parseQuery :: ByteString -> (ByteString, Maybe ByteString)
-parseQuery bs = case reverse (BC.words bs) of
+parseQuery :: Text -> (Text, Maybe Text)
+parseQuery bs = case reverse (T.words bs) of
     (year : title)
-        | BC.all isDigit year -> (BC.unwords (reverse title), Just year)
-        | otherwise           -> (bs, Nothing)
-    _                         -> (bs, Nothing)
+        | T.all isDigit year -> (T.unwords (reverse title), Just year)
+        | otherwise          -> (bs, Nothing)
+    _                        -> (bs, Nothing)
 
 
 --------------------------------------------------------------------------------
-imdb :: ByteString -> IO ByteString
+imdb :: Text -> IO Text
 imdb query = do
     json <- http url id
     case parseJsonEither json of

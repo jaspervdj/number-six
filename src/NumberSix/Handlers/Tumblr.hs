@@ -12,7 +12,8 @@ import           Control.Monad.Trans   (liftIO)
 import           Data.Aeson            (FromJSON (..), Value (..), (.:))
 import           Data.ByteString       (ByteString)
 import qualified Data.ByteString.Char8 as B
-import qualified Data.ByteString.Char8 as BC
+import           Data.Text             (Text)
+import qualified Data.Text             as T
 
 
 --------------------------------------------------------------------------------
@@ -34,7 +35,7 @@ instance FromJSON Tumblr where
 
 
 --------------------------------------------------------------------------------
-data Post = Post ByteString ByteString deriving (Show)
+data Post = Post Text Text deriving (Show)
 
 
 --------------------------------------------------------------------------------
@@ -61,7 +62,7 @@ cleanTumblrJSON str
 --------------------------------------------------------------------------------
 -- | Get a random tumble from the user, taken from the last 'count' tumbles. To
 -- obtain the last tumble, just pass 1 as the count.
-randomTumble :: ByteString -> Int -> IO ByteString
+randomTumble :: Text -> Int -> IO Text
 randomTumble query count = do
     result <- parseJsonEither . cleanTumblrJSON <$> http url id
     case result of
@@ -69,16 +70,16 @@ randomTumble query count = do
             Post url' slug <- randomElement posts
             textAndUrl slug url'
         Left e               ->
-            return $ "Something went wrong: " <> BC.pack e
+            return $ "Something went wrong: " <> T.pack e
   where
     url = "http://" <> query <> ".tumblr.com/api/read/json?num=" <>
-        B.pack (show count)
+        T.pack (show count)
 
 
 --------------------------------------------------------------------------------
-tumblr :: ByteString -> IO ByteString
+tumblr :: Text -> IO Text
 tumblr query =
-    let (command : user) = B.words query
+    let (command : user) = T.words query
     in case command of
         "last" -> randomTumble (head user) 1
         _      -> randomTumble query 50

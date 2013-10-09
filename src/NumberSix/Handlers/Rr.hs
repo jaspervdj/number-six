@@ -10,9 +10,9 @@ import           Control.Concurrent.MVar   (MVar, modifyMVar, modifyMVar_,
                                             newMVar)
 import           Control.Monad             (forM_)
 import           Control.Monad.Trans       (liftIO)
-import           Data.ByteString           (ByteString)
 import           Data.Set                  (Set)
 import qualified Data.Set                  as S
+import           Data.Text                 (Text)
 import           System.Random             (randomRIO)
 
 
@@ -27,7 +27,7 @@ import           NumberSix.Util.Irc
 
 --------------------------------------------------------------------------------
 -- | Only one game per channel
-type Locks = MVar (Set ByteString)
+type Locks = MVar (Set Text)
 
 
 --------------------------------------------------------------------------------

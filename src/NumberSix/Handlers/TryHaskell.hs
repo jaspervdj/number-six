@@ -10,8 +10,8 @@ import           Control.Applicative   ((<$>), (<*>), (<|>))
 import           Control.Monad         (mzero)
 import           Control.Monad.Trans   (liftIO)
 import           Data.Aeson            (FromJSON, Value (..), parseJSON, (.:))
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString.Char8 as B
+import           Data.Text       (Text)
+import qualified Data.Text as T
 
 
 --------------------------------------------------------------------------------
@@ -24,8 +24,8 @@ import           NumberSix.Util.Http
 
 --------------------------------------------------------------------------------
 data Result
-    = Result ByteString ByteString  -- Type, value
-    | Error ByteString              -- Error message
+    = Result Text Text  -- Type, value
+    | Error Text              -- Error message
 
 
 --------------------------------------------------------------------------------
@@ -37,10 +37,10 @@ instance FromJSON Result where
 
 
 --------------------------------------------------------------------------------
-eval :: ByteString -> IO ByteString
+eval :: Text -> IO Text
 eval query = http url id >>= \bs -> return $ case parseJsonEither bs of
     Left _             -> "Request failed!"
-    Right (Result t r) -> if ":t" `B.isPrefixOf` query then t else r
+    Right (Result t r) -> if ":t" `T.isPrefixOf` query then t else r
     Right (Error e)    -> "Error: " <> e
   where
     url = "http://tryhaskell.org/haskell.json?method=eval&expr=" <>

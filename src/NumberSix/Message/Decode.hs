@@ -13,6 +13,8 @@ import qualified Data.Attoparsec.Char8 as AC
 import           Data.ByteString       (ByteString)
 import qualified Data.ByteString.Char8 as BC
 import           Data.Monoid           (mempty)
+import qualified Data.Text.Encoding as T
+import Data.Text (Text)
 
 
 --------------------------------------------------------------------------------
@@ -36,7 +38,7 @@ prefixParser = do
     prefix <- AC.takeTill $ \x -> isSpace x || x == '!' || x == '@'
     -- A dot denotes a server prefix
     if '.' `BC.elem` prefix
-        then AC.skipWhile isSpace >> return (ServerPrefix prefix)
+        then AC.skipWhile isSpace >> return (ServerPrefix $ T.decodeUtf8 prefix)
         else do
             user <- A.option Nothing $ Just <$> do
                         _ <- AC.char8 '!'
@@ -45,22 +47,25 @@ prefixParser = do
                         _ <- AC.char8 '@'
                         AC.takeTill isSpace
             AC.skipWhile isSpace
-            return $ NickPrefix prefix user host
+            return $ NickPrefix
+                (T.decodeUtf8 prefix)
+                (T.decodeUtf8 <$> user)
+                (T.decodeUtf8 <$> host)
 
 
 --------------------------------------------------------------------------------
-commandParser :: A.Parser ByteString
-commandParser = AC.takeTill isSpace
+commandParser :: A.Parser Text
+commandParser = T.decodeUtf8 <$> AC.takeTill isSpace
 
 
 --------------------------------------------------------------------------------
-parameterParser :: A.Parser ByteString
+parameterParser :: A.Parser Text
 parameterParser = do
     AC.skipWhile isSpace
-    trailing <|> middle
+    T.decodeUtf8 <$> (trailing <|> middle)
   where
     trailing = AC.char8 ':' >> AC.takeTill (\x -> x == '\r' || x == '\n')
-    middle = AC.takeTill isSpace
+    middle   = AC.takeTill isSpace
 
 
 --------------------------------------------------------------------------------

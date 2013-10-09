@@ -1,3 +1,4 @@
+--------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Weather
     ( handler
@@ -6,9 +7,8 @@ module NumberSix.Handlers.Weather
 
 --------------------------------------------------------------------------------
 import           Control.Monad.Trans  (liftIO)
-import           Data.ByteString      (ByteString)
-import qualified Data.ByteString      as B
-import qualified Data.Text.Encoding   as T
+import           Data.Text            (Text)
+import qualified Data.Text            as T
 import           Text.XmlHtml
 import           Text.XmlHtml.Cursor
 
@@ -22,20 +22,20 @@ import           NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
-weather :: ByteString -> IO ByteString
+weather :: Text -> IO Text
 weather query = do
     result <- httpScrape Html url id $ \cursor -> do
         -- Find content div
         con    <- findRec (byTagNameAttrs "div" [("class", "content")]) cursor
         temp   <- findRec (byTagNameAttrs "span" [("class", "temperature")]) con
         remark <- findRec (byTagNameAttrs "p" [("class", "remark")]) con
-        return $ T.encodeUtf8 (nodeText $ current temp) <>
-            T.encodeUtf8 "°?! " <>
-            T.encodeUtf8 (nodeText $ current remark)
+        return $ (nodeText $ current temp) <>
+            "°?! " <>
+            (nodeText $ current remark)
 
     maybe randomError return result
   where
-    loc = if B.null query then "ghent" else query
+    loc = if T.null query then "ghent" else query
     url = "http://thefuckingweather.com/?unit=c&where=" <> loc
 
 

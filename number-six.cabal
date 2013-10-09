@@ -70,7 +70,6 @@ Library
     NumberSix.Util.Error,
     NumberSix.Util.Http,
     NumberSix.Util.Irc,
-    NumberSix.Util.Sql,
     NumberSix.Util.Time
 
   Build-depends:

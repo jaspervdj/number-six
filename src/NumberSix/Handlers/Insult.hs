@@ -9,7 +9,7 @@ module NumberSix.Handlers.Insult
 --------------------------------------------------------------------------------
 import           Control.Applicative ((<$>))
 import           Control.Monad.Trans (liftIO)
-import           Data.ByteString     (ByteString)
+import           Data.Text           (Text)
 
 
 --------------------------------------------------------------------------------
@@ -25,12 +25,12 @@ handler = makeBangHandler "Insult" ["!insult"] $ \user ->
 
 
 --------------------------------------------------------------------------------
-randomInsult :: IO ByteString
+randomInsult :: IO Text
 randomInsult = randomElement insults
 
 
 --------------------------------------------------------------------------------
-insults :: [ByteString]
+insults :: [Text]
 insults =
     [ "fart smeller"
     , "I can't tell if I'm talking to your face or your asshole"
