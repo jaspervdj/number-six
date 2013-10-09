@@ -18,16 +18,15 @@ module NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
-import qualified Codec.Binary.Url      as Url
-import           Control.Applicative   ((<$>))
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString       as B
-import qualified Data.ByteString.Char8 as BC
-import qualified Data.ByteString.Lazy  as BL
-import           Data.Text             (Text)
-import qualified Data.Text             as T
-import qualified Data.Text.Encoding    as T
-import qualified Network.HTTP.Conduit  as HC
+import qualified Codec.Binary.Url     as Url
+import           Control.Applicative  ((<$>))
+import           Data.ByteString      (ByteString)
+import qualified Data.ByteString      as B
+import qualified Data.ByteString.Lazy as BL
+import           Data.Text            (Text)
+import qualified Data.Text            as T
+import qualified Data.Text.Encoding   as T
+import qualified Network.HTTP.Conduit as HC
 import           Text.XmlHtml
 import           Text.XmlHtml.Cursor
 
@@ -43,7 +42,7 @@ type RequestOptions = forall m. Monad m => HC.Request m -> HC.Request m
 --------------------------------------------------------------------------------
 -- | Perform an HTTP get request and return the response body. The response body
 -- is limited in size, for security reasons.
-http :: ByteString      -- ^ URL
+http :: Text            -- ^ URL
      -> RequestOptions  -- ^ Set extra request options
      -> IO ByteString   -- ^ Response body
 http uri modifyReq = do
@@ -52,7 +51,7 @@ http uri modifyReq = do
         modifyReq $ setUserAgent "number-six/0.1.0.0" req
     return $ B.concat $ BL.toChunks $ HC.responseBody rsp
   where
-    uri'               = T.unpack $ T.decodeUtf8 $ httpPrefix uri
+    uri'               = T.unpack $ httpPrefix uri
     setUserAgent ua rq =
         rq {HC.requestHeaders = ("User-Agent", ua) : HC.requestHeaders rq}
 
@@ -62,33 +61,33 @@ data Doc = Html | Xml deriving (Show)
 
 
 --------------------------------------------------------------------------------
-httpNodes :: Doc -> ByteString -> RequestOptions -> IO [Node]
+httpNodes :: Doc -> Text -> RequestOptions -> IO [Node]
 httpNodes doc url mr = http url mr >>= \bs -> case parse source bs of
     Left err   -> error err
     Right doc' -> return $ docContent doc'
   where
-    source = BC.unpack url
+    source = T.unpack url
     parse  = case doc of Html -> parseHTML; Xml -> parseXML
 
 
 --------------------------------------------------------------------------------
-httpScrape :: Doc -> ByteString -> RequestOptions
+httpScrape :: Doc -> Text -> RequestOptions
            -> (Cursor -> Maybe a) -> IO (Maybe a)
 httpScrape doc url mr f = (>>= f) . fromNodes <$> httpNodes doc url mr
 
 
 --------------------------------------------------------------------------------
 -- | Add @"http://"@ to the given URL, if needed
-httpPrefix :: ByteString -> ByteString
+httpPrefix :: Text -> Text
 httpPrefix url
-    | "http://" `B.isPrefixOf` url || "https://" `B.isPrefixOf` url  = url
+    | "http://" `T.isPrefixOf` url || "https://" `T.isPrefixOf` url  = url
     | otherwise = "http://" <> url
 
 
 --------------------------------------------------------------------------------
 -- | Encode a ByteString to an URL
-urlEncode :: ByteString -> ByteString
-urlEncode = BC.pack . Url.encode . B.unpack
+urlEncode :: Text -> Text
+urlEncode = T.pack . Url.encode . B.unpack . T.encodeUtf8
 
 
 --------------------------------------------------------------------------------

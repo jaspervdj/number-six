@@ -9,11 +9,11 @@ module NumberSix.Handlers.Bomb
 import           Control.Applicative       ((<$>))
 import           Control.Concurrent.MVar
 import           Control.Monad.Trans       (liftIO)
-import           Data.ByteString           (ByteString)
-import qualified Data.ByteString.Char8     as SBC
 import           Data.Foldable             (forM_)
 import           Data.Map                  (Map)
 import qualified Data.Map                  as M
+import           Data.Text                 (Text)
+import qualified Data.Text                 as T
 
 
 --------------------------------------------------------------------------------
@@ -28,12 +28,12 @@ import           NumberSix.Util.Irc
 
 --------------------------------------------------------------------------------
 -- | A bomb is assigned through (target, sender)
-type Bomb = (ByteString, ByteString)
+type Bomb = (Text, Text)
 
 
 --------------------------------------------------------------------------------
 -- | Bomb state: each channel may have a bomb assigned
-type BombState = Map ByteString Bomb
+type BombState = Map Text Bomb
 
 
 --------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ bombHook mvar = onBangCommand "!bomb" $ do
         updateBomb mvar $ \b -> do
             forM_ b $ \(target, _) ->
                 write $ "Bomb attached to " <> target <> ", blowing up in " <>
-                    SBC.pack (show $ sum $ x : xs) <> " seconds."
+                    T.pack (show $ sum $ x : xs) <> " seconds."
             return b
         sleep x
         bomb xs
@@ -87,7 +87,7 @@ passHook mvar = onBangCommand "!pass" $ do
         Nothing                 -> return Nothing
         Just (target, attacker)
             | sender ==? target -> do
-                let newTarget = if SBC.null text then attacker else text
+                let newTarget = if T.null text then attacker else text
                 write $ sender <> " passes the bomb to " <> newTarget <> "!"
                 return $ Just (newTarget, sender)
             -- Nothing changes

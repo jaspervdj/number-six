@@ -1,22 +1,27 @@
+--------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Identify
     ( handler
     ) where
 
-import Data.Char (toUpper)
 
-import qualified Data.ByteString.Char8 as B
+--------------------------------------------------------------------------------
+import qualified Data.Text     as T
 
-import NumberSix.Irc
 
+--------------------------------------------------------------------------------
+import           NumberSix.Irc
+
+
+--------------------------------------------------------------------------------
 handler :: UninitializedHandler
 handler = makeHandlerWith "Identify" [] initialize
 
+
+--------------------------------------------------------------------------------
 initialize :: Irc ()
 initialize = do
-    nick' <- getNick
+    nick'     <- getNick
     realName' <- getRealName
     writeMessage "NICK" [nick']
-    writeMessage "USER" [ B.map toUpper nick'
-                        , "*", "*", realName'
-                        ]
+    writeMessage "USER" [T.toUpper nick', "*", "*", realName']

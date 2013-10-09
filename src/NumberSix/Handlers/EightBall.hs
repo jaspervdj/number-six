@@ -6,8 +6,9 @@ module NumberSix.Handlers.EightBall
 
 
 --------------------------------------------------------------------------------
-import           Data.ByteString (ByteString)
-import qualified Data.ByteString as B
+import           Data.Char      (ord)
+import           Data.Text      (Text)
+import qualified Data.Text      as T
 
 
 --------------------------------------------------------------------------------
@@ -16,15 +17,15 @@ import           NumberSix.Irc
 
 
 --------------------------------------------------------------------------------
-hashMod :: Int -> ByteString -> Int
+hashMod :: Int -> Text -> Int
 hashMod max' bs = if hash < 0 then hash + max' else hash
   where
-    hash = B.foldl' step 5381 bs `mod` max'
-    step x c = x * 33 + fromIntegral c
+    hash     = T.foldl' step 5381 bs `mod` max'
+    step x c = x * 33 + ord c
 
 
 --------------------------------------------------------------------------------
-eightball :: ByteString -> ByteString
+eightball :: Text -> Text
 eightball = (answers !!) . hashMod (length answers)
   where
     answers =

@@ -1,3 +1,4 @@
+--------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Google
     ( google
@@ -9,8 +10,8 @@ module NumberSix.Handlers.Google
 import           Control.Applicative  ((<$>), (<*>))
 import           Control.Monad        (mzero)
 import           Control.Monad.Trans  (liftIO)
-import           Data.Aeson           (FromJSON(..), Value(..), (.:))
-import           Data.ByteString      (ByteString)
+import           Data.Aeson           (FromJSON (..), Value (..), (.:))
+import           Data.Text            (Text)
 
 
 --------------------------------------------------------------------------------
@@ -24,12 +25,12 @@ import           NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
-googleApiKey :: ByteString
+googleApiKey :: Text
 googleApiKey = "AIzaSyBIYwie0BY-Txs92F5196V7iZb5Xn3cMxw"
 
 
 --------------------------------------------------------------------------------
-googleCseId :: ByteString
+googleCseId :: Text
 googleCseId = "015170067376393226585:deqxftulnbm"
 
 
@@ -44,7 +45,7 @@ instance FromJSON Result where
 
 
 --------------------------------------------------------------------------------
-data Item = Item ByteString ByteString deriving (Show)
+data Item = Item Text Text deriving (Show)
 
 
 --------------------------------------------------------------------------------
@@ -55,7 +56,7 @@ instance FromJSON Item where
 
 --------------------------------------------------------------------------------
 -- | Returns the URL of the first found link
-google :: ByteString -> IO ByteString
+google :: Text -> IO Text
 google query = do
     json <- http url id
     case parseJsonEither json of

@@ -1,3 +1,4 @@
+--------------------------------------------------------------------------------
 -- | Link to hacker new items (<http://news.ycombinator.com>). This plugin uses
 -- the API provided at <http://api.ihackernews.com/>
 {-# LANGUAGE OverloadedStrings #-}
@@ -11,8 +12,8 @@ import           Control.Applicative  ((<$>), (<*>))
 import           Control.Monad        (mzero)
 import           Control.Monad.Trans  (liftIO)
 import           Data.Aeson           (FromJSON (..), Value (..), (.:))
-import           Data.ByteString      (ByteString)
-import qualified Data.ByteString.Char8 as BC
+import           Data.Text            (Text)
+import qualified Data.Text            as T
 
 
 --------------------------------------------------------------------------------
@@ -47,13 +48,13 @@ instance FromJSON HackerNews where
 resolveSelfPosts :: HackerNews -> HackerNews
 resolveSelfPosts (HackerNews items) = HackerNews $ map resolve items
   where
-    resolve (Item title url) = Item title $ case (BC.split '/' url) of
+    resolve (Item title url) = Item title $ case (T.split (== '/') url) of
         ["", "comments", nr] -> "http://news.ycombinator.com/item?id=" <> nr
         _                    -> url
 
 
 --------------------------------------------------------------------------------
-data Item = Item ByteString ByteString deriving (Show)
+data Item = Item Text Text deriving (Show)
 
 
 --------------------------------------------------------------------------------
@@ -63,7 +64,7 @@ instance FromJSON Item where
 
 
 --------------------------------------------------------------------------------
-hackerNews :: ByteString -> IO ByteString
+hackerNews :: Text -> IO Text
 hackerNews query = do
     json <- http "api.ihackernews.com/page" id
     case parseJsonEither json of
@@ -72,7 +73,7 @@ hackerNews query = do
             in textAndUrl title url
         _ -> randomError
   where
-    idx = case readByteString query of
+    idx = case readText query of
         Just n -> n - 1
         _      -> 0
 

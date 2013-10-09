@@ -9,7 +9,7 @@ module NumberSix.Handlers.Remind
 import           Control.Applicative    ((<$>))
 import           Control.Monad          (forM_)
 import           Control.Monad.Trans    (liftIO)
-import           Data.ByteString        (ByteString)
+import           Data.Text              (Text)
 import qualified Database.SQLite.Simple as Sqlite
 
 
@@ -48,7 +48,7 @@ remindHook = onBangCommand "!remind" $ do
 
 --------------------------------------------------------------------------------
 -- requires a recipient and the text
-storeHook :: ByteString -> Irc ()
+storeHook :: Text -> Irc ()
 storeHook text = do
     host         <- getHost
     sender       <- toLower <$> getSender

@@ -8,8 +8,7 @@ module NumberSix.Handlers.Wikipedia
 
 --------------------------------------------------------------------------------
 import           Control.Monad.Trans  (liftIO)
-import           Data.ByteString      (ByteString)
-import qualified Data.Text.Encoding   as T
+import           Data.Text            (Text)
 import           Text.XmlHtml
 import           Text.XmlHtml.Cursor
 
@@ -23,12 +22,12 @@ import           NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
-wiki :: ByteString -> IO ByteString
+wiki :: Text -> IO Text
 wiki query = do
     result <- httpScrape Xml url id $ \cursor -> do
         item  <- findRec   (byTagName "Item")        cursor
         descr <- findChild (byTagName "Description") item
-        return $ T.encodeUtf8 $ nodeText $ current descr
+        return $ nodeText $ current descr
 
     maybe randomError return result
   where

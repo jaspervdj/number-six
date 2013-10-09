@@ -9,9 +9,11 @@ module NumberSix.Message.Encode
 --------------------------------------------------------------------------------
 import           Data.ByteString       (ByteString)
 import           Data.ByteString.Char8 ()
-import qualified Data.ByteString.Char8 as SBC
-import           Data.Maybe            (isJust, fromMaybe)
+import           Data.Maybe            (fromMaybe, isJust)
 import           Data.Monoid           (Monoid, mempty)
+import           Data.Text             (Text)
+import qualified Data.Text             as T
+import qualified Data.Text.Encoding    as T
 
 
 --------------------------------------------------------------------------------
@@ -20,25 +22,27 @@ import           NumberSix.Message
 
 --------------------------------------------------------------------------------
 encodePrefix :: Prefix -> ByteString
-encodePrefix (ServerPrefix s)   = ":" <> s
+encodePrefix (ServerPrefix s)   = ":" <> T.encodeUtf8 s
 encodePrefix (NickPrefix n u h) =
-    ":" <> n <> fromMaybe "" (fmap ("!" <>) u) <> fromMaybe "" (fmap ("@" <>) h)
+    ":" <> T.encodeUtf8 n <>
+        fromMaybe "" (fmap (("!" <>) . T.encodeUtf8) u) <>
+        fromMaybe "" (fmap (("@" <>) . T.encodeUtf8) h)
 
 
 --------------------------------------------------------------------------------
-encodeCommand :: ByteString -> ByteString
-encodeCommand = id
+encodeCommand :: Text -> ByteString
+encodeCommand = T.encodeUtf8
 
 
 --------------------------------------------------------------------------------
-encodeParameters :: [ByteString] -> ByteString
+encodeParameters :: [Text] -> ByteString
 encodeParameters [] = mempty
 encodeParameters (x : [])
-    | hasSpace x || SBC.null x || SBC.head x == ':' = " :" <> x
-    | otherwise                                     = " " <> x
+    | hasSpace x || T.null x || T.head x == ':' = " :" <> T.encodeUtf8 x
+    | otherwise                                 = " "  <> T.encodeUtf8 x
   where
-     hasSpace = isJust . SBC.find (== ' ')
-encodeParameters (x : xs) = " " <> x <> encodeParameters xs
+     hasSpace = isJust . T.find (== ' ')
+encodeParameters (x : xs) = " " <> T.encodeUtf8 x <> encodeParameters xs
 
 
 --------------------------------------------------------------------------------

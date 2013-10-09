@@ -9,10 +9,10 @@ module NumberSix.Handlers.NowPlaying
 import           Control.Applicative  ((<$>))
 import           Control.Exception
 import           Control.Monad.Trans  (liftIO)
-import           Data.ByteString      (ByteString)
+import           Data.Text            (Text)
 import qualified Data.Text.Encoding   as T
 import qualified Network.HTTP.Conduit as HC
-import           Prelude hiding (catch)
+import           Prelude              hiding (catch)
 import           Text.XmlHtml
 import           Text.XmlHtml.Cursor
 
@@ -26,13 +26,13 @@ import           NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
-stubru :: IO ByteString
+stubru :: IO Text
 stubru = do
     result <- httpScrape Xml url id $ \cursor -> do
         sel    <- findRec (byTagNameAttrs "item" [("index", "0")]) cursor
         title  <- nodeText . current <$> findRec (byTagName "titlename") sel
         artist <- nodeText . current <$> findRec (byTagName "artistname") sel
-        return (T.encodeUtf8 title, T.encodeUtf8 artist)
+        return (title, artist)
 
     return $ case result of
         Just (title, "")     -> title
@@ -44,14 +44,14 @@ stubru = do
 
 
 --------------------------------------------------------------------------------
-rgrfm :: IO ByteString
+rgrfm :: IO Text
 rgrfm = do
     result <- httpScrape Html url mreq $ \cursor -> do
         curr <- findRec (byTagNameAttrs "p" [("class", "huidige")]) cursor
         return $ map nodeText $ childNodes $ current curr
 
     case result of
-        Just [x, _, y] -> return $ T.encodeUtf8 x <> " - " <> T.encodeUtf8 y
+        Just [x, _, y] -> return $ x <> " - " <> y
         _              -> randomError
   where
     url = "http://www.rgrfm.be/core/jajaxfiles/nowplaying.php"
@@ -61,8 +61,9 @@ rgrfm = do
 
 
 --------------------------------------------------------------------------------
-urgent :: IO ByteString
-urgent = catch (http url id) (\(SomeException _) -> randomError)
+urgent :: IO Text
+urgent = catch
+    (T.decodeUtf8 <$> http url id) (\(SomeException _) -> randomError)
   where
     url = "http://urgent.fm/nowplaying/livetrack.txt"
 

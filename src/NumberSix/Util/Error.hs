@@ -8,7 +8,7 @@ module NumberSix.Util.Error
 
 
 --------------------------------------------------------------------------------
-import           Data.ByteString (ByteString)
+import           Data.Text      (Text)
 
 
 --------------------------------------------------------------------------------
@@ -16,7 +16,7 @@ import           NumberSix.Util
 
 
 --------------------------------------------------------------------------------
-errors :: [ByteString]
+errors :: [Text]
 errors =
     [ "Error: please restart your computer?"
     , "I'm dealing with a terrorist threat, please hold on."
@@ -49,5 +49,5 @@ errors =
 
 
 --------------------------------------------------------------------------------
-randomError :: IO ByteString
+randomError :: IO Text
 randomError = randomElement errors

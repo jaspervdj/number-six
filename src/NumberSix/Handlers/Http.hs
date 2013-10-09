@@ -6,26 +6,25 @@ module NumberSix.Handlers.Http
 
 
 --------------------------------------------------------------------------------
-import           Control.Exception     (SomeException(..), catch)
-import           Control.Monad.Trans   (liftIO)
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString.Char8 as BC
-import qualified Data.Text             as T
-import qualified Data.Text.Encoding    as T
-import qualified Network.HTTP.Conduit  as H
-import qualified Network.HTTP.Types    as H
-import           Prelude               hiding (catch)
+import           Control.Exception    (SomeException (..), catch)
+import           Control.Monad.Trans  (liftIO)
+import           Data.Text            (Text)
+import qualified Data.Text            as T
+import qualified Data.Text.Encoding   as T
+import qualified Network.HTTP.Conduit as H
+import qualified Network.HTTP.Types   as H
+import           Prelude              hiding (catch)
 
 
 --------------------------------------------------------------------------------
 import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Util
-import           NumberSix.Util.Http   (httpPrefix)
+import           NumberSix.Util.Http  (httpPrefix)
 
 
 --------------------------------------------------------------------------------
-http :: ByteString -> IO ByteString
+http :: Text -> IO Text
 http uri = do
     req <- H.parseUrl uri'
     let req' = req {H.redirectCount = 0, H.checkStatus = \_ _ _ -> Nothing}
@@ -39,18 +38,18 @@ http uri = do
                     Nothing  -> ""
                     Just loc -> " (Location: " <> loc <> ")"
 
-    return $ BC.pack (show $ H.responseVersion rsp) <> " " <>
-        BC.pack (show $ H.statusCode status) <> " " <>
-        H.statusMessage status <> location
+    return $ T.pack (show $ H.responseVersion rsp) <> " " <>
+        T.pack (show $ H.statusCode status) <> " " <>
+        T.decodeUtf8 (H.statusMessage status) <> T.decodeUtf8 location
   where
-    uri' = T.unpack $ T.decodeUtf8 $ httpPrefix uri
+    uri' = T.unpack $ httpPrefix uri
 
 
 --------------------------------------------------------------------------------
 -- | Catch possible network errors
-wrapped :: ByteString -> IO ByteString
+wrapped :: Text -> IO Text
 wrapped uri = catch (http uri) $ \(SomeException e) ->
-    return $ T.encodeUtf8 $ T.pack $ show e
+    return $ T.pack $ show e
 
 
 --------------------------------------------------------------------------------

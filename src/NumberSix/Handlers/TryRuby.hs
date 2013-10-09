@@ -10,8 +10,9 @@ module NumberSix.Handlers.TryRuby
 import           Control.Applicative  ((<$>))
 import           Control.Monad        (mzero)
 import           Control.Monad.Trans  (liftIO)
-import           Data.Aeson           (FromJSON, Value(..), parseJSON, (.:))
-import           Data.ByteString      (ByteString)
+import           Data.Aeson           (FromJSON, Value (..), parseJSON, (.:))
+import           Data.Text            (Text)
+import qualified Data.Text.Encoding   as T
 import qualified Network.HTTP.Conduit as HC
 
 
@@ -25,8 +26,8 @@ import           NumberSix.Util.Http
 
 --------------------------------------------------------------------------------
 data Result
-    = Success ByteString
-    | Error ByteString
+    = Success Text
+    | Error Text
     deriving (Show)
 
 
@@ -39,7 +40,7 @@ instance FromJSON Result where
 
 
 --------------------------------------------------------------------------------
-ruby :: ByteString -> IO ByteString
+ruby :: Text -> IO Text
 ruby cmd = do
     bs <- http "http://tryruby.org/levels/1/challenges/0" (setPut . setCmd)
     case parseJsonEither bs of
@@ -48,7 +49,7 @@ ruby cmd = do
         Left _            -> randomError
   where
     setCmd :: Monad m => HC.Request m -> HC.Request m
-    setCmd = HC.urlEncodedBody [("cmd", cmd)]
+    setCmd = HC.urlEncodedBody [("cmd", T.encodeUtf8 cmd)]
     setPut rq = rq {HC.method = "PUT"}
 
 

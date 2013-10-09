@@ -7,9 +7,9 @@ module NumberSix.Handlers.Quote
 
 --------------------------------------------------------------------------------
 import           Control.Monad.Trans    (liftIO)
-import           Data.ByteString        (ByteString)
-import qualified Data.ByteString.Char8  as BC
 import           Data.Char              (isDigit)
+import           Data.Text              (Text)
+import qualified Data.Text              as T
 import qualified Database.SQLite.Simple as Sqlite
 import           System.Random          (randomRIO)
 
@@ -51,22 +51,22 @@ addQuoteHook = onBangCommand "!addquote" $ do
     withDatabase $ \db -> Sqlite.execute db
         "INSERT INTO quotes (local_id, host, channel, text) VALUES (?, ?, ?, ?)"
         (localId, host, channel, text)
-    write $ "Quote " <> BC.pack (show localId) <> " added"
+    write $ "Quote " <> T.pack (show localId) <> " added"
 
 
 --------------------------------------------------------------------------------
 quoteHook :: Irc ()
 quoteHook = onBangCommand "!quote" $ do
     query <- getBangCommandText
-    if BC.null query
+    if T.null query
         -- No query, return a random quote
         then do
             lastId <- getLastId
             r <- liftIO $ randomRIO (1, lastId)
             showQuote r
-        else if BC.all isDigit query
+        else if T.all isDigit query
             -- A number was given, lookup the quote
-            then showQuote (read $ BC.unpack query)
+            then showQuote (read $ T.unpack query)
             -- A search term was given, search through quotes
             else do
                 qs <- getMatching query
@@ -74,7 +74,7 @@ quoteHook = onBangCommand "!quote" $ do
                     [] -> write     =<< liftIO randomError
                     _  -> showQuote =<< liftIO (randomElement qs)
   where
-    getMatching :: ByteString -> Irc [Integer]
+    getMatching :: Text -> Irc [Integer]
     getMatching query = do
         host    <- getHost
         channel <- getChannel
@@ -114,4 +114,4 @@ showQuote n = do
         "SELECT text FROM quotes  \
         \WHERE host = ? AND channel = ? AND local_id = ?"
         (host, channel, n)
-    write $ "Quote " <> (BC.pack $ show n) <> ": " <> r
+    write $ "Quote " <> (T.pack $ show n) <> ": " <> r

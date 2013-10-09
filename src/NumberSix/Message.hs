@@ -1,3 +1,4 @@
+--------------------------------------------------------------------------------
 -- | Exposes the datastructure describing an IRC message
 module NumberSix.Message
     ( Prefix (..)
@@ -10,29 +11,29 @@ module NumberSix.Message
 
 
 --------------------------------------------------------------------------------
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString.Char8 as B
-import qualified Data.Char             as Char (toLower)
-import           Data.Monoid           (Monoid, mappend)
+import qualified Data.Char   as Char (toLower)
+import           Data.Monoid (Monoid, mappend)
+import           Data.Text   (Text)
+import qualified Data.Text   as T
 
 
 --------------------------------------------------------------------------------
 data Prefix
-    = ServerPrefix ByteString
-    | NickPrefix ByteString (Maybe ByteString) (Maybe ByteString)
+    = ServerPrefix Text
+    | NickPrefix Text (Maybe Text) (Maybe Text)
     deriving (Show, Eq)
 
 
 --------------------------------------------------------------------------------
 data Message = Message
     { messagePrefix     :: Maybe Prefix
-    , messageCommand    :: ByteString
-    , messageParameters :: [ByteString]
+    , messageCommand    :: Text
+    , messageParameters :: [Text]
     } deriving (Eq, Show)
 
 
 --------------------------------------------------------------------------------
-makeMessage :: ByteString -> [ByteString] -> Message
+makeMessage :: Text -> [Text] -> Message
 makeMessage = Message Nothing
 
 
@@ -43,13 +44,13 @@ makeMessage = Message Nothing
 
 --------------------------------------------------------------------------------
 -- | Case-insensitive comparison
-(==?) :: ByteString -> ByteString -> Bool
+(==?) :: Text -> Text -> Bool
 s1 ==? s2 = toLower s1 == toLower s2
 
 
 --------------------------------------------------------------------------------
-toLower :: ByteString -> ByteString
-toLower = B.map toLower'
+toLower :: Text -> Text
+toLower = T.map toLower'
   where
     -- See IRC RFC
     toLower' '['  = '{'

@@ -8,9 +8,8 @@ module NumberSix.Handlers.YouTube
 --------------------------------------------------------------------------------
 import           Control.Applicative  ((<$>))
 import           Control.Monad.Trans  (liftIO)
-import           Data.ByteString      (ByteString)
+import           Data.Text            (Text)
 import qualified Data.Text            as T
-import qualified Data.Text.Encoding   as T
 import           Text.XmlHtml
 import           Text.XmlHtml.Cursor
 
@@ -25,7 +24,7 @@ import           NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
-youTube :: ByteString -> IO ByteString
+youTube :: Text -> IO Text
 youTube query = do
     result <- httpScrape Xml url id $ \cursor -> do
         -- Find entry and title, easy...
@@ -36,7 +35,7 @@ youTube query = do
         link  <- findChild (byTagNameAttrs "link" [("rel", "alternate")]) entry
         href  <- T.takeWhile (/= '&') <$> getAttribute "href" (current link)
 
-        return (T.encodeUtf8 title, T.encodeUtf8 href)
+        return (title, href)
     case result of
         Just (text, href) -> textAndUrl text href
         Nothing           -> randomError

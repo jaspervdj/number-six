@@ -6,8 +6,8 @@ module NumberSix.Handlers.Pick
 
 
 --------------------------------------------------------------------------------
-import           Control.Monad.Trans   (liftIO)
-import qualified Data.ByteString.Char8 as B
+import           Control.Monad.Trans (liftIO)
+import qualified Data.Text           as T
 
 
 --------------------------------------------------------------------------------
@@ -19,4 +19,4 @@ import           NumberSix.Util
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
 handler = makeBangHandler "Pick" ["!pick", "!who"] $
-    liftIO . randomElement . B.words
+    liftIO . randomElement . T.words

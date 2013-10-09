@@ -8,28 +8,27 @@ module NumberSix.Util
     , toLower
     , breakWord
     , prettyList
-    , trim
     , removeNewlines
     , randomElement
     , parseJsonEither
-    , readByteString
+    , readText
     , maxLineLength
     ) where
 
 
 --------------------------------------------------------------------------------
-import           Control.Arrow         (second)
-import           Control.Concurrent    (threadDelay, forkIO)
-import           Control.Monad.Reader  (ask)
-import           Control.Monad.Trans   (liftIO)
-import           Data.Aeson            (FromJSON, json, parseJSON)
-import           Data.Aeson.Types      (parseEither)
-import           Data.Attoparsec       (parseOnly)
-import           Data.ByteString       (ByteString)
-import qualified Data.ByteString       as B
-import qualified Data.ByteString.Char8 as BC
-import           Data.Char             (isSpace)
-import           System.Random         (randomRIO)
+import           Control.Arrow        (second)
+import           Control.Concurrent   (forkIO, threadDelay)
+import           Control.Monad.Reader (ask)
+import           Control.Monad.Trans  (liftIO)
+import           Data.Aeson           (FromJSON, json, parseJSON)
+import           Data.Aeson.Types     (parseEither)
+import           Data.Attoparsec      (parseOnly)
+import           Data.ByteString      (ByteString)
+import           Data.Char            (isSpace)
+import           Data.Text            (Text)
+import qualified Data.Text            as T
+import           System.Random        (randomRIO)
 
 
 --------------------------------------------------------------------------------
@@ -55,13 +54,13 @@ forkIrc irc = do
 
 --------------------------------------------------------------------------------
 -- | Take a word from a string, returing the word and the remainder.
-breakWord :: ByteString -> (ByteString, ByteString)
-breakWord = second (B.drop 1) . BC.break isSpace
+breakWord :: Text -> (Text, Text)
+breakWord = second (T.drop 1) . T.break isSpace
 
 
 --------------------------------------------------------------------------------
 -- | Show a list of strings in a pretty format
-prettyList :: [ByteString] -> ByteString
+prettyList :: [Text] -> Text
 prettyList [] = "none"
 prettyList (x : []) = x
 prettyList (x : y : []) = x <> " and " <> y
@@ -69,15 +68,9 @@ prettyList (x : y : z : r) = x <> ", " <> prettyList (y : z : r)
 
 
 --------------------------------------------------------------------------------
--- | Drop spaces around a string
-trim :: ByteString -> ByteString
-trim = BC.dropWhile isSpace . B.reverse . BC.dropWhile isSpace . B.reverse
-
-
---------------------------------------------------------------------------------
 -- | Replace newlines by spaces
-removeNewlines :: ByteString -> ByteString
-removeNewlines = BC.map (\x -> if x `elem` "\r\n" then ' ' else x)
+removeNewlines :: Text -> Text
+removeNewlines = T.map (\x -> if x `elem` "\r\n" then ' ' else x)
 
 
 --------------------------------------------------------------------------------
@@ -94,8 +87,8 @@ parseJsonEither bs = parseOnly json bs >>= parseEither parseJSON
 
 --------------------------------------------------------------------------------
 -- | Read applied to a bytestring, lifted to maybe
-readByteString :: Read a => ByteString -> Maybe a
-readByteString bs = case reads (BC.unpack bs) of
+readText :: Read a => Text -> Maybe a
+readText t = case reads (T.unpack t) of
     [(x, "")] -> Just x
     _         -> Nothing
 
