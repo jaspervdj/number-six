@@ -6,7 +6,7 @@ module NumberSix.Handlers.Imdb.Tests
 
 
 --------------------------------------------------------------------------------
-import qualified Data.ByteString         as B
+import qualified Data.Text               as T
 import           Test.Framework          (Test, testGroup)
 import           Test.HUnit              (assert)
 
@@ -22,7 +22,7 @@ tests = testGroup "NumberSix.Handlers.Imdb.Tests"
     [ cases "imdb"
         [ do
             bs <- imdb "once upon a time in america"
-            assert $ "Once Upon a Time in America (1984)" `B.isPrefixOf` bs
-            assert $ "http://www.imdb.com/title/tt0087843/" `B.isSuffixOf` bs
+            assert $ "Once Upon a Time in America (1984)" `T.isPrefixOf` bs
+            assert $ "http://www.imdb.com/title/tt0087843/" `T.isSuffixOf` bs
         ]
     ]

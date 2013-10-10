@@ -1,3 +1,4 @@
+--------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Resto
     ( handler
@@ -65,8 +66,8 @@ resto arg = do
     http (T.pack url) id >>= \bs -> case parseJsonEither bs of
         Left _             -> randomError
         Right (WeekMenu m) -> return $ case M.lookup (T.pack day) m of
-            Nothing -> "Resto's not open " <> e <> "..."
-            Just ms -> T.intercalate ", " ms
+                Nothing -> "Resto's not open " <> e <> "..."
+                Just ms -> T.intercalate ", " ms
   where
     days "tomorrow"           = (1, "tomorrow")
     days "morgen"             = (1, "tomorrow")

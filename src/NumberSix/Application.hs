@@ -86,7 +86,7 @@ readMessage logger sock state = do
         Nothing             -> return Nothing
         Just (line, state') -> case decode line of
             Just msg -> do
-                logger $ "IN: " `T.append` T.decodeUtf8 line
+                logger $ T.pack $ "IN: " ++ show msg
                 return $ Just (msg, state')
             Nothing  -> do
                 logger $
@@ -112,5 +112,5 @@ makeMessageWriter logger sock = do
     return $ \msg -> do
         let bs  = encode msg
             san = B.take maxLineLength $ B.takeWhile (`B.notElem` "\r\n") bs
-        logger $ "OUT: " `T.append` T.decodeUtf8 san
+        logger $ T.pack $ "OUT: " ++ show msg
         lineWriter san

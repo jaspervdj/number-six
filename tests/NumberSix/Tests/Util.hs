@@ -16,4 +16,4 @@ cases :: String -> [Assertion] -> Test
 cases name assertions = testGroup name
     [ testCase ("case " ++ show i) assertion
     | (i, assertion) <- zip [1 :: Int ..] assertions
-    ] 
+    ]
