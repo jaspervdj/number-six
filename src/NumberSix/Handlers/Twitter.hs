@@ -1,6 +1,8 @@
+--------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Twitter
-    ( handler
+    ( twitter
+    , handler
     ) where
 
 
