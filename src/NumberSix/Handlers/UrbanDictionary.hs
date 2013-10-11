@@ -1,7 +1,8 @@
 -- | Provides term lookup on urbandictionary.com
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.UrbanDictionary
-    ( handler
+    ( urban
+    , handler
     ) where
 
 
