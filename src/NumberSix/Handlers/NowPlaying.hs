@@ -56,7 +56,7 @@ rgrfm = do
   where
     url = "http://www.rgrfm.be/core/jajaxfiles/nowplaying.php"
 
-    mreq :: Monad m => HC.Request m -> HC.Request m
+    mreq :: HC.Request -> HC.Request
     mreq = HC.urlEncodedBody [("ajax", "jajax")]
 
 

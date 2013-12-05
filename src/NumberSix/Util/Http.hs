@@ -36,7 +36,7 @@ import           NumberSix.Message
 
 
 --------------------------------------------------------------------------------
-type RequestOptions = forall m. Monad m => HC.Request m -> HC.Request m
+type RequestOptions = HC.Request -> HC.Request
 
 
 --------------------------------------------------------------------------------

@@ -48,7 +48,7 @@ ruby cmd = do
         Right (Error x)   -> return x
         Left _            -> randomError
   where
-    setCmd :: Monad m => HC.Request m -> HC.Request m
+    setCmd :: HC.Request -> HC.Request
     setCmd = HC.urlEncodedBody [("cmd", T.encodeUtf8 cmd)]
     setPut rq = rq {HC.method = "PUT"}
 
