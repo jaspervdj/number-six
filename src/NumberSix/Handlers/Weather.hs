@@ -6,7 +6,10 @@ module NumberSix.Handlers.Weather
 
 
 --------------------------------------------------------------------------------
+import           Control.Applicative  ((<$>), (<*>))
+import           Control.Monad        (mzero)
 import           Control.Monad.Trans  (liftIO)
+import           Data.Aeson           (FromJSON (..), Value (..), (.:))
 import           Data.Text            (Text)
 import qualified Data.Text            as T
 import           Text.XmlHtml
@@ -17,26 +20,54 @@ import           Text.XmlHtml.Cursor
 import           NumberSix.Bang
 import           NumberSix.Irc
 import           NumberSix.Message
+import           NumberSix.Util
 import           NumberSix.Util.Error
 import           NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
+kelvin = 273.15
+
+--------------------------------------------------------------------------------
+data Weather = Weather Temperature [Description] deriving (Show)
+
+
+--------------------------------------------------------------------------------
+instance FromJSON Weather where
+    parseJSON (Object o) = Weather
+                            <$> (o .: "main")
+                            <*> (o .: "weather")
+    parseJSON _          = mzero
+
+
+--------------------------------------------------------------------------------
+data Temperature = Temperature Float deriving (Show)
+
+
+--------------------------------------------------------------------------------
+instance FromJSON Temperature where
+    parseJSON (Object o) = Temperature <$> (flip (-) $ kelvin) <$> o .: "temp"
+    parseJSON _          = mzero
+
+
+--------------------------------------------------------------------------------
+data Description = Description Text deriving (Show)
+
+
+--------------------------------------------------------------------------------
+instance FromJSON Description where
+    parseJSON (Object o) = Description <$> o .: "description"
+    parseJSON _          = mzero
+
+
+--------------------------------------------------------------------------------
 weather :: Text -> IO Text
 weather query = do
-    result <- httpScrape Html url id $ \cursor -> do
-        -- Find content div
-        con    <- findRec (byTagNameAttrs "div" [("class", "content")]) cursor
-        temp   <- findRec (byTagNameAttrs "span" [("class", "temperature")]) con
-        remark <- findRec (byTagNameAttrs "p" [("class", "remark")]) con
-        return $ (nodeText $ current temp) <>
-            "°?! " <>
-            (nodeText $ current remark)
-
-    maybe randomError return result
+    result <- (parseJsonEither <$> http url id) :: IO (Either String Weather)
+    either (const randomError) (return . T.pack . show) result
   where
-    loc = if T.null query then "ghent" else query
-    url = "http://thefuckingweather.com/?unit=c&where=" <> loc
+    loc = if T.null query then "gent" else query
+    url = "http://api.openweathermap.org/data/2.5/weather?q=" <> loc
 
 
 --------------------------------------------------------------------------------
