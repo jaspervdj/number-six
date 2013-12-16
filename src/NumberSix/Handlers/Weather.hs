@@ -12,8 +12,6 @@ import           Control.Monad.Trans  (liftIO)
 import           Data.Aeson           (FromJSON (..), Value (..), (.:))
 import           Data.Text            (Text)
 import qualified Data.Text            as T
-import           Text.XmlHtml
-import           Text.XmlHtml.Cursor
 
 
 --------------------------------------------------------------------------------
@@ -26,6 +24,7 @@ import           NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
+kelvin :: Float
 kelvin = 273.15
 
 --------------------------------------------------------------------------------
@@ -41,7 +40,7 @@ instance FromJSON Weather where
 
 
 --------------------------------------------------------------------------------
-data Temperature = Temperature Float deriving (Show)
+data Temperature = Temperature { temp :: Float }
 
 
 --------------------------------------------------------------------------------
@@ -51,7 +50,12 @@ instance FromJSON Temperature where
 
 
 --------------------------------------------------------------------------------
-data Description = Description Text deriving (Show)
+instance Show Temperature where
+    show (Temperature t) = show t ++ "°!?"
+
+
+--------------------------------------------------------------------------------
+data Description = Description { describe :: Text }
 
 
 --------------------------------------------------------------------------------
@@ -61,13 +65,28 @@ instance FromJSON Description where
 
 
 --------------------------------------------------------------------------------
+instance Show Description where
+    show (Description d) = T.unpack $ T.toUpper d
+
+
+--------------------------------------------------------------------------------
 weather :: Text -> IO Text
 weather query = do
     result <- (parseJsonEither <$> http url id) :: IO (Either String Weather)
-    either (const randomError) (return . T.pack . show) result
+    either (const randomError) (return . pprint) result
   where
     loc = if T.null query then "gent" else query
     url = "http://api.openweathermap.org/data/2.5/weather?q=" <> loc
+
+    pprint :: Weather -> Text
+    pprint (Weather t ds) = T.pack (show $ round $ temp t) <> "°!?"
+                            <> T.toUpper (go ds)
+      where
+        go []              = T.pack ""
+        go [Description d] = " AND FUCK, " <> d
+        go dss = " AND FUCK, "
+                <> T.intercalate (T.pack ", ") (map describe $ init dss)
+                <> " AND " <> (describe $ last dss)
 
 
 --------------------------------------------------------------------------------
