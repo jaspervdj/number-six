@@ -79,11 +79,11 @@ weather query = do
     url = "http://api.openweathermap.org/data/2.5/weather?q=" <> loc
 
     pprint :: Weather -> Text
-    pprint (Weather t ds) = T.pack (show $ round $ temp t) <> "°!?"
+    pprint (Weather t ds) = T.pack (show $ (round $ temp t :: Int)) <> "°!?"
                             <> T.toUpper (go ds)
       where
-        go []              = T.pack ""
-        go [Description d] = " AND FUCK, " <> d
+        go []  = T.pack ""
+        go [d] = " AND FUCK, " <> describe d
         go dss = " AND FUCK, "
                 <> T.intercalate (T.pack ", ") (map describe $ init dss)
                 <> " AND " <> (describe $ last dss)
