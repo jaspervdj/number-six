@@ -7,11 +7,13 @@ module NumberSix.Handlers.Weather
 
 --------------------------------------------------------------------------------
 import           Control.Applicative  ((<$>), (<*>))
+import           Control.Exception    (catch)
 import           Control.Monad        (mzero)
 import           Control.Monad.Trans  (liftIO)
 import           Data.Aeson           (FromJSON (..), Value (..), (.:))
 import           Data.Text            (Text)
 import qualified Data.Text            as T
+import           Network.HTTP.Conduit (HttpException)
 
 
 --------------------------------------------------------------------------------
@@ -72,7 +74,8 @@ instance Show Description where
 --------------------------------------------------------------------------------
 weather :: Text -> IO Text
 weather query = do
-    result <- (parseJsonEither <$> http url id) :: IO (Either String Weather)
+    result <- ((parseJsonEither <$> http url id) :: IO (Either String Weather))
+        `catch` (\ex -> return $ Left $ show (ex :: HttpException))
     either (const randomError) (return . pprint) result
   where
     loc = if T.null query then "gent" else query
