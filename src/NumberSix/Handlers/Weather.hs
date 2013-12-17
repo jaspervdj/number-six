@@ -2,6 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Weather
     ( handler
+    , get_weather
+    , Weather (..)
+    , Temperature (..)
     ) where
 
 
@@ -72,15 +75,22 @@ instance Show Description where
 
 
 --------------------------------------------------------------------------------
-weather :: Text -> IO Text
-weather query = do
+get_weather :: Text -> IO (Maybe Weather)
+get_weather query = do
     result <- ((parseJsonEither <$> http url id) :: IO (Either String Weather))
         `catch` (\ex -> return $ Left $ show (ex :: HttpException))
-    either (const randomError) (return . pprint) result
+    either (const $ return Nothing) (return . Just) result
   where
     loc = if T.null query then "gent" else query
     url = "http://api.openweathermap.org/data/2.5/weather?q=" <> loc
 
+
+--------------------------------------------------------------------------------
+weather :: Text -> IO Text
+weather query = do
+    result <- get_weather query
+    maybe randomError (return . pprint) result
+  where
     pprint :: Weather -> Text
     pprint (Weather t ds) = T.pack (show $ (round $ temp t :: Int)) <> "°!?"
                             <> T.toUpper (go ds)
