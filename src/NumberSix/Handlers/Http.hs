@@ -6,14 +6,13 @@ module NumberSix.Handlers.Http
 
 
 --------------------------------------------------------------------------------
-import           Control.Exception    (SomeException (..), catch)
+import           Control.Exception    (SomeException (..), handle)
 import           Control.Monad.Trans  (liftIO)
 import           Data.Text            (Text)
 import qualified Data.Text            as T
 import qualified Data.Text.Encoding   as T
 import qualified Network.HTTP.Conduit as H
 import qualified Network.HTTP.Types   as H
-import           Prelude              hiding (catch)
 
 
 --------------------------------------------------------------------------------
@@ -48,8 +47,9 @@ http uri = do
 --------------------------------------------------------------------------------
 -- | Catch possible network errors
 wrapped :: Text -> IO Text
-wrapped uri = catch (http uri) $ \(SomeException e) ->
-    return $ T.pack $ show e
+wrapped uri = handle
+    (\(SomeException e) -> return $ T.pack $ show e)
+    (http uri)
 
 
 --------------------------------------------------------------------------------

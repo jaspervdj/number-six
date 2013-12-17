@@ -7,12 +7,11 @@ module NumberSix.Handlers.NowPlaying
 
 --------------------------------------------------------------------------------
 import           Control.Applicative  ((<$>))
-import           Control.Exception
+import           Control.Exception    (SomeException (..), handle)
 import           Control.Monad.Trans  (liftIO)
 import           Data.Text            (Text)
 import qualified Data.Text.Encoding   as T
 import qualified Network.HTTP.Conduit as HC
-import           Prelude              hiding (catch)
 import           Text.XmlHtml
 import           Text.XmlHtml.Cursor
 
@@ -62,8 +61,8 @@ rgrfm = do
 
 --------------------------------------------------------------------------------
 urgent :: IO Text
-urgent = catch
-    (T.decodeUtf8 <$> http url id) (\(SomeException _) -> randomError)
+urgent = handle
+    (\(SomeException _) -> randomError) (T.decodeUtf8 <$> http url id)
   where
     url = "http://urgent.fm/nowplaying/livetrack.txt"
 

@@ -15,7 +15,6 @@ import           Control.Monad           (forM, forM_)
 import           Data.Maybe              (catMaybes)
 import qualified Data.Text               as T
 import qualified Database.SQLite.Simple  as Sqlite
-import           Prelude                 hiding (catch)
 import           System.Environment      (getProgName)
 
 
