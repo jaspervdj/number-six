@@ -6,7 +6,7 @@ module NumberSix.Handlers.Weather.Tests
 
 
 --------------------------------------------------------------------------------
-import           Data.Maybe                 (fromJust, isJust)
+import           Data.Maybe                 (fromJust)
 import           Test.Framework             (Test, testGroup)
 import           Test.HUnit                 (assert)
 
@@ -22,8 +22,7 @@ tests :: Test
 tests = testGroup "NumberSix.Handlers.Weather.Tests"
     [ cases "weather"
         [ do
-            result <- get_weather "gent"
-            assert $ isJust result
+            result <- getWeather "gent"
             let (Weather (Temperature t) _) = fromJust result
             assert $ -15 <= t && t <= 60
         ]

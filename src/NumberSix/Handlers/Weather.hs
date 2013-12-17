@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Weather
     ( handler
-    , get_weather
+    , getWeather
     , Weather (..)
     , Temperature (..)
     ) where
@@ -75,8 +75,8 @@ instance Show Description where
 
 
 --------------------------------------------------------------------------------
-get_weather :: Text -> IO (Maybe Weather)
-get_weather query = do
+getWeather :: Text -> IO (Maybe Weather)
+getWeather query = do
     result <- ((parseJsonEither <$> http url id) :: IO (Either String Weather))
         `catch` (\ex -> return $ Left $ show (ex :: HttpException))
     either (const $ return Nothing) (return . Just) result
@@ -88,7 +88,7 @@ get_weather query = do
 --------------------------------------------------------------------------------
 weather :: Text -> IO Text
 weather query = do
-    result <- get_weather query
+    result <- getWeather query
     maybe randomError (return . pprint) result
   where
     pprint :: Weather -> Text
