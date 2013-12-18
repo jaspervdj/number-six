@@ -132,7 +132,6 @@ insults =
     , "YOU'RE AN INANIMATE FUCKING OBJECT."
     , "you must've been born on a highway cause thats where all the accidents happen"
     , "I will plant a tree in your mother's ass and fuck your sister in its shade"
-    , "You are not a piece of shit, you are every piece of shit from the beginning of time until the end. You are the sum total of all excrement, personified. You are a loathsome, hollow-hearted mound of pile and pus masquerading as a human being. You are an unethical tapeworm feasting in the bowels of the human condition, preying on the fear and stupidity of those who you work diligently to keep stupid and fearful. You have less value than a piece of smegma encrusted lint pulled from the foreskin of a sweaty, uncircumcised penis. You are an emotionally tone deaf abominable travesty whose every action is as rotten as it is disingenuous and whose every thought is an insipid as it is deplorable. If there is even a molecule of human decency in your soul, I feel tremendous pity for it. Fuck your smarmy face. Fuck the condescending tone to which you speak to those around you. Fuck your pathological aversion to honesty and integrity. Fuck anyone who considers you a friend. Fuck this whole universe, for creating you and fuck us for existing alongside you. Most of all, I’d like to say fuck you, but fuck you is far too tame an insult for someone as reprehensible as you have shown yourself to be."
     , "go write some haskell"
     , "you have the mental agility of a bagel"
     , "you are the human equivalent of a snap-back fedora"
@@ -142,5 +141,4 @@ insults =
     , "you're useless as the g in lasagna"
     , "I refuse to have a battle of wits against an unarmed man"
     , "If I had a gun with two bullets, and I was in a room with you, Hitler, and Bin Laden, I would shoot you twice"
-    , "I'd call you a cunt, but you lack the warmth and depth" 
     ]
