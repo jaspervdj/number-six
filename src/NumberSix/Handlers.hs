@@ -10,6 +10,7 @@ import qualified NumberSix.Handlers.AlfaPapaTango
 import qualified NumberSix.Handlers.Binary
 import qualified NumberSix.Handlers.Bomb
 import qualified NumberSix.Handlers.EightBall
+import qualified NumberSix.Handlers.Feed
 import qualified NumberSix.Handlers.GitHub
 import qualified NumberSix.Handlers.Gods
 import qualified NumberSix.Handlers.Google
@@ -57,6 +58,7 @@ handlers =
     , NumberSix.Handlers.Binary.handler
     , NumberSix.Handlers.Bomb.handler
     , NumberSix.Handlers.EightBall.handler
+    , NumberSix.Handlers.Feed.handler
     , NumberSix.Handlers.GitHub.handler
     , NumberSix.Handlers.Gods.handler
     , NumberSix.Handlers.Google.handler
