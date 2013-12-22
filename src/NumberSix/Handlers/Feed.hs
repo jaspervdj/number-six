@@ -61,9 +61,8 @@ getFeed url = do
     return $ parseFeedString $ B.unpack content
 
 
-
 --------------------------------------------------------------------------------
-newItems :: UTCTime -> Feed -> [Item]
+newItems :: UTCTime -> Feed -> [Item] -- since when, on this feed
 newItems latest feed = Prelude.filter newer $ getFeedItems feed
   where
     newer item = maybe False id $ do
@@ -72,7 +71,7 @@ newItems latest feed = Prelude.filter newer $ getFeedItems feed
 
 
 --------------------------------------------------------------------------------
-layoutItems :: Text -> [Item] -> Irc [Text]
+layoutItems :: Text -> [Item] -> Irc [Text] -- feed title, items to layout
 layoutItems ftitle items = forM items go
   where
     go :: Item -> Irc Text
@@ -82,6 +81,7 @@ layoutItems ftitle items = forM items go
         return $ "News on " <> ftitle <> ": " <> ititle <> " (" <> link <> ")"
 
 
+--------------------------------------------------------------------------------
 selectFeeds :: Irc [(Text, Text, Text)]
 selectFeeds = do
     host         <- getHost
@@ -96,10 +96,10 @@ feedReader :: Irc ()
 feedReader = forever $ do
 
     -- Gather all feeds we're listening to.
+    feeds       <- selectFeeds
     host        <- getHost
     channel     <- getChannel
     IrcTime now <- liftIO getTime
-    feeds       <- selectFeeds
 
     -- Write items for each feed
     forM_ feeds $ \(name, url, latest) -> do
@@ -107,10 +107,14 @@ feedReader = forever $ do
         let time  = read $ T.unpack latest
             news  = maybe [] (newItems time) feed
             title = maybe "" (T.pack . getFeedTitle) feed
-        _ <- mapM_ write <$> layoutItems title news
+        itemlines <- layoutItems title news
+        mapM_ write itemlines
 
+        -- Mark the feed as updated if we could access it
         case feed of
-             Nothing -> return ()
+             Nothing -> do
+                 write $ "Kindly check feed " <> name <> " before I..."
+                 write =<< liftIO randomError
              Just _  -> withDatabase $ \db -> Sqlite.execute db 
                 "UPDATE TABLE feeds SET latest = ?             \
                 \   WHERE host = ? and channel = ? and name = ?"
@@ -123,7 +127,7 @@ feedReader = forever $ do
 --------------------------------------------------------------------------------
 configFeed :: Irc ()
 configFeed = onBangCommand "!rss" $ do
-    text'        <- getBangCommandText
+    text' <- getBangCommandText
     let (command, text) = breakWord text'
     case command of
          "add"    -> let (name, url) = breakWord text in addFeed name url
