@@ -22,6 +22,7 @@ Library
     NumberSix.Handlers.Binary,
     NumberSix.Handlers.Bomb,
     NumberSix.Handlers.EightBall,
+    NumberSix.Handlers.Feed,
     NumberSix.Handlers.GitHub,
     NumberSix.Handlers.Gods,
     NumberSix.Handlers.Google,
