@@ -3,20 +3,18 @@ module NumberSix.Handlers.Feed
     ( handler
     ) where
 --------------------------------------------------------------------------------
-import           Control.Applicative     ((<$>))
-import           Control.Concurrent      (threadDelay)
-import           Control.Monad           (forM, forM_, forever, join)
-import           Control.Monad.Trans     (liftIO)
-import qualified Data.ByteString.Char8   as B
-import           Data.Text               (Text)
-import qualified Data.Text               as T
-import           Data.Time.Clock         (UTCTime)
-import qualified Database.SQLite.Simple  as Sqlite
-import           Text.Feed.Import        (parseFeedString)
-import           Text.Feed.Query         (getFeedItems, getFeedTitle,
-                                          getItemLink, getItemPublishDate,
-                                          getItemTitle)
-import           Text.Feed.Types         (Feed, Item)
+import           Control.Applicative    ((<$>))
+import           Control.Monad          (forM_)
+import           Control.Monad.Trans    (liftIO)
+import qualified Data.ByteString.Char8  as B
+import           Data.Maybe             (listToMaybe)
+import           Data.Text              (Text)
+import qualified Data.Text              as T
+import qualified Database.SQLite.Simple as Sqlite
+import           Text.Feed.Import       (parseFeedString)
+import           Text.Feed.Query        (getFeedItems, getFeedTitle,
+                                         getItemLink, getItemTitle)
+import           Text.Feed.Types        (Feed, Item)
 
 --------------------------------------------------------------------------------
 import           NumberSix.Bang
@@ -24,11 +22,10 @@ import           NumberSix.Irc
 import           NumberSix.Util
 import           NumberSix.Util.Error
 import           NumberSix.Util.Http
-import           NumberSix.Util.Time
 
 --------------------------------------------------------------------------------
-delay :: Int
-delay = 60 * 1000 -- a minute
+delay :: Double
+delay = 15 -- 5 seconds
 
 
 --------------------------------------------------------------------------------
@@ -43,10 +40,9 @@ initialize = do
         \   id      INTEGER PRIMARY KEY AUTOINCREMENT   NOT NULL,   \
         \   host    TEXT                                NOT NULL,   \
         \   channel TEXT                                NOT NULL,   \
-        \   name    TEXT                                NOT NULL,   \
         \   url     TEXT                                NOT NULL,   \
-        \   latest  TEXT                                NOT NULL,   \
-        \   UNIQUE (host, channel, name)                            \
+        \   latest  TEXT,                                           \
+        \   UNIQUE (host, channel, url)                             \
         \)"
 
     -- Spawn feedReader in background
@@ -62,66 +58,65 @@ getFeed url = do
 
 
 --------------------------------------------------------------------------------
-newItems :: UTCTime -> Feed -> [Item] -- since when, on this feed
-newItems latest feed = Prelude.filter newer $ getFeedItems feed
-  where
-    newer item = maybe False id $ do
-        time <- join $ getItemPublishDate item
-        return $ latest < time
+newestItem :: Maybe Text -> Feed -> Maybe Item -- since when, on this feed
+newestItem mLatest feed = do
+    newest <- listToMaybe $ getFeedItems feed
+    link   <- getItemLink newest
+    if Just (T.pack link) == mLatest
+        then Nothing
+        else return newest
 
 
 --------------------------------------------------------------------------------
-layoutItems :: Text -> [Item] -> Irc [Text] -- feed title, items to layout
-layoutItems ftitle items = forM items go
-  where
-    go :: Item -> Irc Text
-    go item = maybe (liftIO randomError) (return) $ do
+layoutItem :: Text -> Item -> Irc Text -- feed title, items to layout
+layoutItem ftitle item = maybe (liftIO randomError) (return) $ do
         link   <- T.pack <$> getItemLink item
         ititle <- T.pack <$> getItemTitle item
         return $ "News on " <> ftitle <> ": " <> ititle <> " (" <> link <> ")"
 
 
 --------------------------------------------------------------------------------
-selectFeeds :: Irc [(Text, Text, Text)]
+selectFeeds :: Irc [(Text, Text, Maybe Text)]
 selectFeeds = do
-    host         <- getHost
-    channel      <- getChannel
+    host <- getHost
     withDatabase $ \db -> Sqlite.query db
-        "SELECT name, url, latest FROM feeds WHERE host = ? and channel = ?"
-        (host, channel)
+        "SELECT channel, url, latest FROM feeds WHERE host = ?"
+        (Sqlite.Only host)
 
 
 --------------------------------------------------------------------------------
 feedReader :: Irc ()
-feedReader = forever $ do
+feedReader = do
+
+    sleep delay
 
     -- Gather all feeds we're listening to.
     feeds       <- selectFeeds
     host        <- getHost
-    channel     <- getChannel
-    IrcTime now <- liftIO getTime
 
     -- Write items for each feed
-    forM_ feeds $ \(name, url, latest) -> do
-        feed <- liftIO $ getFeed url
-        let time  = read $ T.unpack latest
-            news  = maybe [] (newItems time) feed
-            title = maybe "" (T.pack . getFeedTitle) feed
-        itemlines <- layoutItems title news
-        mapM_ write itemlines
-
-        -- Mark the feed as updated if we could access it
-        case feed of
-             Nothing -> do
-                 write $ "Kindly check feed " <> name <> " before I..."
-                 write =<< liftIO randomError
-             Just _  -> withDatabase $ \db -> Sqlite.execute db 
-                "UPDATE TABLE feeds SET latest = ?             \
-                \   WHERE host = ? and channel = ? and name = ?"
-                (now, host, channel, name)
+    forM_ feeds $ \(channel, url, mLatest) -> do
+        mFeed <- liftIO $ getFeed url
+        case mFeed of
+            Nothing -> do
+                writeChannel channel  $ "Kindly check feed " <> url
+                       <> " before I..."
+                writeChannel channel  =<< liftIO randomError
+            Just feed -> do
+                let new   = newestItem mLatest feed
+                    title = T.pack $ getFeedTitle feed
+                case new of
+                    Nothing   -> return ()
+                    Just item -> do
+                        itemline <- layoutItem title item
+                        writeChannel channel itemline
+                        withDatabase $ \db -> Sqlite.execute db
+                            "UPDATE feeds SET latest = ?                  \
+                            \   WHERE host = ? AND channel = ? AND url = ?"
+                            (getItemLink item, host, channel, url)
 
     -- Sleep and go
-    liftIO $ threadDelay delay
+    feedReader
 
 
 --------------------------------------------------------------------------------
@@ -130,27 +125,26 @@ configFeed = onBangCommand "!rss" $ do
     text' <- getBangCommandText
     let (command, text) = breakWord text'
     case command of
-         "add"    -> let (name, url) = breakWord text in addFeed name url
+         "add"    -> addFeed text
          "list"   -> listFeeds
          "remove" -> removeFeed text
          _        -> write =<< liftIO randomError
 
 
 --------------------------------------------------------------------------------
-addFeed :: Text -> Text -> Irc ()
-addFeed name url = do
-    (names, _, _) <- unzip3 <$> selectFeeds
-    if name `elem` names
+addFeed :: Text -> Irc ()
+addFeed url = do
+    channel <- getChannel
+    (channels, urls, _) <- unzip3 <$> selectFeeds
+    if (channel, url) `elem` zip channels urls
         then write =<< liftIO randomError
         else do
-            host         <- getHost
-            channel      <- getChannel
-            IrcTime time <- liftIO getTime
+            host <- getHost
             withDatabase $ \db -> Sqlite.execute db
-                "INSERT INTO feeds (host, channel, name, url, latest) \
-                \   VALUES (?, ?, ?, ?, ?)"
-                (host, channel, name, url, time)
-            writeReply $ "Listening to " <> name <> " on " <> url <> "."
+                "INSERT INTO feeds (host, channel, url) \
+                \   VALUES (?, ?, ?)"
+                (host, channel, url)
+            writeReply $ "Listening to " <> url <> "."
 
 
 --------------------------------------------------------------------------------
@@ -158,21 +152,23 @@ listFeeds :: Irc ()
 listFeeds = do
     feeds <- selectFeeds
     writeReply $ "I'm listening to:"
-    forM_ feeds $ \(name, url, _) ->
-        write $ "  " <> name <> " (" <> url <> ")"
+    forM_ feeds $ \(_, url, mLatest) ->
+        case mLatest of
+             Nothing     -> write $ url
+             Just latest -> write $ url <> " (last was: " <> latest <> ")"
 
 
 --------------------------------------------------------------------------------
 removeFeed :: Text -> Irc ()
-removeFeed name = do
-    (names, _, _) <- unzip3 <$> selectFeeds
-    if not (name `elem` names)
+removeFeed url = do
+    channel <- getChannel
+    (channels, urls, _) <- unzip3 <$> selectFeeds
+    if not $ (channel, url) `elem` zip channels urls
         then write =<< liftIO randomError
         else do
-            host    <- getHost
-            channel <- getChannel
+            host <- getHost
             withDatabase $ \db -> Sqlite.execute db
-                "DELETE FROM feeds WHERE host = ?, channel = ?, name = ?"
-                (host, channel, name)
-            writeReply $ "Ignoring " <> name <> "."
+                "DELETE FROM feeds WHERE host = ? AND channel = ? AND url = ?"
+                (host, channel, url)
+            write $ "Ignoring " <> url <> "."
 
