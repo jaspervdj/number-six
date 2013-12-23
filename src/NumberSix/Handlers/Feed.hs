@@ -121,7 +121,7 @@ feedReader = do
 
 --------------------------------------------------------------------------------
 configFeed :: Irc ()
-configFeed = onBangCommand "!rss" $ do
+configFeed = onBangCommand "!feed" $ do
     text' <- getBangCommandText
     let (command, text) = breakWord text'
     case command of
