@@ -128,9 +128,9 @@ feedCommands = onBangCommand "!feed" $ do
     text' <- getBangCommandText
     let (command, text) = breakWord text'
     case command of
-         "add"    -> addFeed text
+         "add"    -> onGod $ addFeed text
          "list"   -> listFeeds
-         "remove" -> removeFeed text
+         "remove" -> onGod $ removeFeed text
          _        -> write =<< liftIO randomError
 
 
