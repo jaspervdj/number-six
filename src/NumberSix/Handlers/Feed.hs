@@ -156,7 +156,7 @@ listFeeds = do
     feeds <- selectFeeds
     case feeds of
         [] -> writeReply $ "I'm not subscribed to any feeds."
-        _  -> forM_ feeds $ \(_, url, mLatest) -> write url
+        _  -> forM_ feeds $ \(_, url, _) -> write url
 
 
 --------------------------------------------------------------------------------
