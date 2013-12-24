@@ -54,6 +54,16 @@ Ask a question to the wise 8-ball handler. Commands:
 
 - `!8ball question`: Ask a question
 
+Feed
+----
+
+Manage Atom/RSS feed subscriptions. New items will be printed to the IRC
+channel.
+
+- `!feed add http://example.com/rss.xml`: Subscribe to a feed
+- `!feed remove http://example.com/rss.xml`: Unsubscribe from a feed
+- `!feed list`: List subscribed feeds
+
 GitHub
 ------
 
