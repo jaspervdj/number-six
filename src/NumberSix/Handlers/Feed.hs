@@ -1,10 +1,14 @@
+--------------------------------------------------------------------------------
 {-# LANGUAGE OverloadedStrings #-}
 module NumberSix.Handlers.Feed
     ( handler
     ) where
+
+
 --------------------------------------------------------------------------------
 import           Control.Applicative    ((<$>))
-import           Control.Monad          (forM_)
+import           Control.Monad          (forM_, forever)
+import           Control.Monad.Reader   (ask)
 import           Control.Monad.Trans    (liftIO)
 import qualified Data.ByteString.Char8  as B
 import           Data.Maybe             (listToMaybe)
@@ -19,18 +23,22 @@ import           Text.Feed.Types        (Feed, Item)
 --------------------------------------------------------------------------------
 import           NumberSix.Bang
 import           NumberSix.Irc
+import           NumberSix.SandBox
 import           NumberSix.Util
+import           NumberSix.Util.BitLy
 import           NumberSix.Util.Error
 import           NumberSix.Util.Http
 
+
 --------------------------------------------------------------------------------
 delay :: Double
-delay = 15 -- 5 seconds
+delay = 5 * 60  -- 5 minutes
 
 
 --------------------------------------------------------------------------------
 handler :: UninitializedHandler
-handler = makeHandlerWith "Feed" [const configFeed] initialize
+handler = makeHandlerWith "Feed" [const feedCommands] initialize
+
 
 --------------------------------------------------------------------------------
 initialize :: Irc ()
@@ -45,20 +53,21 @@ initialize = do
         \   UNIQUE (host, channel, url)                             \
         \)"
 
-    -- Spawn feedReader in background
-    forkIrc $ feedReader
+    -- Spawn checkFeeds in background
+    forkIrc $ checkFeeds
 
 
 --------------------------------------------------------------------------------
-getFeed :: Text             -- ^ URL
-        -> IO (Maybe Feed)  -- ^ Feed on URL
+getFeed :: Text              -- ^ URL
+        -> Irc (Maybe Feed)  -- ^ Feed on URL
 getFeed url = do
-    content <- http url id
-    return $ parseFeedString $ B.unpack content
+    logger  <- ircLogger . ircEnvironment <$> ask
+    content <- liftIO $ sandBox logger "Feed.getFeed" (Just 30) (http url id)
+    return $ parseFeedString =<< fmap B.unpack content
 
 
 --------------------------------------------------------------------------------
-newestItem :: Maybe Text -> Feed -> Maybe Item -- since when, on this feed
+newestItem :: Maybe Text -> Feed -> Maybe Item  -- since when, on this feed
 newestItem mLatest feed = do
     newest <- listToMaybe $ getFeedItems feed
     link   <- getItemLink newest
@@ -68,11 +77,11 @@ newestItem mLatest feed = do
 
 
 --------------------------------------------------------------------------------
-layoutItem :: Text -> Item -> Irc Text -- feed title, items to layout
-layoutItem ftitle item = maybe (liftIO randomError) (return) $ do
-        link   <- T.pack <$> getItemLink item
-        ititle <- T.pack <$> getItemTitle item
-        return $ "News on " <> ftitle <> ": " <> ititle <> " (" <> link <> ")"
+layoutItem :: Text -> Item -> IO Text -- feed title, items to layout
+layoutItem fTitle item = do
+    let link   = maybe "?" T.pack $ getItemLink item
+        iTitle = maybe "?" T.pack $ getItemTitle item
+    textAndUrl (fTitle <> ": " <> iTitle) link
 
 
 --------------------------------------------------------------------------------
@@ -85,9 +94,8 @@ selectFeeds = do
 
 
 --------------------------------------------------------------------------------
-feedReader :: Irc ()
-feedReader = do
-
+checkFeeds :: Irc ()
+checkFeeds = forever $ do
     sleep delay
 
     -- Gather all feeds we're listening to.
@@ -96,32 +104,27 @@ feedReader = do
 
     -- Write items for each feed
     forM_ feeds $ \(channel, url, mLatest) -> do
-        mFeed <- liftIO $ getFeed url
+        mFeed <- getFeed url
         case mFeed of
             Nothing -> do
-                writeChannel channel  $ "Kindly check feed " <> url
-                       <> " before I..."
-                writeChannel channel  =<< liftIO randomError
+                err <- liftIO randomError
+                writeChannel channel $ "Feed " <> url <> ": " <> err
             Just feed -> do
                 let new   = newestItem mLatest feed
                     title = T.pack $ getFeedTitle feed
                 case new of
                     Nothing   -> return ()
                     Just item -> do
-                        itemline <- layoutItem title item
-                        writeChannel channel itemline
+                        writeChannel channel =<< liftIO (layoutItem title item)
                         withDatabase $ \db -> Sqlite.execute db
                             "UPDATE feeds SET latest = ?                  \
                             \   WHERE host = ? AND channel = ? AND url = ?"
                             (getItemLink item, host, channel, url)
 
-    -- Sleep and go
-    feedReader
-
 
 --------------------------------------------------------------------------------
-configFeed :: Irc ()
-configFeed = onBangCommand "!feed" $ do
+feedCommands :: Irc ()
+feedCommands = onBangCommand "!feed" $ do
     text' <- getBangCommandText
     let (command, text) = breakWord text'
     case command of
@@ -144,18 +147,16 @@ addFeed url = do
                 "INSERT INTO feeds (host, channel, url) \
                 \   VALUES (?, ?, ?)"
                 (host, channel, url)
-            writeReply $ "Listening to " <> url <> "."
+            writeReply $ "Subscribed to: " <> url
 
 
 --------------------------------------------------------------------------------
 listFeeds :: Irc ()
 listFeeds = do
     feeds <- selectFeeds
-    writeReply $ "I'm listening to:"
-    forM_ feeds $ \(_, url, mLatest) ->
-        case mLatest of
-             Nothing     -> write $ url
-             Just latest -> write $ url <> " (last was: " <> latest <> ")"
+    case feeds of
+        [] -> writeReply $ "I'm not subscribed to any feeds."
+        _  -> forM_ feeds $ \(_, url, mLatest) -> write url
 
 
 --------------------------------------------------------------------------------
@@ -171,4 +172,3 @@ removeFeed url = do
                 "DELETE FROM feeds WHERE host = ? AND channel = ? AND url = ?"
                 (host, channel, url)
             write $ "Ignoring " <> url <> "."
-
