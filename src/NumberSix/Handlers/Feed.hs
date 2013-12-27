@@ -79,8 +79,8 @@ newestItem mLatest feed = do
 --------------------------------------------------------------------------------
 layoutItem :: Text -> Item -> IO Text -- feed title, items to layout
 layoutItem fTitle item = do
-    let link   = maybe "?" T.pack $ getItemLink item
-        iTitle = maybe "?" T.pack $ getItemTitle item
+    let link   = removeNewlines $ maybe "?" T.pack $ getItemLink item
+        iTitle = removeNewlines $ maybe "?" T.pack $ getItemTitle item
     textAndUrl (fTitle <> ": " <> iTitle) link
 
 
