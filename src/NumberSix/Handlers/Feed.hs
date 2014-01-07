@@ -169,8 +169,9 @@ listFeeds = do
     feeds <- selectFeeds
     case feeds of
         [] -> writeReply $ "I'm not subscribed to any feeds."
-        _  -> forM_ feeds $ \(_, url, _, broken) -> write $
-            url <> (if broken then " (broken)" else "")
+        _  -> forM_ feeds $ \(_, url, _, broken) -> do
+            write $ url <> (if broken then " (broken)" else "")
+            sleep 1
 
 
 --------------------------------------------------------------------------------
