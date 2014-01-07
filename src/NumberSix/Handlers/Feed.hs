@@ -106,9 +106,19 @@ checkFeeds = forever $ do
     forM_ feeds $ \(channel, url, mLatest) -> do
         mFeed <- getFeed url
         case mFeed of
-            Nothing -> do
-                err <- liftIO randomError
-                writeChannel channel $ "Feed " <> url <> ": " <> err
+            -- An error occurred
+            Nothing
+                -- Error has alread been printed
+                | mLatest == Just "error" -> return ()
+                -- First time having an error
+                | otherwise -> do
+                    err <- liftIO randomError
+                    writeChannel channel $ "Feed " <> url <> ": " <> err
+                    withDatabase $ \db -> Sqlite.execute db
+                        "UPDATE feeds SET latest = ?                  \
+                        \   WHERE host = ? AND channel = ? AND url = ?"
+                        ("error" :: Text, host, channel, url)
+            -- Everything is fine
             Just feed -> do
                 let new   = newestItem mLatest feed
                     title = T.pack $ getFeedTitle feed
