@@ -11,6 +11,7 @@ import           Control.Monad          (forM_, forever)
 import           Control.Monad.Reader   (ask)
 import           Control.Monad.Trans    (liftIO)
 import qualified Data.ByteString.Char8  as B
+import           Data.List              (unzip4)
 import           Data.Maybe             (listToMaybe)
 import           Data.Text              (Text)
 import qualified Data.Text              as T
@@ -19,6 +20,7 @@ import           Text.Feed.Import       (parseFeedString)
 import           Text.Feed.Query        (getFeedItems, getFeedTitle,
                                          getItemLink, getItemTitle)
 import           Text.Feed.Types        (Feed, Item)
+
 
 --------------------------------------------------------------------------------
 import           NumberSix.Bang
@@ -50,6 +52,7 @@ initialize = do
         \   channel TEXT                                NOT NULL,   \
         \   url     TEXT                                NOT NULL,   \
         \   latest  TEXT,                                           \
+        \   broken  INTEGER                             NOT NULL,   \
         \   UNIQUE (host, channel, url)                             \
         \)"
 
@@ -85,11 +88,11 @@ layoutItem fTitle item = do
 
 
 --------------------------------------------------------------------------------
-selectFeeds :: Irc [(Text, Text, Maybe Text)]
+selectFeeds :: Irc [(Text, Text, Maybe Text, Bool)]
 selectFeeds = do
     host <- getHost
     withDatabase $ \db -> Sqlite.query db
-        "SELECT channel, url, latest FROM feeds WHERE host = ?"
+        "SELECT channel, url, latest, broken FROM feeds WHERE host = ?"
         (Sqlite.Only host)
 
 
@@ -103,21 +106,21 @@ checkFeeds = forever $ do
     host        <- getHost
 
     -- Write items for each feed
-    forM_ feeds $ \(channel, url, mLatest) -> do
+    forM_ feeds $ \(channel, url, mLatest, broken) -> do
         mFeed <- getFeed url
         case mFeed of
             -- An error occurred
             Nothing
                 -- Error has alread been printed
-                | mLatest == Just "error" -> return ()
+                | broken    -> return ()
                 -- First time having an error
                 | otherwise -> do
                     err <- liftIO randomError
                     writeChannel channel $ "Feed " <> url <> ": " <> err
                     withDatabase $ \db -> Sqlite.execute db
-                        "UPDATE feeds SET latest = ?                  \
+                        "UPDATE feeds SET broken = ?                  \
                         \   WHERE host = ? AND channel = ? AND url = ?"
-                        ("error" :: Text, host, channel, url)
+                        (True, host, channel, url)
             -- Everything is fine
             Just feed -> do
                 let new   = newestItem mLatest feed
@@ -127,9 +130,9 @@ checkFeeds = forever $ do
                     Just item -> do
                         writeChannel channel =<< liftIO (layoutItem title item)
                         withDatabase $ \db -> Sqlite.execute db
-                            "UPDATE feeds SET latest = ?                  \
+                            "UPDATE feeds SET latest = ?, broken = ?      \
                             \   WHERE host = ? AND channel = ? AND url = ?"
-                            (getItemLink item, host, channel, url)
+                            (getItemLink item, False, host, channel, url)
 
 
 --------------------------------------------------------------------------------
@@ -148,15 +151,15 @@ feedCommands = onBangCommand "!feed" $ do
 addFeed :: Text -> Irc ()
 addFeed url = do
     channel <- getChannel
-    (channels, urls, _) <- unzip3 <$> selectFeeds
+    (channels, urls, _, _) <- unzip4 <$> selectFeeds
     if (channel, url) `elem` zip channels urls
         then write =<< liftIO randomError
         else do
             host <- getHost
             withDatabase $ \db -> Sqlite.execute db
-                "INSERT INTO feeds (host, channel, url) \
-                \   VALUES (?, ?, ?)"
-                (host, channel, url)
+                "INSERT INTO feeds (host, channel, url, broken) \
+                \   VALUES (?, ?, ?, ?)"
+                (host, channel, url, False)
             writeReply $ "Subscribed to: " <> url
 
 
@@ -166,14 +169,15 @@ listFeeds = do
     feeds <- selectFeeds
     case feeds of
         [] -> writeReply $ "I'm not subscribed to any feeds."
-        _  -> forM_ feeds $ \(_, url, _) -> write url
+        _  -> forM_ feeds $ \(_, url, _, broken) -> write $
+            url <> (if broken then " (broken)" else "")
 
 
 --------------------------------------------------------------------------------
 removeFeed :: Text -> Irc ()
 removeFeed url = do
     channel <- getChannel
-    (channels, urls, _) <- unzip3 <$> selectFeeds
+    (channels, urls, _, _) <- unzip4 <$> selectFeeds
     if not $ (channel, url) `elem` zip channels urls
         then write =<< liftIO randomError
         else do
