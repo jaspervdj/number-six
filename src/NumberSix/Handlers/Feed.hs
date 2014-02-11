@@ -118,20 +118,24 @@ checkFeeds = forever $ do
                     err <- liftIO randomError
                     writeChannel channel $ "Feed " <> url <> ": " <> err
                     withDatabase $ \db -> Sqlite.execute db
-                        "UPDATE feeds SET broken = ?                  \
-                        \   WHERE host = ? AND channel = ? AND url = ?"
+                        "UPDATE feeds SET broken = ?               \
+                        \WHERE host = ? AND channel = ? AND url = ?"
                         (True, host, channel, url)
             -- Everything is fine
             Just feed -> do
                 let new   = newestItem mLatest feed
                     title = T.pack $ getFeedTitle feed
                 case new of
-                    Nothing   -> return ()
+                    Nothing ->
+                        withDatabase $ \db -> Sqlite.execute db
+                            "UPDATE feeds SET broken = ?               \
+                            \WHERE host = ? AND channel = ? AND url = ?"
+                            (False, host, channel, url)
                     Just item -> do
                         writeChannel channel =<< liftIO (layoutItem title item)
                         withDatabase $ \db -> Sqlite.execute db
-                            "UPDATE feeds SET latest = ?, broken = ?      \
-                            \   WHERE host = ? AND channel = ? AND url = ?"
+                            "UPDATE feeds SET latest = ?, broken = ?   \
+                            \WHERE host = ? AND channel = ? AND url = ?"
                             (getItemLink item, False, host, channel, url)
 
 

@@ -132,7 +132,7 @@ insults =
     , "YOU'RE AN INANIMATE FUCKING OBJECT."
     , "you must've been born on a highway cause thats where all the accidents happen"
     , "I will plant a tree in your mother's ass and fuck your sister in its shade"
-    , "go write some haskell"
+    , "go write some php"
     , "you have the mental agility of a bagel"
     , "you are the human equivalent of a snap-back fedora"
     , "too bad your mother didn't believe in abortion"
