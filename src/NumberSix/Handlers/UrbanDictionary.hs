@@ -25,7 +25,7 @@ import           NumberSix.Util.Http
 urban :: Text -> IO Text
 urban query = do
     result <- httpScrape Html url id $ \cursor -> do
-        def <- findRec (byTagNameAttrs "div" [("class", "definition")]) cursor
+        def <- findRec (byTagNameAttrs "div" [("class", "meaning")]) cursor
         return $ nodeText $ current def
     maybe randomError return result
   where
