@@ -74,6 +74,8 @@ resto arg = do
     days "morgen"             = (1, "tomorrow")
     days "day after tomorrow" = (2, "the day after tomorrow")
     days "overmorgen"         = (2, "the day after tomorrow")
+    days "overovermorgen"     = (3, "the day after the day after tomorrow")
+    days "overoverovermorgen" = (4, "the day after the day after the day after tomorrow")
     days _                    = (0, "today")
 
 
