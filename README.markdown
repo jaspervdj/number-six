@@ -294,7 +294,7 @@ TryRuby
 
 Bindings to the ruby evaluation service of tryruby.org. Commands:
 
-- `!ruby expression`: Evaluate the given expression
+- `@ expression`, `!ruby expression`: Evaluate the given expression
 
 Tumblr
 ------
