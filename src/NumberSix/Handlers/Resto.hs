@@ -15,9 +15,8 @@ import           Data.Maybe           (maybeToList)
 import           Data.Text            (Text)
 import qualified Data.Text            as T
 import           Data.Time            (UTCTime (..), addDays, formatTime,
-                                       getCurrentTime)
+                                       getCurrentTime, defaultTimeLocale)
 import qualified Data.Vector          as V
-import           System.Locale        (defaultTimeLocale)
 
 
 --------------------------------------------------------------------------------

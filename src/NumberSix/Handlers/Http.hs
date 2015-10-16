@@ -27,7 +27,8 @@ http :: Text -> IO Text
 http uri = do
     req <- H.parseUrl uri'
     let req' = req {H.redirectCount = 0, H.checkStatus = \_ _ _ -> Nothing}
-    rsp <- H.withManager $ \m -> H.httpLbs req' m
+    mgr <- H.newManager H.tlsManagerSettings
+    rsp <- H.httpLbs req' mgr
     let status   = H.responseStatus rsp
         location
             | H.statusCode status < 300  = ""

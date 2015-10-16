@@ -13,9 +13,8 @@ import           Control.Concurrent.MVar (newMVar, putMVar, takeMVar)
 import           Data.Text               (Text)
 import qualified Data.Text.IO            as T
 import           Data.Time.Clock         (getCurrentTime)
-import           Data.Time.Format        (formatTime)
+import           Data.Time.Format        (defaultTimeLocale, formatTime)
 import qualified System.IO               as IO
-import           System.Locale           (defaultTimeLocale)
 
 
 --------------------------------------------------------------------------------

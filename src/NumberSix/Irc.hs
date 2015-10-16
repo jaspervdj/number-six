@@ -62,7 +62,7 @@ module NumberSix.Irc
 
 
 --------------------------------------------------------------------------------
-import           Control.Applicative      ((<$>))
+import           Control.Applicative      (Applicative, (<$>))
 import           Control.Concurrent       (MVar, modifyMVar_, readMVar)
 import           Control.Concurrent.MVar  (withMVar)
 import           Control.Monad            (when)
@@ -123,7 +123,7 @@ data IrcState = IrcState
 -- | Monad stack for the IRC bot
 --
 newtype Irc a = Irc {unIrc :: ReaderT IrcState IO a}
-              deriving ( Monad, Functor, MonadIO
+              deriving ( Applicative, Monad, Functor, MonadIO
                        , MonadReader IrcState
                        )
 

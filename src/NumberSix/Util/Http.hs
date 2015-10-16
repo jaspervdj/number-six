@@ -18,15 +18,15 @@ module NumberSix.Util.Http
 
 
 --------------------------------------------------------------------------------
-import qualified Codec.Binary.Url     as Url
-import           Control.Applicative  ((<$>))
-import           Data.ByteString      (ByteString)
-import qualified Data.ByteString      as B
-import qualified Data.ByteString.Lazy as BL
-import           Data.Text            (Text)
-import qualified Data.Text            as T
-import qualified Data.Text.Encoding   as T
-import qualified Network.HTTP.Conduit as HC
+import           Control.Applicative    ((<$>))
+import           Data.ByteString        (ByteString)
+import qualified Data.ByteString        as B
+import qualified Data.ByteString.Lazy   as BL
+import           Data.Text              (Text)
+import qualified Data.Text              as T
+import qualified Data.Text.Encoding     as T
+import qualified Network.HTTP.Conduit   as HC
+import qualified Network.HTTP.Types.URI as URI
 import           Text.XmlHtml
 import           Text.XmlHtml.Cursor
 
@@ -47,8 +47,11 @@ http :: Text            -- ^ URL
      -> IO ByteString   -- ^ Response body
 http uri modifyReq = do
     req <- HC.parseUrl uri'
-    rsp <- HC.withManager $ \m -> flip HC.httpLbs m $
+    mgr <- HC.newManager HC.tlsManagerSettings
+    rsp <- flip HC.httpLbs mgr $
         modifyReq $ setUserAgent "number-six/0.1.0.0" req
+
+    HC.closeManager mgr
     return $ B.concat $ BL.toChunks $ HC.responseBody rsp
   where
     uri'               = T.unpack $ httpPrefix uri
@@ -87,7 +90,7 @@ httpPrefix url
 --------------------------------------------------------------------------------
 -- | Encode a ByteString to an URL
 urlEncode :: Text -> Text
-urlEncode = T.pack . Url.encode . B.unpack . T.encodeUtf8
+urlEncode = T.decodeUtf8 . URI.urlEncode True . T.encodeUtf8
 
 
 --------------------------------------------------------------------------------

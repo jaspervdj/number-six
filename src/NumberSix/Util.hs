@@ -70,7 +70,7 @@ prettyList (x : y : z : r) = x <> ", " <> prettyList (y : z : r)
 --------------------------------------------------------------------------------
 -- | Replace newlines by spaces
 removeNewlines :: Text -> Text
-removeNewlines = T.map (\x -> if x `elem` "\r\n" then ' ' else x)
+removeNewlines = T.map (\x -> if x `elem` ['\r', '\n'] then ' ' else x)
 
 
 --------------------------------------------------------------------------------
